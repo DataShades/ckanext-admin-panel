@@ -1,5 +1,5 @@
 
-[![Tests](https://github.com/mutantsan/ckanext-admin-panel/workflows/Tests/badge.svg?branch=main)](https://github.com/mutantsan/ckanext-admin-panel/actions)
+[![Tests](https://github.com/DataShades/ckanext-admin-panel/workflows/Tests/badge.svg?branch=main)](https://github.com/DataShades/ckanext-admin-panel/actions)
 
 # ckanext-admin-panel
 
@@ -133,7 +133,7 @@ To install ckanext-admin-panel:
 
 2. Clone the source and install it on the virtualenv
 
-    git clone https://github.com/mutantsan/ckanext-admin-panel.git
+    git clone https://github.com/DataShades/ckanext-admin-panel.git
     cd ckanext-admin-panel
     pip install -e .
 	pip install -r requirements.txt
@@ -222,7 +222,7 @@ It is important to note that console commands are not permitted within cron jobs
 To install ckanext-admin-panel for development, activate your CKAN virtualenv and
 do:
 
-    git clone https://github.com/mutantsan/ckanext-admin-panel.git
+    git clone https://github.com/DataShades/ckanext-admin-panel.git
     cd ckanext-admin-panel
     python setup.py develop
     pip install -r dev-requirements.txt
