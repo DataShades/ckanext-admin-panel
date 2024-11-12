@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from typing import Any, Callable
 
+import ckan.model as model
 from ckan.plugins import toolkit as tk
 from ckanext.collection.types import BaseSerializer
 
@@ -29,9 +30,45 @@ def date(
 def user_link(
     value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
+    """Generate a link to the user profile page with an avatar.
+
+    It's a custom implementation of the linked_user
+    function, where we replace an actual user avatar with a placeholder.
+
+    Fetching an avatar requires an additional user_show call, and it's too
+    expensive to do it for every user in the list. So we use a placeholder
+
+    Args:
+        value (str): user ID
+        options (dict[str, Any]): options for the renderer
+        name (str): column name
+        record (Any): row data
+        self (BaseSerializer): serializer instance
+    """
     if not value:
         return ""
-    return tk.h.linked_user(value, maxlength=options.get("maxlength") or 20)
+
+    user = model.User.get(value)
+
+    if not user:
+        return value
+
+    maxlength = options.get("maxlength") or 20
+    avatar = options.get("maxlength") or 20
+
+    display_name = user.display_name
+
+    if maxlength and len(user.display_name) > maxlength:
+        display_name = display_name[:maxlength] + "..."
+
+    return tk.h.literal(
+        "{icon} {link}".format(
+            icon=tk.h.snippet(
+                "user/snippets/placeholder.html", size=avatar, user_name=display_name
+            ),
+            link=tk.h.link_to(display_name, tk.h.url_for("user.read", id=user.name)),
+        )
+    )
 
 
 @renderer
