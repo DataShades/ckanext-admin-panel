@@ -27,6 +27,12 @@ body[admin-panel="true"],
     .form-group .info-block {
         color: var(--ap-color);
     }
+
+    // small fix for tom-select input height
+    .ts-control input,
+    .ts-control select {
+        height: unset;
+    }
 }
 
 .form-group.tom-select {
