@@ -1,0 +1,37 @@
+{% import 'admin_panel/macros/form.html' as form %}
+
+{% from "macros/form/attributes.html" import attributes %}
+
+{%- set options=[] -%}
+{% set errors = errors[field.field_name] %}
+{% set attrs = field.get('form_attrs', {}) %}
+{% set value = data[field.field_name] %}
+
+{% if value %}
+    {% set value = value.split() %}
+{% endif %}
+
+{% if "data-module" in attrs %}
+    {% do attrs.update({'data-module': attrs['data-module'] ~ ' ap-tom-select'}) %}
+{% else %}
+    {% do attrs.update({'data-module': 'ap-tom-select'}) %}
+{% endif %}
+
+<div class="form-group control-medium tom-select control-select {{ error if errors }}{{ ' ' ~ classes | join(' ') }}">
+    <label class="form-label" for="{{ field.field_name }}">
+        {% if is_required %}<span class="control-required">*</span> {% endif %}
+        {{- h.scheming_language_text(field.label) or _(' Custom') -}}
+    </label>
+    <div class="controls{{ ' ' ~ control_classes | join(' ') }}">
+        <input
+            id="{{ 'field-' + field.field_name }}"
+            name="{{ field.field_name }}"
+            value="{{ value | join(',') }}"
+            placeholder="{{ field.placeholder }}"
+            autocomplete="off"
+            {% if h.scheming_field_required(field) %}required{% endif %}
+            {{ attributes(attrs) }}
+            >
+        {% if errors and errors is iterable %}<span class="error-block">{{ errors|join(', ') }}</span>{% endif %}
+    </div>
+</div>
