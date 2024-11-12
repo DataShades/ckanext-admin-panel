@@ -28,7 +28,10 @@ def get_config_sections() -> list[SectionConfig]:
         )
         config_sections[section["name"]]["configs"].extend(section["configs"])
 
-    return list(config_sections.values())
+    sections = list(config_sections.values())
+    sections.sort(key=lambda x: x["name"])
+
+    return sections
 
 
 @helper
