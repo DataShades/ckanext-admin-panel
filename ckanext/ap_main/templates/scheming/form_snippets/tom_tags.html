@@ -26,7 +26,7 @@
         <input
             id="{{ 'field-' + field.field_name }}"
             name="{{ field.field_name }}"
-            value="{{ value | join(',') }}"
+            value="{{ data[field.field_name] }}"
             placeholder="{{ field.placeholder }}"
             autocomplete="off"
             {% if h.scheming_field_required(field) %}required{% endif %}
