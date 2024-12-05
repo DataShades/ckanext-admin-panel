@@ -64,7 +64,7 @@ def ap_doi_get_packages_doi(
     )
 
     results = _prepare_problem_package_data(results, packages_to_update)
-    return filter_dois(results, data_dict)
+    return _filter_dois(results, data_dict)
 
 
 def _prepare_problem_package_data(
@@ -111,7 +111,7 @@ def _prepare_problem_package_data(
     )
 
 
-def filter_dois(
+def _filter_dois(
     results: list[DOIProblemPackageData], data_dict: dict[str, Any]
 ) -> list[DOIProblemPackageData]:
     """Filter out packages that do not have a DOI."""
@@ -146,7 +146,6 @@ def ap_doi_update_doi(context: Any, data_dict: dict[str, Any]) -> dict[str, Any]
 
     return {
         "status": "success" if not errors else "error",
-        # "status": "success",
         "message": "DOI update completed",
         "errors": errors,
     }

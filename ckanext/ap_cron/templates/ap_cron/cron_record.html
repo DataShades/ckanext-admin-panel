@@ -18,7 +18,7 @@
                 class="btn btn-primary {{ 'disabled' if job_running }}"
                 href="{{ '#' if job_running else h.url_for('ap_cron.get_edit_form', job_id=data.id) }}"
 
-                {#} block editing while task is running {#}
+                {# block editing while task is running #}
                 {% if not job_running %}
                     data-bs-toggle= "modal",
                     data-bs-target= "#edit-cron-job",

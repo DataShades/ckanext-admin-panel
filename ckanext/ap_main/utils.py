@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
@@ -21,6 +23,24 @@ collect_config_schemas_signal = tk.signals.ckanext.signal(
 
 
 def ap_before_request() -> None:
+    """Check if user has access to the admin panel.
+
+    Calls `admin_panel_access` auth function to check if user has access to the
+    admin panel view. If you want to change the auth function logic, you can chain it.
+
+    Raises:
+        tk.NotAuthorized: If user does not have access to the admin panel
+
+    Example:
+        ```python
+        from flask import Blueprint, Response
+
+        from ckanext.ap_main.utils import ap_before_request
+
+        blueprint = Blueprint("my_blueprint", __name__, url_prefix="/admin-panel/my_blueprint")
+        blueprint.before_request(ap_before_request)
+        ```
+    """
     try:
         tk.check_access(
             "admin_panel_access",
@@ -31,9 +51,36 @@ def ap_before_request() -> None:
 
 
 def get_all_renderers() -> dict[str, ap_types.ColRenderer]:
+    """Get all registered column renderers.
+
+    A renderer is a function that takes a column value and can modify its appearance
+    in a table.
+
+    Returns:
+        A mapping of renderer names to renderer functions
+    """
     if not _renderers_cache:
         for plugin in reversed(list(p.PluginImplementations(IAdminPanel))):
             for name, fn in plugin.get_col_renderers().items():
                 _renderers_cache[name] = fn
 
     return _renderers_cache
+
+
+def get_config_schema(schema_id: str) -> dict[Any, Any] | None:
+    """Get a schema by its id from the loaded schemas.
+
+    Args:
+        schema_id: The id of the schema to get
+
+    Returns:
+        The schema if found, otherwise None
+    """
+    from ckanext.scheming.plugins import _load_schemas, _expand_schemas
+
+    for _, schemas_paths in collect_config_schemas_signal.send():
+        schemas = _load_schemas(schemas_paths, "schema_id")
+        expanded_schemas = _expand_schemas(schemas)
+
+        if schema := expanded_schemas.get(schema_id):
+            return schema

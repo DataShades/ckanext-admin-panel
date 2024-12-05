@@ -16,7 +16,6 @@ from ckanext.ap_main.interfaces import IAdminPanel
 @tk.blanket.blueprints
 @tk.blanket.actions
 @tk.blanket.auth_functions
-@tk.blanket.validators
 class AdminPanelPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurer)
     p.implements(p.IBlueprint)

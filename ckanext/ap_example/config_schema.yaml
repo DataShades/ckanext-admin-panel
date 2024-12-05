@@ -16,7 +16,6 @@ fields:
   - field_name: ckanext.ap_example.cache.duration
     label: Cache TTL
     form_placeholder: 600
-    validators: default(3600) int_validator
     input_type: number
 
   - field_name: ckanext.ap_example.drupal_url
@@ -26,7 +25,6 @@ fields:
 
   - field_name: ckanext.ap_example.api_version
     label: API version
-    validators: default(core), one_of([json, core])
     preset: select
     required: true
     choices:
@@ -37,20 +35,16 @@ fields:
 
   - field_name: ckanext.ap_example.core.menu_export_endpoint
     label: Menu export API endpoint
-    validators: unicode_safe
     required: true
     help_text: If you are using the core API version, you might face the situation when your endpoint differ from the default one
 
   - field_name: ckanext.ap_example.timeout
     label: API request timeout
-    validators: default(5) int_validator
     input_type: number
 
   - field_name: ckanext.ap_example.request.user
     label: HTTP auth user
-    validators: unicode_safe
 
   - field_name: ckanext.ap_example.request.pass
     label: HTTP auth password
-    validators: unicode_safe
     input_type: password

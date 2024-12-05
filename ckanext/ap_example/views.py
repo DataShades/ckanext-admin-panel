@@ -10,7 +10,7 @@ import ckan.plugins.toolkit as tk
 
 from ckanext.editable_config.shared import value_as_string
 
-from ckanext.ap_main.utils import ap_before_request
+from ckanext.ap_main.utils import ap_before_request, get_config_schema
 from ckanext.ap_main.views.generics import ApConfigurationPageView
 
 
@@ -21,7 +21,7 @@ ap_example.before_request(ap_before_request)
 
 class ApConfigurationDisplayPageView(MethodView):
     def get(self):
-        self.schema = tk.h.ap_get_config_schema("admin_panel_example_config")
+        self.schema = get_config_schema("admin_panel_example_config")
         data = self.get_config_form_data()
 
         return tk.render(
@@ -33,6 +33,9 @@ class ApConfigurationDisplayPageView(MethodView):
         """Fetch/humanize configuration values from a CKANConfig"""
 
         data = {}
+
+        if not self.schema:
+            return data
 
         for field in self.schema["fields"]:
             if field["field_name"] not in tk.config:

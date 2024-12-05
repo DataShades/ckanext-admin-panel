@@ -19,8 +19,23 @@ renderer, get_renderers = Collector().split()
 
 @renderer
 def date(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: datetime, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
+    """Render a datetime object as a string.
+
+    Args:
+        value (datetime): date value
+        options (dict[str, Any]): options for the renderer
+        name (str): column name
+        record (Any): row data
+        self (BaseSerializer): serializer instance
+
+    Options:
+        - `date_format` (str) - date format string. **Default** is `%d/%m/%Y - %H:%M`
+
+    Returns:
+        formatted date
+    """
     date_format: str = options.get("date_format", "%d/%m/%Y - %H:%M")
 
     return tk.h.render_datetime(value, date_format=date_format)
@@ -28,7 +43,7 @@ def date(
 
 @renderer
 def user_link(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: str, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
     """Generate a link to the user profile page with an avatar.
 
@@ -44,6 +59,13 @@ def user_link(
         name (str): column name
         record (Any): row data
         self (BaseSerializer): serializer instance
+
+    Options:
+        - `maxlength` (int) - maximum length of the user name. **Default** is `20`
+        - `avatar` (int) - size of the avatar. **Default** is `20`
+
+    Returns:
+        User link with an avatar placeholder
     """
     if not value:
         return ""
@@ -75,20 +97,56 @@ def user_link(
 def bool(
     value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
+    """Render a boolean value as a string.
+
+    Args:
+        value (Any): boolean value
+        options (dict[str, Any]): options for the renderer
+        name (str): column name
+        record (Any): row data
+        self (BaseSerializer): serializer instance
+
+    Returns:
+        "Yes" if value is True, otherwise "No"
+    """
     return "Yes" if value else "No"
 
 
 @renderer
 def log_level(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: int, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
+    """Render a log level as a string.
+
+    Args:
+        value (Any): numeric representation of logging level
+        options (dict[str, Any]): options for the renderer
+        name (str): column name
+        record (Any): row data
+        self (BaseSerializer): serializer instance
+
+    Returns:
+        log level name
+    """
     return logging.getLevelName(value)
 
 
 @renderer
 def list(
     value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
-):
+) -> str:
+    """Render a list as a comma-separated string.
+
+    Args:
+        value (Any): list value
+        options (dict[str, Any]): options for the renderer
+        name (str): column name
+        record (Any): row data
+        self (BaseSerializer): serializer instance
+
+    Returns:
+        comma-separated string
+    """
     return ", ".join(value)
 
 
@@ -103,6 +161,18 @@ def none_as_empty(
 def day_passed(
     value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
+    """Calculate the number of days passed since the date.
+
+    Args:
+        value (Any): date value
+        options (dict[str, Any]): options for the renderer
+        name (str): column name
+        record (Any): row data
+        self (BaseSerializer): serializer instance
+
+    Returns:
+        A priority badge with day counter and color based on priority.
+    """
     if not value:
         return "0"
 
@@ -127,7 +197,22 @@ def day_passed(
 def trim_string(
     value: str, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
-    """Trim string to a certain length"""
+    """Trim string to a certain length.
+
+    Args:
+        value (str): string value
+        options (dict[str, Any]): options for the renderer
+        name (str): column name
+        record (Any): row data
+        self (BaseSerializer): serializer instance
+
+    Options:
+        - `max_length` (int) - maximum length of the string. **Default** is `79`
+        - `add_ellipsis` (bool) - add ellipsis to the end of the string. **Default** is `True`
+
+    Returns:
+        trimmed string
+    """
     if not value:
         return ""
 

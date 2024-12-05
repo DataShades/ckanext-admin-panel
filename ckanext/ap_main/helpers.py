@@ -19,7 +19,11 @@ helper, get_helpers = Collector("ap").split()
 
 @helper
 def get_config_sections() -> list[SectionConfig]:
-    """Prepare a config section structure for render"""
+    """Prepare a config section structure for render.
+
+    Returns:
+        A list of sections with their config items
+    """
     config_sections = {}
 
     for _, section in ap_utils.collect_sections_signal.send():
@@ -36,6 +40,14 @@ def get_config_sections() -> list[SectionConfig]:
 
 @helper
 def get_toolbar_structure() -> list[ToolbarButton]:
+    """Prepare a toolbar structure for render.
+
+    An extension can register its own toolbar buttons by implementing the
+    `register_toolbar_button` method in the `IAdminPanel` interface.
+
+    Returns:
+        A list of toolbar button objects
+    """
     configuration_subitems = [
         ToolbarButton(
             label=section["name"],
@@ -113,40 +125,30 @@ def get_toolbar_structure() -> list[ToolbarButton]:
 
 @helper
 def munge_string(value: str) -> str:
+    """Munge a string using CKAN's munge_name function.
+
+    Args:
+        value: The string to munge
+
+    Returns:
+        The munged string
+    """
     return munge.munge_name(value)
 
 
 @helper
-def add_url_param(key: str, value: str) -> str:
-    """Add a GET param to URL."""
-    blueprint, view = p.toolkit.get_endpoint()
-
-    url = tk.h.url_for(f"{blueprint}.{view}")
-
-    params_items = tk.request.args.items(multi=True)
-    params = [(k, v) for k, v in params_items if k != "page" and k != key]
-    params.append((key, value))
-
-    return (
-        url
-        + "?"
-        + urlencode(
-            [
-                (k, v.encode("utf-8") if isinstance(v, str) else str(v))
-                for k, v in params
-            ]
-        )
-    )
-
-
-@helper
 def show_toolbar_theme_switcher() -> bool:
+    """Check if the toolbar theme switcher should be displayed."""
     return ap_config.show_toolbar_theme_switcher()
 
 
 @helper
 def user_add_role_options() -> list[dict[str, str | int]]:
-    """Return a list of options for a user add form"""
+    """Return a list of options for a user add form.
+
+    Returns:
+        A list of options for a user add form
+    """
     return [
         {"value": "user", "text": "Regular user"},
         {"value": "sysadmin", "text": "Sysadmin"},
@@ -155,26 +157,34 @@ def user_add_role_options() -> list[dict[str, str | int]]:
 
 @helper
 def generate_page_unique_class() -> str:
-    """Build a unique css class for each page"""
+    """Build a unique css class for each page.
+
+    Returns:
+        A unique css class for the current page
+    """
 
     return tk.h.ap_munge_string((f"ap-{tk.request.endpoint}"))
 
 
 @helper
-def get_config_schema(schema_id: str) -> dict[Any, Any] | None:
-    """Get a schema by its id from the loaded schemas"""
-    from ckanext.scheming.plugins import _load_schemas, _expand_schemas
+def calculate_priority(value: int, threshold: int) -> str:
+    """Calculate the priority of a value based on a threshold.
 
-    for _, schemas_paths in ap_utils.collect_config_schemas_signal.send():
-        schemas = _load_schemas(schemas_paths, "schema_id")
-        expanded_schemas = _expand_schemas(schemas)
+    Args:
+        value: The value to calculate the priority for
+        threshold: The threshold to compare the value to
 
-        if schema := expanded_schemas.get(schema_id):
-            return schema
+    Returns:
+        The priority of the value
 
+    Example:
+        ```python
+        from ckanext.ap_main.helpers import calculate_priority
 
-@helper
-def calculate_priority(value: int, threshold: int):
+        priority = calculate_priority(10, 100)
+        print(priority) # low
+        ```
+    """
     percentage = value / threshold * 100
 
     if percentage < 25:

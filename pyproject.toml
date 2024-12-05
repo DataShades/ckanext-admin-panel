@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ckanext-admin-panel"
-version = "1.1.18"
+version = "1.1.19"
 description = "Custom admin panel for CKAN to expand default functionality"
 authors = [
     { name = "DataShades", email = "datashades@linkdigital.com.au" },
@@ -24,7 +24,7 @@ requires-python = ">= 3.8"
 dependencies = [
     "typing-extensions",
     "ckanext-toolbelt",
-    "ckanext-collection>=0.1.21,<0.3.0",
+    "ckanext-collection>=0.1.21,<1.0.0",
     "croniter>=2.0.1,<3.0.0",
     "cron-descriptor>=1.4.0,<2.0.0",
     "ckanext-wysiwyg>=0.1.0,<1.0.0",

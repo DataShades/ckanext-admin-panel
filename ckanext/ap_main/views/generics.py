@@ -9,6 +9,7 @@ import ckan.plugins as p
 from ckan.logic import parse_params
 
 from ckanext.ap_main.interfaces import IAdminPanel
+from ckanext.ap_main.utils import get_config_schema
 
 
 class ApConfigurationPageView(MethodView):
@@ -53,7 +54,7 @@ class ApConfigurationPageView(MethodView):
         """Fetch a full schema or use the fields user provides and put them inside
         a dict to imitate a schema"""
         schema = (
-            tk.h.ap_get_config_schema(self.schema_id)
+            get_config_schema(self.schema_id)
             if not self.fields
             else {"schema_id": self.schema_id, "fields": self.fields}
         )

@@ -1,0 +1,116 @@
+site_name: ckanext-admin-panel
+site_url: https://.github.io/ckanext-admin-panel/
+
+repo_url:  https://github.com/DataShades/ckanext-admin-panel
+
+markdown_extensions:
+    - pymdownx.snippets
+    - admonition
+    - pymdownx.details
+    - pymdownx.emoji:
+        emoji_index: !!python/name:material.extensions.emoji.twemoji
+        emoji_generator: !!python/name:material.extensions.emoji.to_svg
+    - pymdownx.superfences:
+        custom_fences:
+          - name: mermaid
+            class: mermaid
+            format: !!python/name:pymdownx.superfences.fence_code_format
+    - pymdownx.tabbed:
+            alternate_style: true
+
+
+plugins:
+  - include-markdown:
+      start:
+      end:
+      comments: false
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["ckanext"]
+          options:
+            show_root_full_path: false
+            show_root_toc_entry: false
+            show_symbol_type_heading: true
+            show_source: false
+            docstring_section_style: spacy
+  - search:
+      separator: '[\s\-\.\_]+'
+
+watch:
+  - README.md
+  - ckanext/ap_main/
+
+theme:
+  name: material
+  logo: image/logo.png
+  favicon: image/favicon.ico
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.footer
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+
+nav:
+  - index.md
+  - install.md
+  - configuration.md
+
+  - Extra plugins:
+    - features/index.md
+
+    - Logging:
+      - features/logging/index.md
+      - features/logging/install.md
+      - features/logging/usage.md
+
+    - Cron:
+      - features/cron/index.md
+      - features/cron/install.md
+      - features/cron/usage.md
+
+    - DOI:
+      - features/doi/index.md
+      - features/doi/install.md
+      - features/doi/usage.md
+      - features/doi/configuration.md
+
+  - register_config_page.md
+  - register_config_section.md
+
+  - Collections:
+    - collections/index.md
+    - collections/col_renderers.md
+
+  - interfaces.md
+  - utils.md
+  - helpers.md
+  - tests.md
+
+  # - troubleshooting.md
