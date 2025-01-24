@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from typing import Any
-from urllib.parse import urlencode
-
 import ckan.lib.munge as munge
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
 from ckanext.toolbelt.decorators import Collector
+from ckanext.toolbelt.utils.cache import Cache
 
 import ckanext.ap_main.config as ap_config
 import ckanext.ap_main.utils as ap_utils
@@ -39,6 +37,7 @@ def get_config_sections() -> list[SectionConfig]:
 
 
 @helper
+# @Cache(duration=900) # cache for 15 minutes
 def get_toolbar_structure() -> list[ToolbarButton]:
     """Prepare a toolbar structure for render.
 
@@ -93,10 +92,10 @@ def get_toolbar_structure() -> list[ToolbarButton]:
         ToolbarButton(
             icon="fa fa-gavel",
             url=tk.url_for("admin.index"),
-            attributes={"title": tk._("Old admin")},
+            attributes={"title": tk._("Old admin"), "class": "ms-auto"},
         ),
         ToolbarButton(
-            label=tk.h.user_image((tk.current_user.name), size=20),
+            icon="fa fa-user",
             url=tk.url_for("user.read", id=tk.current_user.name),
             attributes={"title": tk._("View profile")},
         ),
@@ -110,12 +109,27 @@ def get_toolbar_structure() -> list[ToolbarButton]:
             url=tk.url_for("user.edit", id=tk.current_user.name),
             attributes={"title": tk._("Profile settings")},
         ),
+    ]
+
+    if tk.h.ap_show_toolbar_theme_switcher():
+        default_structure.append(
+            ToolbarButton(
+                icon="fa-solid fa-moon",
+                attributes={
+                    "title": tk._("Theme Switcher"),
+                    "data-module": "ap-theme-switcher",
+                },
+            ),
+        )
+
+    # place logout button at the end
+    default_structure.append(
         ToolbarButton(
             icon="fa fa-sign-out",
             url=tk.url_for("user.logout"),
             attributes={"title": tk._("Log out")},
-        ),
-    ]
+        )
+    )
 
     for plugin in reversed(list(p.PluginImplementations(IAdminPanel))):
         default_structure = plugin.register_toolbar_button(default_structure)

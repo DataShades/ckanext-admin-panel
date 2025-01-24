@@ -1,6 +1,10 @@
-// THEME SWITCHER BUTTON
-// switch themes bettwen dark and light
-// save current theme in the Local Storage
+/**
+ * Theme switcher module
+ *
+ * This module is responsible for switching between light and dark themes.
+ *
+ * The module uses the localStorage to store the user's preferred theme.
+ */
 ckan.module("ap-theme-switcher", function ($, _) {
     "use strict";
     return {
@@ -11,13 +15,11 @@ ckan.module("ap-theme-switcher", function ($, _) {
             this.dark = "dark";
 
             this.defaultSchema = this.light;
-            this.buttonsTarget = ".ap-theme-switcher";
             this.localStorageKey = "apPreferredColorScheme";
 
             this.scheme = this.getSchemeFromLS();
 
-            this.addButton();
-            this.initSwitchers();
+            this.el.on("click", this._onSwitch.bind(this));
             this.applyScheme();
         },
 
@@ -35,22 +37,10 @@ ckan.module("ap-theme-switcher", function ($, _) {
             document.querySelector("#admin-panel").setAttribute("admin-panel-theme", this.scheme);
         },
 
-        addButton: function () {
-            let btn = document.createElement("BUTTON");
-            btn.className = "ap-theme-switcher";
-            btn.title = "Dark theme switcher"
-            document.querySelector("#admin-panel .collapse").appendChild(btn)
-        },
-
-        initSwitchers: function () {
-            document.querySelectorAll(this.buttonsTarget).forEach(e => {
-                e.addEventListener("click", () => {
-                    this.scheme = this.scheme == this.light ? this.dark : this.light;
-                    this.applyScheme();
-                    this.saveSchemeToLS();
-                });
-            }
-            );
-        },
+        _onSwitch: function () {
+            this.scheme = this.scheme == this.light ? this.dark : this.light;
+            this.applyScheme();
+            this.saveSchemeToLS();
+        }
     };
 });

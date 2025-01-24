@@ -2,11 +2,26 @@
 
 {% macro toolbar_button(button, nested=false) %}
     {% set is_active = request.path == button.url %}
-    <li class="{% if not nested %}nav-item {% if button.subitems %}dropdown{% endif %}{% endif %} {{ 'active' if is_active }}">
-        <a
-            class="{% if nested %}dropdown-item {{ 'with-subitems' if button.subitems }}{% else %}nav-link{% endif %}"
-            href="{{ button.url or '#' }}"
-            {{ attributes(button.attributes or {}) }}>
+
+    {% if not nested %}
+        {% set link_class = ' nav-item dropdown' if button.subitems else 'nav-item' %}
+    {% else %}
+        {% set link_class = ' nav-item' %}
+    {% endif %}
+
+    {% if button.attributes and button.attributes.class %}
+        {% do button.attributes.update({"class": button.attributes.class ~ " " ~ link_class}) %}
+    {% endif %}
+
+    <li
+        {% if button.attributes and button.attributes.class %}
+            class="{{ button.attributes.class }} {{ 'active' if is_active }}"
+        {% else %}
+            class="{% if not nested %} nav-item {% if button.subitems %}dropdown{% endif %}{% endif %} {{ 'active' if is_active }}"
+        {% endif %}
+        {{ attributes(button.attributes or {}) }}>
+        <a class="{% if nested %}dropdown-item {{ 'with-subitems' if button.subitems }}{% else %}nav-link{% endif %}"
+            href="{{ button.url or '#' }}">
             {% if button.icon %}
                 <i class="{{ button.icon }}"></i>
             {% endif %}

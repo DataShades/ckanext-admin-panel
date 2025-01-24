@@ -1,25 +1,26 @@
 <div
     id="admin-panel"
-    data-module="ap-main ap-htmx ap-nested-dropdown {% if h.ap_show_toolbar_theme_switcher() %}ap-theme-switcher{% endif %}">
-    <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            {% block ap_toolbar_logo %}
-                <a class="navbar-brand" href="{{ h.url_for('home.index') }}">
-                    {% snippet 'snippets/svg/admin-header-icon.svg' %}
-                </a>
-            {% endblock %}
+    data-module="ap-main ap-htmx ap-nested-dropdown">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminPanelToggle" aria-controls="adminPanelToggle" aria-expanded="false" aria-label="Toggle navigation">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminPanelToggle" aria-controls="adminPanelToggle" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-
-            <div class="collapse navbar-collapse" id="adminPanelToggle">
-                {% block ap_toolbar_nav %}
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-wrap">
-                        {% snippet 'admin_panel/panel_links.html' %}
-                    </ul>
-                {% endblock %}
+                <div class="collapse navbar-collapse" id="adminPanelToggle">
+                    {% block ap_toolbar_nav %}
+                        <ul class="navbar-nav mb-2 mb-lg-0 w-100 flex-wrap">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="{{ h.url_for('home.index') }}">
+                                    <i class="fa-solid fa-home"></i>
+                                </a>
+                            </li>
+                            {% snippet 'admin_panel/panel_links.html' %}
+                        </ul>
+                    {% endblock %}
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </div>
 </div>

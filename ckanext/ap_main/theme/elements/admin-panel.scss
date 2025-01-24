@@ -9,9 +9,11 @@ body.filters-modal {
     $color: var(--ap-color);
     $background: var(--ap-body-bg);
     $color-hover: var(--ap-color-hover);
-
     $nav-item-bg: var(--ap-nav-item-bg);
     $nav-item-bg-hover: var(--ap-nav-item-bg-hover);
+
+    font-family: $font-family;
+    font-size: $font-size;
 
     background: $background;
     border: $border;
@@ -40,17 +42,16 @@ body.filters-modal {
 
         .nav-item {
             display: flex;
+            font-weight: 600;
+            line-height: 21px;
 
             .nav-link {
-                padding: 10px;
+                padding: 7px 13px;
                 color: $color;
                 display: flex;
                 gap: 5px;
                 align-items: center;
-
-                i {
-                    width: 15px;
-                }
+                text-align: center;
             }
 
             .dropdown-menu.show {
@@ -138,10 +139,6 @@ body.filters-modal {
         }
     }
 
-    .ap-theme-switcher {
-        margin-inline-start: 12px;
-    }
-
     .btn.btn-outline-success:hover {
         color: $white;
     }
@@ -171,11 +168,6 @@ body.filters-modal {
                     margin: 0.5rem 0.7rem;
                 }
             }
-        }
-
-        .ap-theme-switcher {
-            width: 100%;
-            margin: 8px 0 0 0;
         }
     }
 

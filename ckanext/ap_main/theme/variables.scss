@@ -1,7 +1,7 @@
 :root {
     --ap-body-bg: white;
-    --ap-border-color: black;
-    --ap-color: black;
+    --ap-border-color: #CED4DA;
+    --ap-color: #335A79;
     --ap-color-hover: black;
     --ap-color-link: #0d6efd;
     --ap-color-link-hover: #0a58ca;
@@ -57,3 +57,6 @@ $screen-md-min: 992px;
 $screen-lg-min: 1200px;
 
 $border: 1px solid var(--ap-border-color);
+
+$font-family: 'Montserrat', sans-serif;
+$font-size: 12px;
