@@ -20,17 +20,18 @@
 {{ form.input("timeout", label=_("Job timeout"), value=data.timeout or h.ap_cron_get_job_timeout(), is_required=true, type='number', attrs={"step": "1", "pattern": "\d+", "class": "form-control"}) }}
 
 <div class="quick-schedule mb-4">
-    <label style="display: block">{{ _("Quick Schedule") }}</label>
-    <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@reboot\'' }}">{{ _("Startup") }}</a>
-    <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@hourly\'' }}">{{ _("Hourly") }}</a>
-    <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@daily\'' }}">{{ _("Daily") }}</a>
-    <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@weekly\'' }}">{{ _("Weekly") }}</a>
-    <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@monthly\'' }}">{{ _("Monthly") }}</a>
-    <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@yearly\'' }}">{{ _("Yearly") }}</a>
-
+    <label class="mb-2">{{ _("Quick Schedule") }}</label>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@reboot\'' }}">{{ _("Startup") }}</a>
+        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@hourly\'' }}">{{ _("Hourly") }}</a>
+        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@daily\'' }}">{{ _("Daily") }}</a>
+        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@weekly\'' }}">{{ _("Weekly") }}</a>
+        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@monthly\'' }}">{{ _("Monthly") }}</a>
+        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@yearly\'' }}">{{ _("Yearly") }}</a>
+    </div>
 </div>
 
-<div class="row">
+<div class="row mb-2">
     <div class="col-md-2">{{ _("Minute") }}</div>
     <div class="col-md-2">{{ _("Hour") }}</div>
     <div class="col-md-2">{{ _("Day") }}</div>
@@ -38,7 +39,7 @@
     <div class="col-md-2">{{ _("Week") }}</div>
 </div>
 
-<div class="row">
+<div class="row mb-2">
     <div class="col-md-2">
         <input type="text" class="form-control" id="{{ scope }}-job-minute" value="*">
     </div>

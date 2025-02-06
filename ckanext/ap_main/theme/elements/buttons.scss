@@ -1,3 +1,22 @@
+@mixin register-button($type, $outline: #CED4DA) {
+    &.btn-#{$type} {
+        border: 1px solid var(--ap-#{$type}-btn-border);
+        background: var(--ap-#{$type}-btn-bg);
+        color: var(--ap-#{$type}-btn-color);
+
+        &:hover,
+        &:active {
+            color: var(--ap-#{$type}-btn-hover-color);
+            background-color: var(--ap-#{$type}-btn-hover-bg);
+        }
+
+        &:focus {
+            box-shadow: inset 0 0px 0px $outline, 0 0 0 3px $outline;
+        }
+    }
+}
+
+
 body[admin-panel="true"],
 #admin-panel {
     .sort-trigger {
@@ -6,45 +25,15 @@ body[admin-panel="true"],
 
     .btn,
     a.btn {
-        border-radius: 0 ;
+        border-radius: 4px;
+        font-weight: 500;
+        padding: 6px 12px;
+        font-size: 1rem;
+
         box-shadow: none;
         display: inline-block;
-        font-weight: normal;
-        padding: 6px 12px;
         border: 1px solid var(--ap-primary-btn-border);
         color: var(--ap-color);
-
-        &.btn-primary {
-            border: 1px solid var(--ap-primary-btn-border);
-            background: var(--ap-primary-btn-bg);
-            color: var(--ap-primary-btn-color);
-
-            &:hover,
-            &:active,
-            &:focus {
-                color: var(--ap-color-hover);
-                background-color: var(--ap-nav-item-bg-hover);
-            }
-        }
-
-        &.btn-black {
-            border: 1px solid var(--ap-border-color);
-            background: var(--ap-body-bg);
-            color: var(--ap-color);
-
-            &:hover,
-            &:active,
-            &:focus {
-                color: var(--ap-color-hover);
-                background-color: var(--ap-nav-item-bg-hover);
-            }
-        }
-
-        &.btn-danger {
-            color: $white;
-            background-color: #d43f3a;
-            border-color: #d43f3a;
-        }
 
         &.btn-remove-url {
             right: 0;
@@ -56,14 +45,16 @@ body[admin-panel="true"],
             display: flex;
         }
 
-        &.btn-success {
-            background-color: #3A833A;
-            border-color: #3A833A;
-            color: var(--ap-primary-btn-color);
-        }
-
         i {
             margin-left: 0;
         }
+
+        @include register-button("primary");
+        @include register-button("secondary");
+        @include register-button("outline-primary");
+        @include register-button("outline-secondary");
+        @include register-button("black", var(--ap-black-btn-outline-color));
+        @include register-button("danger");
+        @include register-button("success");
     }
 }

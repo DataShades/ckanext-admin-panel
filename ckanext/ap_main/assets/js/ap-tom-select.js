@@ -25,8 +25,6 @@ ckan.module("ap-tom-select", function ($) {
                 return
             }
 
-            console.log(this.options);
-
             if (this.options.loadUrl) {
                 this.options.load = this._loadOptions;
             }

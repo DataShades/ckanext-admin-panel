@@ -21,7 +21,7 @@ ckan.module("ap-nested-dropdown", function ($, _) {
                 $(this).siblings().toggleClass("show");
             });
 
-            $(`${self.apID} .nav-link.dropdown-toggle`).click(function (e) {
+            $(`${self.apID} .nav-link.ap-dropdown-toggle`).click(function (e) {
                 if (!self.isMobileDevice()) {
                     return;
                 }

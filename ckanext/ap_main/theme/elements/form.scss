@@ -1,6 +1,6 @@
 body[admin-panel="true"],
 #admin-panel {
-    $input-height: 40px;
+    $input-height: 38px;
 
     input {
         height: $input-height;
@@ -24,8 +24,24 @@ body[admin-panel="true"],
         }
     }
 
-    .form-group .info-block {
-        color: var(--ap-color);
+    .form-group {
+        .form-control,
+        .select2-container-multi .select2-choices {
+            box-shadow: unset;
+            padding: 6px 12px;
+            background: var(--ap-form-control-bg);
+            color: var(--ap-form-control-color);
+            border-color: var(--ap-form-control-border);
+            border-radius: 4px;
+        }
+
+        .form-select {
+            padding: 6px 12px;
+        }
+
+        .info-block {
+            color: var(--ap-color-help);
+        }
     }
 
     // small fix for tom-select input height

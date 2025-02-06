@@ -20,12 +20,17 @@
             class="{% if not nested %} nav-item {% if button.subitems %}dropdown{% endif %}{% endif %} {{ 'active' if is_active }}"
         {% endif %}
         {{ attributes(button.attributes or {}) }}>
-        <a class="{% if nested %}dropdown-item {{ 'with-subitems' if button.subitems }}{% else %}nav-link{% endif %}"
-            href="{{ button.url or '#' }}">
+
+        <a class="{% if nested %}dropdown-item {{ 'with-subitems' if button.subitems }}{% else %}nav-link{% endif %}" href="{{ button.url or '#' }}">
             {% if button.icon %}
                 <i class="{{ button.icon }}"></i>
             {% endif %}
+
             {{ button.label }}
+
+            {% if nested and button.subitems %}
+                <i class="fas fa-chevron-right"></i>
+            {% endif %}
         </a>
 
         {% if button.subitems %}
@@ -33,12 +38,14 @@
 
             {% if not nested %}
                 <a
-                    class="nav-link dropdown-toggle"
+                    class="nav-link ap-dropdown-toggle"
                     href="#"
                     id="{{ dropdown_id }}"
                     role="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false">
+
+                    <i class="fas fa-chevron-down"></i>
                 </a>
             {% endif %}
 

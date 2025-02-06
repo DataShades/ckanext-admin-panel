@@ -1,12 +1,19 @@
 body[admin-panel="true"] {
     div.list-group {
+        padding-bottom: 0.5rem;
         .list-group-item {
-            border: 1px solid var(--ap-border-color);
-            background: var(--ap-body-bg);
+            padding: 0.5rem 2rem;
+            border: unset;
+            background: var(--ap-accordion-bg);
             color: var(--ap-color);
 
-            border-radius: 0;
-            margin-bottom: 0.5rem;
+            & a {
+                font-weight: 600;
+
+                i {
+                    margin-right: 4px;
+                }
+            }
 
             &.list-group-item--description {
                 color: var(--ap-color);

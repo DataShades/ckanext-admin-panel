@@ -178,7 +178,8 @@ class ContentCollection(ApCollection):
                     "label": "Clear",
                     "type": "button",
                     "attrs": {
-                        "onclick": "$(this).closest('form').find('input,select').val('').prevObject[0].requestSubmit()"
+                        "onclick": "$(this).closest('form').find('input,select').val('').prevObject[0].requestSubmit()",
+                        "class": "btn btn-outline-primary",
                     },
                 },
             ),

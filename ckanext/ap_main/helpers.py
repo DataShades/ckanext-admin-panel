@@ -90,14 +90,15 @@ def get_toolbar_structure() -> list[ToolbarButton]:
             subitems=[],
         ),
         ToolbarButton(
-            icon="fa fa-gavel",
-            url=tk.url_for("admin.index"),
-            attributes={"title": tk._("Old admin"), "class": "ms-auto"},
-        ),
-        ToolbarButton(
             icon="fa fa-user",
             url=tk.url_for("user.read", id=tk.current_user.name),
-            attributes={"title": tk._("View profile")},
+            label=tk.current_user.display_name,
+            attributes={"title": tk._("View profile"), "class": "ms-lg-auto"},
+        ),
+        ToolbarButton(
+            icon="fa fa-gavel",
+            url=tk.url_for("admin.index"),
+            attributes={"title": tk._("Old admin")},
         ),
         ToolbarButton(
             icon="fa fa-tachometer",

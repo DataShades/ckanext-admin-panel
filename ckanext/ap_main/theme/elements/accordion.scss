@@ -1,15 +1,15 @@
 body[admin-panel="true"] {
     .accordion {
-        border: $border;
-
         .accordion-item {
-            background: var(--ap-body-bg);
+            background: var(--ap-accordion-bg);
 
             .accordion-header {
                 .accordion-button {
-                    border: $border;
-                    background: transparent;
+                    background: inherit;
                     color: var(--ap-color);
+                    box-shadow: unset;
+                    padding: 1.5rem 2rem;
+                    font-weight: 600;
 
                     &:after {
                         background-image: var(--ap-accordion-arrow) !important;
@@ -24,7 +24,8 @@ body[admin-panel="true"] {
 
             .accordion-header,
             .accordion-body {
-                padding: 0.5rem;
+                // padding: 0.5rem;
+                padding: 0;
             }
         }
     }

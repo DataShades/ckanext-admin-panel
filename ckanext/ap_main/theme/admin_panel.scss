@@ -1,10 +1,10 @@
 @import "variables";
-@import "mixins";
+@import "fonts";
 @import "global";
+@import "collections";
 
 @import "elements/admin-panel";
 @import "elements/buttons";
-@import "elements/theme-switcher";
 @import "elements/flash";
 @import "elements/list";
 @import "elements/accordion";
@@ -15,5 +15,3 @@
 @import "elements/form";
 @import "elements/notify_toast";
 @import "elements/badge";
-
-@import "page/user_list";

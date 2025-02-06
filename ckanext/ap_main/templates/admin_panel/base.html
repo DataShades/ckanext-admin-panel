@@ -12,7 +12,7 @@
     {% endblock %}
 
     <div class="main {% block ap_main_class %}{% endblock %}">
-        <div id="content" class="container-fluid">
+        <div id="content" class="container">
             {% block flash %}
                 <div class="flash-messages" data-module="ap-notify">
                     {% block flash_inner %}
@@ -23,23 +23,21 @@
                 </div>
             {% endblock %}
 
-            <div class="module">
-                <div class="module-content">
-                    {% block toolbar %}
-                        <div class="toolbar" role="navigation" aria-label="{{ _('Breadcrumb') }}">
-                        {% block breadcrumb %}
-                            <ol class="breadcrumb">
-                                {% snippet 'admin_panel/config/snippets/home_breadcrumb.html' %}
-                                {% block breadcrumb_content %}{% endblock %}
-                            </ol>
-                        {% endblock %}
-                        </div>
+            <div class="ap-content">
+                {% block toolbar %}
+                    <div class="toolbar" role="navigation" aria-label="{{ _('Breadcrumb') }}">
+                    {% block breadcrumb %}
+                        <ol class="breadcrumb">
+                            {% snippet 'admin_panel/config/snippets/home_breadcrumb.html' %}
+                            {% block breadcrumb_content %}{% endblock %}
+                        </ol>
                     {% endblock %}
+                    </div>
+                {% endblock %}
 
-                    {% block ap_content %}{% endblock ap_content %}
+                {% block ap_content %}{% endblock ap_content %}
 
-                    {% block page_pagination %}{% endblock page_pagination %}
-                </div>
+                {% block page_pagination %}{% endblock page_pagination %}
             </div>
         </div>
     </div>
