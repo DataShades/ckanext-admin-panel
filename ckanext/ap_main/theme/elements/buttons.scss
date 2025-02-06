@@ -45,6 +45,18 @@ body[admin-panel="true"],
             display: flex;
         }
 
+        &.btn-square {
+            min-height: 38px;
+            min-width: 38px;
+            position: relative;
+
+            i {
+                position: absolute;
+                transform: translate(-50%, -50%);
+                top: 50%;
+            }
+        }
+
         i {
             margin-left: 0;
         }
