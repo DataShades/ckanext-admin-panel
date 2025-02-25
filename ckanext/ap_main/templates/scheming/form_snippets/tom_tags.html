@@ -12,9 +12,9 @@
 {% endif %}
 
 {% if "data-module" in attrs %}
-    {% do attrs.update({'data-module': attrs['data-module'] ~ ' ap-tom-select'}) %}
+    {% do attrs.update({'data-module': attrs['data-module'] ~ ' ap-tom-select', 'data-module-delimiter': ' '}) %}
 {% else %}
-    {% do attrs.update({'data-module': 'ap-tom-select'}) %}
+    {% do attrs.update({'data-module': 'ap-tom-select', 'data-module-delimiter': ' '}) %}
 {% endif %}
 
 <div class="form-group control-medium tom-select control-select {{ error if errors }}{{ ' ' ~ classes | join(' ') }}">

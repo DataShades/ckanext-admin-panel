@@ -14,7 +14,7 @@ ckan.module("ap-tom-select", function ($) {
             },
             loadUrl: null,
             create: true,
-            delimiter: " ",
+            delimiter: ",",
         },
 
         initialize() {
