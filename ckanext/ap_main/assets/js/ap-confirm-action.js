@@ -8,6 +8,7 @@ var extendedModule = $.extend({}, ckan.module.registry["confirm-action"].prototy
 
 extendedModule._onConfirmSuccess = function (e) {
     if (this.el.attr("type") === "submit") {
+        this.el.hide();
         this.el.closest("form").append(
             $('<input>').attr({
                 type: 'hidden',
