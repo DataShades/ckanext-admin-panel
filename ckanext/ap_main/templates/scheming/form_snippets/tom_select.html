@@ -26,6 +26,15 @@
   {%- set option_selected = "" -%}
 {%- endif -%}
 
+{% set form_attrs = field.get('form_attrs', {}) %}
+{% set delimiter = form_attrs.get('delimiter', ',') %}
+
+{% if form_attrs.multiple %}
+    {% set option_selected = option_selected.split(delimiter) %}
+{% else %}
+    {% set option_selected = [option_selected] %}
+{% endif %}
+
 {% call form.tom_select(
     field.field_name,
     id='field-' + field.field_name,
@@ -34,7 +43,7 @@
     selected=option_selected,
     error=errors[field.field_name],
     classes=field.classes if 'classes' in field else ['control-medium', 'tom-select'],
-    attrs=field.get('form_attrs', {}),
+    attrs=form_attrs,
     is_required=h.scheming_field_required(field)
     )
 %}
