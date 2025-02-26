@@ -5,13 +5,17 @@
     tomselect select macro, adds the data-module attribute to the select element and settings argument
 #}
 
-{% macro tom_select(name, id='', label='', options='', selected='', error='', classes=[], attrs={}, settings={}, is_required=false) %}
+{% macro tom_select(name, id='', label='', options=[], selected='', error='', classes=[], attrs={}, settings={}, is_required=false) %}
     {% set classes = (classes|list) %}
     {% do classes.append('control-select') %}
 
     {%- set extra_html = caller() if caller -%}
 
     {% call input_block(id or name, label or name, error, classes, extra_html=extra_html, is_required=is_required) %}
-        <input id="{{ id or name }}" name="{{ name }}" data-module="ap-tom-select" {{ attributes(attrs) }} {{ attributes(settings) }} value="{{ selected }}" {{ required if is_required}}>
+        <select id="{{ id or name }}" name="{{ name }}" data-module='ap-tom-select' {{ attributes(attrs) }} {{ attributes(settings) }}>
+            {% for option in options %}
+                <option value="{{ option.value }}"{% if option.value == selected %} selected{% endif %}>{{ option.text or option.value }}</option>
+            {% endfor %}
+        </select>
     {% endcall %}
 {% endmacro %}
