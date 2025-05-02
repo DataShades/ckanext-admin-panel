@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import ckan.lib.munge as munge
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
@@ -37,7 +39,7 @@ def get_config_sections() -> list[SectionConfig]:
 
 
 @helper
-# @Cache(duration=900) # cache for 15 minutes
+@Cache(duration=900)  # cache for 15 minutes
 def get_toolbar_structure() -> list[ToolbarButton]:
     """Prepare a toolbar structure for render.
 
@@ -210,3 +212,25 @@ def calculate_priority(value: int, threshold: int) -> str:
         return "high"
     else:
         return "urgent"
+
+
+@helper
+def build_url_from_params(
+    endpoint: str, url_params: dict[str, Any], row: dict[str, Any]
+) -> str:
+    """Build an action URL based on the endpoint and URL parameters.
+
+    The url_params might contain values like $id, $type, etc.
+    We need to replace them with the actual values from the row
+
+    Args:
+        endpoint: The endpoint to build the URL for
+        url_params: The URL parameters to build the URL for
+        row: The row to build the URL for
+    """
+
+    for key, value in url_params.items():
+        if value.startswith("$"):
+            url_params[key] = row[value[1:]]
+
+    return tk.url_for(endpoint, **url_params)

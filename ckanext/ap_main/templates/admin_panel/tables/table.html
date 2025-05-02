@@ -1,0 +1,38 @@
+{% extends "admin_panel/base.html" %}
+
+{% block ap_content %}
+    <div class="d-flex gap-2 align-items-center">
+        <select id="filter-field">
+            <option></option>
+            {% for column in columns %}
+                {% if column.filterable %}
+                    <option value="{{ column.field }}" {% if request.args.get('field') == column.field %}selected{% endif %}>
+                        {{ column.title }}
+                    </option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+        <select id="filter-operator">
+            {% for operator in ["=", "<", "<=", ">", ">=", "!=", "like"] %}
+                <option value="{{ operator }}" {% if request.args.get('operator') == operator %}selected{% endif %}>
+                    {{ operator }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <input id="filter-value" value="{{ request.args.get('q', '')}}" type="text" placeholder="{{ _('Value to filter') }}">
+
+        <button class="btn btn-primary" id="filter-clear">{{ _('Clear filter') }}</button>
+    </div>
+    <div
+        id="{{ table_id }}" class="tabulator-container"
+        data-module="ap-tabulator"
+        data-module-table-name="{{ table_name }}"
+        data-module-table-title="{{ table_title }}"
+        data-module-columns="{{ columns }}"
+        data-module-tabulator-options="{{ tabulator_options }}"
+        data-module-data-url="{{ data_url }}"
+        data-module-global-actions="{{ global_actions }}"
+    ></div>
+{% endblock %}

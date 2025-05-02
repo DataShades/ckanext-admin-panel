@@ -1,32 +1,13 @@
-# encoding: utf-8
-
-"""API functions for searching for and getting data from CKAN."""
 from __future__ import annotations
 
-import logging
 from typing import Any
 
-import sqlalchemy
+import sqlalchemy as sa
 
+import ckan.model as model
 import ckan.lib.dictization.model_dictize as model_dictize
-import ckan.logic as logic
 import ckan.plugins.toolkit as tk
-from ckan.common import asbool, config
 from ckan.types import ActionResult, Context, DataDict, Query
-
-log = logging.getLogger("ckan.logic")
-
-
-_check_access = logic.check_access
-NotFound = logic.NotFound
-NotAuthorized = logic.NotAuthorized
-ValidationError = logic.ValidationError
-
-_select = sqlalchemy.sql.select
-_or_ = sqlalchemy.or_
-_and_ = sqlalchemy.and_
-_func = sqlalchemy.func
-_case = sqlalchemy.case
 
 
 @tk.side_effect_free
@@ -56,14 +37,12 @@ def user_list(context: Context, data_dict: DataDict) -> ActionResult.UserList:
       or draft state.
 
     """
-    model = context["model"]
-
-    _check_access("user_list", context, data_dict)
+    tk.check_access("user_list", context, data_dict)
 
     q = data_dict.get("q", "")
     email = data_dict.get("email")
     order_by = data_dict.get("order_by", "display_name")
-    all_fields = asbool(data_dict.get("all_fields", True))
+    all_fields = tk.asbool(data_dict.get("all_fields", True))
 
     if all_fields:
         query: "Query[Any]" = model.Session.query(
@@ -74,9 +53,9 @@ def user_list(context: Context, data_dict: DataDict) -> ActionResult.UserList:
             model.User.about.label("about"),  # type: ignore
             model.User.email.label("email"),  # type: ignore
             model.User.created.label("created"),  # type: ignore
-            _select(
-                [_func.count(model.Package.id)],
-                _and_(
+            sa.select(
+                [sa.func.count(model.Package.id)],
+                sa.and_(
                     model.Package.creator_user_id == model.User.id,
                     model.Package.state == "active",
                     model.Package.private is False,
@@ -86,8 +65,8 @@ def user_list(context: Context, data_dict: DataDict) -> ActionResult.UserList:
     else:
         query = model.Session.query(model.User.name)
 
-    if not asbool(data_dict.get("include_site_user", False)):
-        site_id = config.get("ckan.site_id")
+    if not tk.asbool(data_dict.get("include_site_user", False)):
+        site_id = tk.config.get("ckan.site_id")
         query = query.filter(model.User.name != site_id)
 
     if q:
@@ -97,7 +76,7 @@ def user_list(context: Context, data_dict: DataDict) -> ActionResult.UserList:
 
     order_by_field = None
     if order_by == "edits":
-        raise ValidationError({"message": "order_by=edits is no longer supported"})
+        raise tk.ValidationError({"message": "order_by=edits is no longer supported"})
     elif order_by == "number_created_packages":
         order_by_field = order_by
     elif order_by != "display_name":
@@ -107,10 +86,10 @@ def user_list(context: Context, data_dict: DataDict) -> ActionResult.UserList:
             pass
     if order_by == "display_name" or order_by_field is None:
         query = query.order_by(
-            _case(
+            sa.case(
                 [
                     (
-                        _or_(model.User.fullname is None, model.User.fullname == ""),
+                        sa.or_(model.User.fullname is None, model.User.fullname == ""),
                         model.User.name,
                     )
                 ],
@@ -136,7 +115,7 @@ def user_list(context: Context, data_dict: DataDict) -> ActionResult.UserList:
     if all_fields:
         for user in query.all():
             result_dict = model_dictize.user_dictize(user[0], context)
-            users_list.append(result_dict)
+            users_list.append(result_dict)  # type: ignore
     else:
         for user in query.all():
             users_list.append(user[0])
