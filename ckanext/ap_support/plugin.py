@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import ckan.types as types
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-
-from ckanext.ap_main.interfaces import IAdminPanel
-from ckanext.ap_main.types import ColRenderer
+import ckan.types as types
 
 from ckanext.ap_support.col_renderers import get_renderers
 from ckanext.ap_support.collection import SupportCollection
+
+from ckanext.ap_main.interfaces import IAdminPanel
+from ckanext.ap_main.types import ColRenderer
 
 
 @tk.blanket.blueprints

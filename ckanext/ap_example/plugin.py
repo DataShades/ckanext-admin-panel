@@ -4,9 +4,9 @@ from os import path
 
 from yaml import safe_load
 
+import ckan.logic as logic
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-import ckan.logic as logic
 from ckan.config.declaration import Declaration, Key
 from ckan.types import SignalMapping
 

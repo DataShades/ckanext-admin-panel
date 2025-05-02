@@ -12,14 +12,10 @@ import ckan.plugins.toolkit as tk
 from ckan import model
 
 import ckanext.ap_main.utils as ap_utils
-
 import ckanext.ap_main.views.tables.formatters as formatters
-from ckanext.ap_main.views.tables.table import (
-    TableDefinition,
-    ColumnDefinition,
-    ActionDefinition,
-)
-
+from ckanext.ap_main.views.tables.table import (ActionDefinition,
+                                                ColumnDefinition,
+                                                TableDefinition)
 
 ContentList: TypeAlias = "list[dict[str, Any]]"
 

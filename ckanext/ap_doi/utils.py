@@ -3,11 +3,11 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Optional, TypedDict, cast
 
+import ckan.plugins.toolkit as tk
+import ckan.types as types
+
 from ckanext.doi.lib.api import DataciteClient
 from ckanext.doi.model.doi import DOI
-
-import ckan.types as types
-import ckan.plugins.toolkit as tk
 
 
 class DOIFlakesData(TypedDict):

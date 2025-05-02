@@ -4,13 +4,11 @@ from dominate import tags
 
 import ckan.plugins.toolkit as tk
 
-import ckanext.ap_main.collection.base as collection_base
-
-from ckanext.collection.utils import ApiData
-from ckanext.collection.types import InputFilter, ButtonFilter, SelectFilter
-from ckanext.collection.utils import Filters
-
 from ckanext.ap_doi.utils import DOIProblemPackageData
+from ckanext.collection.types import ButtonFilter, InputFilter, SelectFilter
+from ckanext.collection.utils import ApiData, Filters
+
+import ckanext.ap_main.collection.base as collection_base
 
 
 def row_dictizer(

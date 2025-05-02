@@ -13,9 +13,10 @@ import ckan.logic as logic
 import ckan.plugins.toolkit as tk
 from ckan import model, types
 
+from ckanext.collection.shared import get_collection
+
 from ckanext.ap_main.logic import schema as ap_schema
 from ckanext.ap_main.utils import ap_before_request
-from ckanext.collection.shared import get_collection
 
 UserList: TypeAlias = "list[dict[str, Any]]"
 

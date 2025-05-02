@@ -1,23 +1,17 @@
 from __future__ import annotations
 
-from typing import Any
+
+import sqlalchemy as sa
 from dominate import tags
 
 import ckan.plugins.toolkit as tk
-import ipdb
-import sqlalchemy as sa
-
-from ckanext.collection.types import InputFilter, ButtonFilter, SelectFilter
-from ckanext.collection.utils import Filters, StatementSaData, ModelData
-
-from ckanext.ap_main.collection.base import (
-    ApCollection,
-    ApColumns,
-    BulkAction,
-    ApHtmxTableSerializer,
-)
 
 from ckanext.ap_cron.model import CronJob
+from ckanext.collection.types import ButtonFilter, InputFilter, SelectFilter
+from ckanext.collection.utils import Filters, StatementSaData
+
+from ckanext.ap_main.collection.base import (ApCollection, ApColumns,
+                                             ApHtmxTableSerializer, BulkAction)
 
 
 class CronCollection(ApCollection):

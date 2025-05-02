@@ -4,7 +4,6 @@ import logging
 from typing import Any, Callable
 
 from ckanext.collection.types import BaseSerializer
-
 from ckanext.toolbelt.decorators import Collector
 
 from ckanext.ap_main.types import ColRenderer

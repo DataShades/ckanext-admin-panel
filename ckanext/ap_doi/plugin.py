@@ -1,27 +1,25 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 from os import path
+from typing import Any
 
 from yaml import safe_load
 
-import ckan.plugins as p
 import ckan.logic as logic
+import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-from ckan.types import SignalMapping
 from ckan.config.declaration import Declaration, Key
+from ckan.types import SignalMapping
 
+import ckanext.ap_doi.config as config
+import ckanext.ap_doi.const as const
+import ckanext.ap_doi.utils as utils
+from ckanext.ap_doi.collection import ApDOICollection
+from ckanext.collection.interfaces import CollectionFactory, ICollection
 from ckanext.doi.plugin import DOIPlugin
 
 import ckanext.ap_main.types as ap_types
-
-from ckanext.collection.interfaces import CollectionFactory, ICollection
-from ckanext.ap_doi.collection import ApDOICollection
-
-import ckanext.ap_doi.const as const
-import ckanext.ap_doi.utils as utils
-import ckanext.ap_doi.config as config
 
 log = logging.getLogger(__name__)
 

@@ -10,8 +10,8 @@ from ckan import types
 from ckan.logic import get_action
 
 from ckanext.ap_cron import model as cron_model
-from ckanext.ap_cron.interfaces import IAPCron
 from ckanext.ap_cron.const import KWARGS
+from ckanext.ap_cron.interfaces import IAPCron
 
 
 def cron_schedule_validator(value: str, context: types.Context) -> Any:

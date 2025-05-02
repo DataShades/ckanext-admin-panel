@@ -9,10 +9,10 @@ from flask.views import MethodView
 import ckan.plugins.toolkit as tk
 from ckan.logic import parse_params
 
-from ckanext.collection.shared import get_collection
-from ckanext.ap_main.utils import ap_before_request
-
 from ckanext.ap_support.model import Ticket
+from ckanext.collection.shared import get_collection
+
+from ckanext.ap_main.utils import ap_before_request
 
 ap_support = Blueprint(
     "ap_support",
@@ -125,7 +125,7 @@ class TicketReadView(MethodView):
                 {"id": ticket_id},
             )
         except tk.ValidationError:
-            return tk.abort(404, tk._('Ticket not found'))
+            return tk.abort(404, tk._("Ticket not found"))
 
         return tk.render("ap_support/ticket_read.html", extra_vars={"ticket": ticket})
 

@@ -4,8 +4,8 @@ from typing import Any
 
 from flask.views import MethodView
 
-import ckan.plugins.toolkit as tk
 import ckan.plugins as p
+import ckan.plugins.toolkit as tk
 from ckan.logic import parse_params
 
 from ckanext.ap_main.interfaces import IAdminPanel

@@ -6,10 +6,11 @@ import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 from ckan.types import SignalMapping
 
-from ckanext.collection.interfaces import ICollection, CollectionFactory
+from ckanext.collection.interfaces import CollectionFactory, ICollection
+
 import ckanext.ap_main.types as ap_types
+from ckanext.ap_main import collection, helpers, utils
 from ckanext.ap_main.col_renderers import get_renderers
-from ckanext.ap_main import helpers, collection, utils
 from ckanext.ap_main.interfaces import IAdminPanel
 
 

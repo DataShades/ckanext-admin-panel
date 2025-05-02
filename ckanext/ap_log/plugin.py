@@ -3,12 +3,12 @@ from __future__ import annotations
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
-from ckanext.collection.interfaces import ICollection, CollectionFactory
-from ckanext.ap_main.interfaces import IAdminPanel
-import ckanext.ap_main.types as ap_types
-
-from ckanext.ap_log.col_renderers import get_renderers
 from ckanext.ap_log import collection
+from ckanext.ap_log.col_renderers import get_renderers
+from ckanext.collection.interfaces import CollectionFactory, ICollection
+
+import ckanext.ap_main.types as ap_types
+from ckanext.ap_main.interfaces import IAdminPanel
 
 
 @tk.blanket.blueprints

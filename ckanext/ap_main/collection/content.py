@@ -6,7 +6,7 @@ from dominate import tags
 import ckan.plugins.toolkit as tk
 from ckan import model
 
-from ckanext.collection.types import InputFilter, ButtonFilter, SelectFilter
+from ckanext.collection.types import ButtonFilter, InputFilter, SelectFilter
 from ckanext.collection.utils import Filters, UnionSaData
 
 from .base import ApCollection, BulkAction, RowAction
@@ -32,7 +32,12 @@ class ContentCollection(ApCollection):
             "metadata_created",
             "metadata_modified",
         },
-        width={"bulk-action": "3%", "title": "15%", "notes": "20%", "row_actions": "15%"},
+        width={
+            "bulk-action": "3%",
+            "title": "15%",
+            "notes": "20%",
+            "row_actions": "15%",
+        },
         searchable={"title", "notes"},
         labels={
             "bulk-action": tk.literal(

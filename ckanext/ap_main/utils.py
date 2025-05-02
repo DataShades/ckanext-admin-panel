@@ -76,7 +76,7 @@ def get_config_schema(schema_id: str) -> dict[Any, Any] | None:
     Returns:
         The schema if found, otherwise None
     """
-    from ckanext.scheming.plugins import _load_schemas, _expand_schemas
+    from ckanext.scheming.plugins import _expand_schemas, _load_schemas
 
     for _, schemas_paths in collect_config_schemas_signal.send():
         schemas = _load_schemas(schemas_paths, "schema_id")

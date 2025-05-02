@@ -7,12 +7,10 @@ from flask import Blueprint, Response
 from flask.views import MethodView
 
 import ckan.plugins.toolkit as tk
-
 from ckan.logic import parse_params
 
-from ckanext.editable_config.shared import value_as_string
-
 from ckanext.collection.shared import get_collection
+from ckanext.editable_config.shared import value_as_string
 
 from ckanext.ap_main.utils import ap_before_request, get_config_schema
 from ckanext.ap_main.views.generics import ApConfigurationPageView

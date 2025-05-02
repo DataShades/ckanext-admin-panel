@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from ckanext.collection.shared import configurable_attribute
-
-from dominate import tags
 import sqlalchemy as sa
+from dominate import tags
+
 import ckan.plugins.toolkit as tk
 from ckan import model
 
-from ckanext.collection.types import InputFilter, ButtonFilter, SelectFilter
+from ckanext.collection.shared import configurable_attribute
+from ckanext.collection.types import ButtonFilter, InputFilter, SelectFilter
 from ckanext.collection.utils import Filters, ModelData
 
 from .base import ApCollection, BulkAction, RowAction

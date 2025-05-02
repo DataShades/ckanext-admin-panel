@@ -14,7 +14,9 @@ renderer, get_renderers = Collector("ap_support").split()
 def status(
     value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
-    return tk.literal(tk.render(
-        "ap_support/renderers/status.html",
-        extra_vars={"value": value},
-    ))
+    return tk.literal(
+        tk.render(
+            "ap_support/renderers/status.html",
+            extra_vars={"value": value},
+        )
+    )

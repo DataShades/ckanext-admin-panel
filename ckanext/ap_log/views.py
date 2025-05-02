@@ -8,11 +8,10 @@ from flask.views import MethodView
 import ckan.plugins.toolkit as tk
 from ckan.logic import parse_params
 
-from ckanext.collection.shared import get_collection
-from ckanext.ap_main.utils import ap_before_request
-
 from ckanext.ap_log.model import ApLogs
+from ckanext.collection.shared import get_collection
 
+from ckanext.ap_main.utils import ap_before_request
 
 ap_log = Blueprint("ap_log", __name__, url_prefix="/admin-panel")
 ap_log.before_request(ap_before_request)

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
-from sqlalchemy import Column, DateTime, Integer, Text, ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text
+from sqlalchemy.orm import backref, relationship
 from typing_extensions import Self
 
 import ckan.model as model
@@ -30,9 +30,7 @@ class Ticket(tk.BaseModel):
     category = Column(Text)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    author_id: Optional[str] = Column(
-        Text, ForeignKey(model.User.id), nullable=False
-    )
+    author_id: Optional[str] = Column(Text, ForeignKey(model.User.id), nullable=False)
 
     author = relationship(
         model.User,

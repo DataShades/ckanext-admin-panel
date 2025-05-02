@@ -8,14 +8,12 @@ import ckan.plugins.toolkit as tk
 from ckanext.ap_cron import helpers
 from ckanext.ap_cron.cli import get_commands
 from ckanext.ap_cron.col_renderers import get_renderers
-
-from ckanext.collection.interfaces import ICollection, CollectionFactory
+from ckanext.ap_cron.collection import CronCollection
+from ckanext.collection.interfaces import CollectionFactory, ICollection
 
 import ckanext.ap_main.types as ap_types
 from ckanext.ap_main.interfaces import IAdminPanel
 from ckanext.ap_main.types import ColRenderer
-
-from ckanext.ap_cron.collection import CronCollection
 
 
 @tk.blanket.blueprints

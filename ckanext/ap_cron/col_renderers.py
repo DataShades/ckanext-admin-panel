@@ -1,13 +1,13 @@
 from __future__ import annotations
+
 from typing import Any, Callable
 
 import ckan.plugins.toolkit as tk
-from ckanext.collection.types import BaseSerializer
 
+from ckanext.collection.types import BaseSerializer
 from ckanext.toolbelt.decorators import Collector
 
 from ckanext.ap_main.types import ColRenderer
-
 
 renderer: Collector[ColRenderer]
 get_renderers: Callable[[], dict[str, ColRenderer]]
@@ -32,17 +32,21 @@ def schedule(
 ) -> str:
     tooltip = tk.h.ap_cron_explain_cron_schedule(value)
 
-    return tk.literal(tk.render(
-        "ap_cron/renderers/schedule.html",
-        extra_vars={"value": value, "tooltip": tooltip},
-    ))
+    return tk.literal(
+        tk.render(
+            "ap_cron/renderers/schedule.html",
+            extra_vars={"value": value, "tooltip": tooltip},
+        )
+    )
 
 
 @renderer
 def json_display(
     value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
 ) -> str:
-    return tk.literal(tk.render(
-        "ap_cron/renderers/json.html",
-        extra_vars={"value": value},
-    ))
+    return tk.literal(
+        tk.render(
+            "ap_cron/renderers/json.html",
+            extra_vars={"value": value},
+        )
+    )

@@ -3,20 +3,14 @@ from __future__ import annotations
 from dominate import tags
 
 import ckan.plugins.toolkit as tk
-import sqlalchemy as sa
-
-from ckanext.collection.types import InputFilter, ButtonFilter, SelectFilter
-from ckanext.collection.utils import Filters, ModelData
-
-from ckanext.ap_main.collection.base import (
-    ApCollection,
-    ApColumns,
-    BulkAction,
-    RowAction,
-    ApHtmxTableSerializer,
-)
 
 from ckanext.ap_support.model import Ticket
+from ckanext.collection.types import ButtonFilter, InputFilter, SelectFilter
+from ckanext.collection.utils import Filters, ModelData
+
+from ckanext.ap_main.collection.base import (ApCollection, ApColumns,
+                                             ApHtmxTableSerializer, BulkAction,
+                                             RowAction)
 
 
 def custom_row_dictizer(serializer: ApHtmxTableSerializer, row: Ticket):
@@ -94,7 +88,6 @@ class SupportCollection(ApCollection):
                         {"value": "1", "text": "Close selected tickets"},
                         {"value": "2", "text": "Reopen selected tickets"},
                         {"value": "3", "text": "Remove selected tickets"},
-
                     ],
                 },
             ),

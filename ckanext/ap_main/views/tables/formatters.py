@@ -12,7 +12,6 @@ from ckanext.toolbelt.decorators import Collector
 
 from .table import ColumnDefinition, TableDefinition
 
-
 Formatter: TypeAlias = Callable[
     [Any, "dict[str, Any]", str, Any, BaseSerializer],
     Any,

@@ -5,12 +5,10 @@ from typing import Any, Literal, Sequence
 from typing_extensions import NotRequired, TypedDict
 
 from ckanext.collection.shared import configurable_attribute
-from ckanext.collection.types import (
-    Filter,
-    SelectFilterOptions,
-    TDataCollection,
-)
-from ckanext.collection.utils import Collection, HtmxTableSerializer, Columns
+from ckanext.collection.types import (Filter, SelectFilterOptions,
+                                      TDataCollection)
+from ckanext.collection.utils import Collection, Columns, HtmxTableSerializer
+
 from ckanext.ap_main.utils import get_all_renderers
 
 

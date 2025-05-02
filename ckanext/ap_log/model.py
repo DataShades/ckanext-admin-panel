@@ -11,7 +11,6 @@ from sqlalchemy.orm import Query, Session
 from ckan.model.types import make_uuid
 from ckan.plugins import toolkit as tk
 
-
 log = logging.getLogger(__name__)
 
 

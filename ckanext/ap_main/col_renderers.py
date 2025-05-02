@@ -6,8 +6,8 @@ from typing import Any, Callable
 
 import ckan.model as model
 from ckan.plugins import toolkit as tk
-from ckanext.collection.types import BaseSerializer
 
+from ckanext.collection.types import BaseSerializer
 from ckanext.toolbelt.decorators import Collector
 
 from ckanext.ap_main.types import ColRenderer
@@ -19,7 +19,11 @@ renderer, get_renderers = Collector().split()
 
 @renderer
 def date(
-    value: datetime, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: datetime,
+    options: dict[str, Any],
+    name: str,
+    record: Any,
+    self: BaseSerializer,
 ) -> str:
     """Render a datetime object as a string.
 

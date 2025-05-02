@@ -1,24 +1,19 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, Sequence
-import sqlalchemy as sa
 import logging
-from ckan import model
-from ckanext.collection.types import (
-    InputFilter,
-    ButtonFilter,
-    Filter,
-    SelectOption,
-)
-from ckanext.collection.utils import Filters, ModelData
+from typing import Any, Iterable, Sequence
 
-from ckanext.ap_main.collection.base import (
-    ApCollection,
-    MultiSelectFilter,
-    GlobalAction,
-)
+import sqlalchemy as sa
+
+from ckan import model
 
 from ckanext.ap_log.model import ApLogs
+from ckanext.collection.types import (ButtonFilter, Filter, InputFilter,
+                                      SelectOption)
+from ckanext.collection.utils import Filters, ModelData
+
+from ckanext.ap_main.collection.base import (ApCollection, GlobalAction,
+                                             MultiSelectFilter)
 
 
 class DbLogCollection(ApCollection):

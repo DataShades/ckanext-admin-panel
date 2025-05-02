@@ -12,12 +12,11 @@ import ckan.plugins.toolkit as tk
 from ckan import types
 from ckan.logic import parse_params
 
-from ckanext.collection.shared import get_collection
-
 import ckanext.ap_cron.utils as cron_utils
 from ckanext.ap_cron import types as cron_types
 from ckanext.ap_cron.interfaces import IAPCron
 from ckanext.ap_cron.model import CronJob
+from ckanext.collection.shared import get_collection
 
 from ckanext.ap_main.utils import ap_before_request
 
@@ -168,10 +167,7 @@ class CronEditJobFormView(MethodView):
 
         return tk.render(
             "ap_cron/cron_edit_modal_form.html",
-            extra_vars={
-                "data": result,
-                "scope": "edit"
-            },
+            extra_vars={"data": result, "scope": "edit"},
         )
 
 

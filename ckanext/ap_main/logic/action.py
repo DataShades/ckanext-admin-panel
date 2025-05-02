@@ -4,8 +4,8 @@ from typing import Any
 
 import sqlalchemy as sa
 
-import ckan.model as model
 import ckan.lib.dictization.model_dictize as model_dictize
+import ckan.model as model
 import ckan.plugins.toolkit as tk
 from ckan.types import ActionResult, Context, DataDict, Query
 
