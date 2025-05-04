@@ -1,17 +1,7 @@
 body[admin-panel="true"],
 #admin-panel {
-    $input-height: 38px;
-
-    input {
-        height: $input-height;
-    }
-
     input[type=checkbox] {
         height: auto;
-    }
-
-    select {
-        height: $input-height;
     }
 
     #bulk-action {

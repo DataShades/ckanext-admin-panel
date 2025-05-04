@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-
 import sqlalchemy as sa
 from dominate import tags
 

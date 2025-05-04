@@ -1,3 +1,5 @@
+const { Swal } = require("../../../ap_main/assets/js/vendor/sweetalert2.min");
+
 /**
  * A script to manage AJAX actions on the cron list page
  */
@@ -37,7 +39,7 @@ ckan.module("ap-cron-htmx", function ($) {
             if (evt.detail.path.includes("/cron/delete")) {
                 evt.preventDefault();
 
-                swal({
+                Swal.fire({
                     text: this._("Are you sure you wish to delete a cron job?"),
                     icon: "warning",
                     buttons: true,

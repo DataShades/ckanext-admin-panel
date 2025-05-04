@@ -50,18 +50,18 @@ def ap_before_request() -> None:
         tk.abort(403, tk._("Need to be system administrator to administer"))
 
 
-def get_all_renderers() -> dict[str, ap_types.ColRenderer]:
-    """Get all registered column renderers.
+def get_all_formatters() -> dict[str, ap_types.Formatter]:
+    """Get all registered tabulator formatters.
 
-    A renderer is a function that takes a column value and can modify its appearance
+    A formatter is a function that takes a column value and can modify its appearance
     in a table.
 
     Returns:
-        A mapping of renderer names to renderer functions
+        A mapping of formatter names to formatter functions
     """
     if not _renderers_cache:
         for plugin in reversed(list(p.PluginImplementations(IAdminPanel))):
-            for name, fn in plugin.get_col_renderers().items():
+            for name, fn in plugin.get_formatters().items():
                 _renderers_cache[name] = fn
 
     return _renderers_cache

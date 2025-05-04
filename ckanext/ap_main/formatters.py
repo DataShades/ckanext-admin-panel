@@ -7,23 +7,22 @@ from typing import Any, Callable
 import ckan.model as model
 from ckan.plugins import toolkit as tk
 
-from ckanext.collection.types import BaseSerializer
 from ckanext.toolbelt.decorators import Collector
 
-from ckanext.ap_main.types import ColRenderer
+from ckanext.ap_main.table import ColumnDefinition, TableDefinition
+from ckanext.ap_main.types import Formatter
 
-renderer: Collector[ColRenderer]
-get_renderers: Callable[[], dict[str, ColRenderer]]
-renderer, get_renderers = Collector().split()
+get_formatters: Callable[[], dict[str, Formatter]]
+formatter, get_formatters = Collector().split()
 
 
-@renderer
+@formatter
 def date(
     value: datetime,
     options: dict[str, Any],
     name: str,
     record: Any,
-    self: BaseSerializer,
+    table: TableDefinition,
 ) -> str:
     """Render a datetime object as a string.
 
@@ -32,7 +31,7 @@ def date(
         options (dict[str, Any]): options for the renderer
         name (str): column name
         record (Any): row data
-        self (BaseSerializer): serializer instance
+        table (TableDefinition): table definition
 
     Options:
         - `date_format` (str) - date format string. **Default** is `%d/%m/%Y - %H:%M`
@@ -45,9 +44,13 @@ def date(
     return tk.h.render_datetime(value, date_format=date_format)
 
 
-@renderer
+@formatter
 def user_link(
-    value: str, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: str,
+    options: dict[str, Any],
+    column: ColumnDefinition,
+    row: dict[str, Any],
+    table: TableDefinition,
 ) -> str:
     """Generate a link to the user profile page with an avatar.
 
@@ -60,9 +63,9 @@ def user_link(
     Args:
         value (str): user ID
         options (dict[str, Any]): options for the renderer
-        name (str): column name
-        record (Any): row data
-        self (BaseSerializer): serializer instance
+        column (ColumnDefinition): column definition
+        row (dict[str, Any]): row data
+        table (TableDefinition): table definition
 
     Options:
         - `maxlength` (int) - maximum length of the user name. **Default** is `20`
@@ -97,37 +100,44 @@ def user_link(
     )
 
 
-@renderer
+@formatter
 def bool(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: Any,
+    options: dict[str, Any],
+    column: ColumnDefinition,
+    row: dict[str, Any],
+    table: TableDefinition,
 ) -> str:
     """Render a boolean value as a string.
 
     Args:
         value (Any): boolean value
         options (dict[str, Any]): options for the renderer
-        name (str): column name
-        record (Any): row data
-        self (BaseSerializer): serializer instance
-
+        column (ColumnDefinition): column definition
+        row (dict[str, Any]): row data
+        table (TableDefinition): table definition
     Returns:
         "Yes" if value is True, otherwise "No"
     """
     return "Yes" if value else "No"
 
 
-@renderer
+@formatter
 def log_level(
-    value: int, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: int,
+    options: dict[str, Any],
+    column: ColumnDefinition,
+    row: dict[str, Any],
+    table: TableDefinition,
 ) -> str:
     """Render a log level as a string.
 
     Args:
         value (Any): numeric representation of logging level
         options (dict[str, Any]): options for the renderer
-        name (str): column name
-        record (Any): row data
-        self (BaseSerializer): serializer instance
+        column (ColumnDefinition): column definition
+        row (dict[str, Any]): row data
+        table (TableDefinition): table definition
 
     Returns:
         log level name
@@ -135,18 +145,22 @@ def log_level(
     return logging.getLevelName(value)
 
 
-@renderer
+@formatter
 def list(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: Any,
+    options: dict[str, Any],
+    column: ColumnDefinition,
+    row: dict[str, Any],
+    table: TableDefinition,
 ) -> str:
     """Render a list as a comma-separated string.
 
     Args:
         value (Any): list value
         options (dict[str, Any]): options for the renderer
-        name (str): column name
-        record (Any): row data
-        self (BaseSerializer): serializer instance
+        column (ColumnDefinition): column definition
+        row (dict[str, Any]): row data
+        table (TableDefinition): table definition
 
     Returns:
         comma-separated string
@@ -154,26 +168,29 @@ def list(
     return ", ".join(value)
 
 
-@renderer
+@formatter
 def none_as_empty(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: Any,
+    options: dict[str, Any],
+    column: ColumnDefinition,
+    row: dict[str, Any],
+    table: TableDefinition,
 ) -> Any:
     return value if value is not None else ""
 
 
-@renderer
+@formatter
 def day_passed(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: Any, options: dict[str, Any], column: ColumnDefinition, row: dict[str, Any]
 ) -> str:
     """Calculate the number of days passed since the date.
 
     Args:
         value (Any): date value
         options (dict[str, Any]): options for the renderer
-        name (str): column name
-        record (Any): row data
-        self (BaseSerializer): serializer instance
-
+        column (ColumnDefinition): column definition
+        row (dict[str, Any]): row data
+        table (TableDefinition): table definition
     Returns:
         A priority badge with day counter and color based on priority.
     """
@@ -191,24 +208,27 @@ def day_passed(
 
     return tk.literal(
         tk.render(
-            "admin_panel/renderers/day_passed.html",
+            "admin_panel/tables/formatters/day_passed.html",
             extra_vars={"value": days_passed},
         )
     )
 
 
-@renderer
+@formatter
 def trim_string(
-    value: str, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: str,
+    options: dict[str, Any],
+    column: ColumnDefinition,
+    row: dict[str, Any],
+    table: TableDefinition,
 ) -> str:
     """Trim string to a certain length.
 
     Args:
         value (str): string value
         options (dict[str, Any]): options for the renderer
-        name (str): column name
-        record (Any): row data
-        self (BaseSerializer): serializer instance
+        column (ColumnDefinition): column definition
+        row (dict[str, Any]): row data
 
     Options:
         - `max_length` (int) - maximum length of the string. **Default** is `79`
@@ -227,3 +247,19 @@ def trim_string(
         trimmed_value += "..."
 
     return trimmed_value
+
+
+@formatter
+def actions(
+    value: Any,
+    options: dict[str, Any],
+    column: ColumnDefinition,
+    row: dict[str, Any],
+    table: TableDefinition,
+) -> str:
+    return tk.literal(
+        tk.render(
+            "admin_panel/tables/formatters/actions.html",
+            extra_vars={"table": table, "column": column, "row": row},
+        )
+    )

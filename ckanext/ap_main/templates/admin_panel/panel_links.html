@@ -59,5 +59,8 @@
 {% endmacro %}
 
 {% for button in h.ap_get_toolbar_structure() %}
-    {{ toolbar_button(button) }}
+    {# render if it's a standalone button or a button with subitems #}
+    {% if button.url or button.subitems %}
+        {{ toolbar_button(button) }}
+    {% endif %}
 {% endfor %}

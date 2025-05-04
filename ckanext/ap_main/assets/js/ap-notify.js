@@ -1,5 +1,12 @@
 /**
- * Provides a way to trigger an AJAX notification
+ * Provides a way to trigger notifications in the UI.
+ *
+ * Example:
+ *   // Show a success notification
+ *   this.sandbox.publish("ap:notify", "Operation completed successfully");
+ *
+ *   // Show an error notification
+ *   this.sandbox.publish("ap:notify", "An error occurred", "error");
  */
 ckan.module("ap-notify", function ($) {
     return {
@@ -15,32 +22,25 @@ ckan.module("ap-notify", function ($) {
         },
 
         _onShowNotification: function (msg, msgType) {
-            var tickIcon = document.createElement("i");
-
             if (msgType === "alert-danger") {
-                msgType = "error"
+                msgType = "error";
             }
 
-            tickIcon.classList = msgType === "error" ? ["fa fa-times"] : ["fa fa-check"];
+            const icon = msgType === "error" ? "error" : "success";
 
-            var toastDiv = document.createElement("div");
-
-            toastDiv.id = "ap-notification-toast";
-            toastDiv.style.display = "none";
-            toastDiv.innerHTML = msg;
-            toastDiv.classList = [msgType]
-            toastDiv.prepend(tickIcon);
-
-            document.querySelector(".main").appendChild(toastDiv);
-
-            // Animate it and remove after
-            $(toastDiv).slideDown(600);
-
-            setTimeout(function () {
-                $(toastDiv).slideUp(600, function () {
-                    $(this).remove();
-                });
-            }, 5000);
+            Swal.fire({
+                icon: icon,
+                text: msg,
+                toast: true,
+                position: 'bottom-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
         }
     };
 });

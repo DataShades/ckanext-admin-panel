@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import ckan.lib.munge as munge
@@ -234,3 +235,16 @@ def build_url_from_params(
             url_params[key] = row[value[1:]]
 
     return tk.url_for(endpoint, **url_params)
+
+
+@helper
+def dumps(value: Any) -> str:
+    """Convert a value to a JSON string.
+
+    Args:
+        value: The value to convert to a JSON string
+
+    Returns:
+        The JSON string
+    """
+    return json.dumps(value)

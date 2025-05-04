@@ -5,7 +5,7 @@ const sass = require('gulp-sass')(require('sass'));
 const sourcemaps = require("gulp-sourcemaps");
 const with_sourcemaps = () => !!process.env.DEBUG
 
-const themeDir = resolve("ckanext/ap_main/theme");
+const themeDir = resolve("ckanext/ap_main/assets/scss");
 const assetsDir = resolve("ckanext/ap_main/assets");
 
 const build = () => {

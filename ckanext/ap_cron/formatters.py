@@ -4,19 +4,18 @@ from typing import Any, Callable
 
 import ckan.plugins.toolkit as tk
 
-from ckanext.collection.types import BaseSerializer
 from ckanext.toolbelt.decorators import Collector
 
-from ckanext.ap_main.types import ColRenderer
+from ckanext.ap_main.table import TableDefinition
+from ckanext.ap_main.types import Formatter
 
-renderer: Collector[ColRenderer]
-get_renderers: Callable[[], dict[str, ColRenderer]]
-renderer, get_renderers = Collector().split()
+get_formatters: Callable[[], dict[str, Formatter]]
+formatter, get_formatters = Collector().split()
 
 
-@renderer
+@formatter
 def last_run(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: Any, options: dict[str, Any], name: str, record: Any, table: TableDefinition
 ) -> str:
     date_format: str = options.get("date_format", "%d/%m/%Y - %H:%M")
 
@@ -26,27 +25,27 @@ def last_run(
     return tk.h.render_datetime(value, date_format=date_format)
 
 
-@renderer
+@formatter
 def schedule(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: Any, options: dict[str, Any], name: str, record: Any, table: TableDefinition
 ) -> str:
     tooltip = tk.h.ap_cron_explain_cron_schedule(value)
 
     return tk.literal(
         tk.render(
-            "ap_cron/renderers/schedule.html",
+            "ap_cron/formatters/schedule.html",
             extra_vars={"value": value, "tooltip": tooltip},
         )
     )
 
 
-@renderer
+@formatter
 def json_display(
-    value: Any, options: dict[str, Any], name: str, record: Any, self: BaseSerializer
+    value: Any, options: dict[str, Any], name: str, record: Any, table: TableDefinition
 ) -> str:
     return tk.literal(
         tk.render(
-            "ap_cron/renderers/json.html",
+            "ap_cron/formatters/json.html",
             extra_vars={"value": value},
         )
     )

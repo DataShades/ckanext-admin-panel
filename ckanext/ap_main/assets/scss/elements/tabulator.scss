@@ -1,0 +1,51 @@
+$color-active: #206b82;
+
+#content .ap-content {
+    .tabulator-container {
+        position: relative;
+        min-height: 120px;
+
+        .tabulator-table {
+            .tabulator-row {
+                &:last-child {
+                    border-bottom: unset;
+                }
+            }
+        }
+        .tabulator-footer {
+            border-top: unset;
+
+            .tabulator-footer-contents {
+                padding: 0;
+
+                .tabulator-paginator {
+                    .tabulator-page-size {
+                        max-width: 70px;
+                        border-radius: 0.25rem;
+                        padding: 6px 12px;
+                    }
+
+                    .tabulator-page {
+                        border-radius: 0.25rem;
+                        padding: 6px 12px;
+
+                        &.active,
+                        &:hover,
+                        &:focus,
+                        &:active {
+                            background-color: $color-active;
+                            border-color: $color-active;
+                            color: #fff;
+                        }
+                    }
+                }
+            }
+        }
+
+        // this is to hide a "Loading..." message that appears when the table is loading
+        // I'm not sure, that something important is lost by hiding it
+        .tabulator-alert {
+            display: none;
+        }
+    }
+}

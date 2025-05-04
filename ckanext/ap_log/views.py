@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import Union
 
 from flask import Blueprint, Response
 from flask.views import MethodView
 
 import ckan.plugins.toolkit as tk
-from ckan.logic import parse_params
 
 from ckanext.ap_log.model import ApLogs
-from ckanext.collection.shared import get_collection
 
 from ckanext.ap_main.utils import ap_before_request
 
@@ -22,12 +20,7 @@ class ReportLogsView(MethodView):
         if not ApLogs.table_initialized():
             return tk.render("ap_log/logs_disabled.html")
 
-        return tk.render("ap_log/logs.html", extra_vars=self._prepare_data_dict())
-
-    def _prepare_data_dict(self) -> dict[str, Any]:
-        return {
-            "collection": get_collection("ap-logs", parse_params(tk.request.args)),
-        }
+        return tk.render("ap_log/logs.html", extra_vars={})
 
     def post(self) -> Response:
         if "clear_logs" in tk.request.form:

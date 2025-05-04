@@ -1,38 +1,67 @@
 {% extends "admin_panel/base.html" %}
 
+{% import 'macros/form.html' as form %}
+
 {% block ap_content %}
-    <div class="d-flex gap-2 align-items-center">
-        <select id="filter-field">
-            <option></option>
-            {% for column in columns %}
-                {% if column.filterable %}
-                    <option value="{{ column.field }}" {% if request.args.get('field') == column.field %}selected{% endif %}>
-                        {{ column.title }}
+    <div class="d-flex gap-2 mb-3 flex-column">
+        <label>{{ _("Filters") }}</label>
+
+        <div class="d-flex gap-2">
+            <select id="filter-field" class="form-select">
+                <option value="">{{ _('Select a field') }}</option>
+                {% for column in table.columns %}
+                    {% if column.filterable %}
+                        <option value="{{ column.field }}" {{ "selected" if request.args.get('field') == column.field }}>
+                            {{ column.title }}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+
+            <select id="filter-operator" class="form-select">
+                {% for operator in ["=", "<", "<=", ">", ">=", "!=", "like"] %}
+                    <option value="{{ operator }}" {{ "selected" if request.args.get('operator') == operator }}>
+                        {{ operator }}
                     </option>
-                {% endif %}
-            {% endfor %}
-        </select>
+                {% endfor %}
+            </select>
 
-        <select id="filter-operator">
-            {% for operator in ["=", "<", "<=", ">", ">=", "!=", "like"] %}
-                <option value="{{ operator }}" {% if request.args.get('operator') == operator %}selected{% endif %}>
-                    {{ operator }}
-                </option>
-            {% endfor %}
-        </select>
+            <input class="form-control" id="filter-value" value="{{ request.args.get('q', '')}}" type="text" placeholder="{{ _('Value to filter') }}">
 
-        <input id="filter-value" value="{{ request.args.get('q', '')}}" type="text" placeholder="{{ _('Value to filter') }}">
+            <button class="btn btn-primary" id="filter-clear" title="{{ _('Clear filter') }}">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
 
-        <button class="btn btn-primary" id="filter-clear">{{ _('Clear filter') }}</button>
     </div>
+
+    <div class="d-flex gap-2 flex-column">
+        <label for="global-action">{{ _("Global action") }}</label>
+
+        <div class="d-flex gap-2">
+            <select id="global-action" name="global-action" class="form-select">
+                <option value="">{{ _("Select global action") }}</option>
+
+                {% for action in table.global_actions %}
+                    <option value="{{ action.action }}">
+                        {{ action.label }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary" id="apply-global-action" title="{{ _('Apply') }}">
+                <i class="fa fa-check"></i>
+            </button>
+        </div>
+    </div>
+
     <div
-        id="{{ table_id }}" class="tabulator-container"
+        id="{{ table.id }}" class="tabulator-container"
         data-module="ap-tabulator"
-        data-module-table-name="{{ table_name }}"
-        data-module-table-title="{{ table_title }}"
-        data-module-columns="{{ columns }}"
-        data-module-tabulator-options="{{ tabulator_options }}"
-        data-module-data-url="{{ data_url }}"
-        data-module-global-actions="{{ global_actions }}"
-    ></div>
+        data-module-config="{{ h.ap_dumps(table.get_tabulator_config()) }}"
+    >
+        <span class="ap-loading-indicator">
+            {% snippet "blocksmith/loading_indicator.html" %}
+            {{ _("Loading data...") }}
+        </span>
+    </div>
 {% endblock %}

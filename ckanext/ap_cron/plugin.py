@@ -7,13 +7,11 @@ import ckan.plugins.toolkit as tk
 
 from ckanext.ap_cron import helpers
 from ckanext.ap_cron.cli import get_commands
-from ckanext.ap_cron.col_renderers import get_renderers
-from ckanext.ap_cron.collection import CronCollection
-from ckanext.collection.interfaces import CollectionFactory, ICollection
+from ckanext.ap_cron.formatters import get_formatters
 
 import ckanext.ap_main.types as ap_types
 from ckanext.ap_main.interfaces import IAdminPanel
-from ckanext.ap_main.types import ColRenderer
+from ckanext.ap_main.types import Formatter
 
 
 @tk.blanket.blueprints
@@ -22,12 +20,10 @@ from ckanext.ap_main.types import ColRenderer
 @tk.blanket.validators
 class AdminPanelCronPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurer)
-    # p.implements(p.IConfigurable)
     p.implements(p.IBlueprint)
     p.implements(p.ITemplateHelpers)
     p.implements(p.IClick)
     p.implements(IAdminPanel, inherit=True)
-    p.implements(ICollection, inherit=True)
 
     # IConfigurer
 
@@ -74,15 +70,10 @@ class AdminPanelCronPlugin(p.SingletonPlugin):
 
         return toolbar_buttons_list
 
-    def get_col_renderers(self) -> dict[str, ColRenderer]:
-        return get_renderers()
+    def get_formatters(self) -> dict[str, Formatter]:
+        return get_formatters()
 
     # IClick
 
     def get_commands(self) -> list[Any]:
         return get_commands()
-
-    # ICollection
-
-    def get_collection_factories(self) -> dict[str, CollectionFactory]:
-        return {"ap-cron": CronCollection}

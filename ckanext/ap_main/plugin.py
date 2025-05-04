@@ -5,25 +5,23 @@ from typing import Any, Callable
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 from ckan.types import SignalMapping
-
-from ckanext.collection.interfaces import CollectionFactory, ICollection
+from ckan.lib.redis import connect_to_redis
 
 import ckanext.ap_main.types as ap_types
-from ckanext.ap_main import collection, helpers, utils
-from ckanext.ap_main.col_renderers import get_renderers
+from ckanext.ap_main import helpers, utils
+from ckanext.ap_main.formatters import get_formatters
 from ckanext.ap_main.interfaces import IAdminPanel
 
 
 @tk.blanket.blueprints
-@tk.blanket.actions
 @tk.blanket.auth_functions
 class AdminPanelPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurer)
+    p.implements(p.IConfigurable)
     p.implements(p.IBlueprint)
     p.implements(p.ISignal)
     p.implements(p.ITemplateHelpers)
     p.implements(IAdminPanel, inherit=True)
-    p.implements(ICollection, inherit=True)
 
     # IConfigurer
 
@@ -32,6 +30,14 @@ class AdminPanelPlugin(p.SingletonPlugin):
         tk.add_public_directory(config_, "public")
         tk.add_resource("assets", "admin_panel")
 
+    # IConfigurable
+
+    def configure(self, config: tk.CKANConfig) -> None:
+        # Remove toolbar cache
+        with connect_to_redis() as conn:
+            for key in conn.scan_iter("ckanext.ap_main.helpers:get_toolbar_structure*"):
+                conn.delete(key)
+
     # ITemplateHelpers
 
     def get_helpers(self) -> dict[str, Callable[..., Any]]:
@@ -39,38 +45,31 @@ class AdminPanelPlugin(p.SingletonPlugin):
 
     # IAdminPanel
 
-    def get_col_renderers(self) -> dict[str, ap_types.ColRenderer]:
-        return get_renderers()
-
-    # ICollection
-    def get_collection_factories(self) -> dict[str, CollectionFactory]:
-        return {
-            "ap-content": collection.ContentCollection,
-            "ap-user": collection.UserCollection,
-        }
+    def get_formatters(self) -> dict[str, ap_types.Formatter]:
+        return get_formatters()
 
     # ISignal
 
     def get_signal_subscriptions(self) -> SignalMapping:
         return {
             utils.collect_sections_signal: [
-                collect_config_sections_subscriber,
+                self.collect_config_sections_subscriber,
             ],
         }
 
-
-def collect_config_sections_subscriber(sender: None):
-    return ap_types.SectionConfig(
-        name="Basic site settings",
-        configs=[
-            ap_types.ConfigurationItem(
-                name=tk._("CKAN configuration"),
-                info=tk._("CKAN site config options"),
-                blueprint=(
-                    "ap_basic.editable_config"
-                    if p.plugin_loaded("editable_config")
-                    else "ap_basic.config"
+    @classmethod
+    def collect_config_sections_subscriber(cls, sender: None):
+        return ap_types.SectionConfig(
+            name="Basic site settings",
+            configs=[
+                ap_types.ConfigurationItem(
+                    name=tk._("CKAN configuration"),
+                    info=tk._("CKAN site config options"),
+                    blueprint=(
+                        "ap_basic.editable_config"
+                        if p.plugin_loaded("editable_config")
+                        else "ap_basic.config"
+                    ),
                 ),
-            ),
-        ],
-    )
+            ],
+        )

@@ -1,23 +1,27 @@
 from __future__ import annotations
 
 import json
-from functools import partial
-from typing import Any, Callable, Union, cast
+from typing import Any, Callable, Optional, Union, cast
 
 from flask import Blueprint, Response, jsonify, make_response
 from flask.views import MethodView
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-from ckan import types
-from ckan.logic import parse_params
+from ckan import model, types
 
 import ckanext.ap_cron.utils as cron_utils
 from ckanext.ap_cron import types as cron_types
 from ckanext.ap_cron.interfaces import IAPCron
 from ckanext.ap_cron.model import CronJob
-from ckanext.collection.shared import get_collection
 
+from ckanext.ap_main.utils import get_all_formatters
+from ckanext.ap_main.table import (
+    ActionDefinition,
+    ColumnDefinition,
+    GlobalActionDefinition,
+    TableDefinition,
+)
 from ckanext.ap_main.utils import ap_before_request
 
 ap_cron = Blueprint(
@@ -28,51 +32,155 @@ ap_cron = Blueprint(
 ap_cron.before_request(ap_before_request)
 
 
-class CronManagerView(MethodView):
-    def get(self) -> Union[str, Response]:
-        return tk.render(
-            "ap_cron/cron_list.html",
-            extra_vars={
-                "collection": get_collection("ap-cron", parse_params(tk.request.args)),
-            },
+class CronTable(TableDefinition):
+    def __init__(self):
+        formatters = get_all_formatters()
+
+        super().__init__(
+            name="cron",
+            ajax_url=tk.url_for("ap_cron.manage", data=True),
+            placeholder="No cron jobs found",
+            columns=[
+                ColumnDefinition(field="id", visible=False, filterable=False),
+                ColumnDefinition(field="name"),
+                ColumnDefinition(field="actions"),
+                ColumnDefinition(
+                    field="data",
+                    formatters=[(formatters["json_display"], {})],
+                ),
+                ColumnDefinition(
+                    field="schedule",
+                    formatters=[(formatters["schedule"], {})],
+                ),
+                ColumnDefinition(
+                    field="updated_at",
+                    formatters=[
+                        (formatters["date"], {"date_format": "%Y-%m-%d %H:%M"})
+                    ],
+                ),
+                ColumnDefinition(
+                    field="last_run",
+                    formatters=[(formatters["last_run"], {})],
+                ),
+                ColumnDefinition(field="state"),
+                ColumnDefinition(
+                    field="actions",
+                    formatters=[(formatters["actions"], {})],
+                    filterable=False,
+                    tabulator_formatter="html",
+                    sorter=None,
+                    resizable=False,
+                ),
+            ],
+            actions=[
+                ActionDefinition(
+                    name="edit",
+                    icon="fa fa-pencil",
+                    endpoint="ap_cron.entity_proxy",
+                    url_params={
+                        "view": "edit",
+                        "entity_id": "$id",
+                    },
+                ),
+                ActionDefinition(
+                    name="view",
+                    icon="fa fa-eye",
+                    endpoint="ap_cron.entity_proxy",
+                    url_params={
+                        "view": "read",
+                        "entity_id": "$id",
+                    },
+                ),
+            ],
+            global_actions=[
+                GlobalActionDefinition(action="disable", label="Disable selected jobs"),
+                GlobalActionDefinition(action="enable", label="Enable selected jobs"),
+                GlobalActionDefinition(action="delete", label="Delete selected jobs"),
+            ],
         )
 
-    def post(self) -> Response:
-        bulk_action = tk.request.form.get("bulk-action")
-        entity_ids = tk.request.form.getlist("entity_id")
+    def get_raw_data(self) -> list[dict[str, Any]]:
+        query = model.Session.query(
+            CronJob.id.label("id"),
+            CronJob.name.label("name"),
+            CronJob.actions.label("actions"),
+            CronJob.data.label("data"),
+            CronJob.schedule.label("schedule"),
+            CronJob.updated_at.label("updated_at"),
+            CronJob.last_run.label("last_run"),
+            CronJob.state.label("state"),
+        ).order_by(CronJob.updated_at.desc())
 
-        action_func = self._get_bulk_action(bulk_action) if bulk_action else None
+        return [dict(row) for row in query.all()]
+
+
+class CronListView(MethodView):
+    def get(self) -> Union[str, Response]:
+        table = CronTable()
+
+        if tk.request.args.get("data"):
+            return jsonify(table.get_data())
+
+        return table.render_table()
+
+    def post(self) -> Response:
+        global_action = tk.request.form.get("global_action")
+        entity_ids = tk.request.form.getlist("entity_ids")
+
+        action_func = self._get_global_action(global_action) if global_action else None
 
         if not action_func:
-            tk.h.flash_error(tk._("The bulk action is not implemented"))
-            return tk.redirect_to("ap_cron.manage")
+            return jsonify(
+                {
+                    "success": False,
+                    "error": tk._("The global action is not implemented"),
+                }
+            )
+
+        errors = []
 
         for entity_id in entity_ids:
             try:
                 action_func(entity_id)
             except tk.ValidationError as e:
-                tk.h.flash_error(str(e))
+                errors.append(str(e))
 
-        return tk.redirect_to("ap_cron.manage")
+        if errors:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": tk._("An error occurred while applying the global action"),
+                }
+            )
 
-    def _get_bulk_action(self, value: str) -> Callable[[str], None] | None:
+        return jsonify({"success": True})
+
+    def _get_global_action(self, value: str) -> Callable[[str], bool] | None:
         return {
-            "1": partial(self._change_job_state, state=CronJob.State.disabled),
-            "2": partial(self._change_job_state, state=CronJob.State.active),
-            "3": self._remove_job,
+            "disable": self._change_job_state,
+            "enable": self._change_job_state,
+            "delete": self._delete_job,
         }.get(value)
 
-    def _change_job_state(self, job_id: str, state: str) -> None:
-        tk.get_action("ap_cron_update_cron_job")(
-            {"ignore_auth": True},
-            {
-                "id": job_id,
-                "state": state,
-            },
-        )
+    @staticmethod
+    def _change_job_state(entity_id: str, is_active: Optional[bool] = True) -> bool:
+        job = model.Session.query(CronJob).get(entity_id)
+        if not job:
+            return False
 
-    def _remove_job(self, job_id: str) -> None:
-        tk.get_action("ap_cron_remove_cron_job")({"ignore_auth": True}, {"id": job_id})
+        job.state = CronJob.State.active if is_active else CronJob.State.disabled
+        model.Session.commit()
+        return True
+
+    @staticmethod
+    def _delete_job(entity_id: str) -> bool:
+        job = model.Session.query(CronJob).get(entity_id)
+        if not job:
+            return False
+
+        model.Session.delete(job)
+        model.Session.commit()
+        return True
 
 
 class CronAddView(MethodView):
@@ -230,7 +338,7 @@ def action_autocomplete() -> Response:
     return make_response(jsonify({"ResultSet": {"Result": actions}}))
 
 
-ap_cron.add_url_rule("/", view_func=CronManagerView.as_view("manage"))
+ap_cron.add_url_rule("/", view_func=CronListView.as_view("manage"))
 ap_cron.add_url_rule("/add", view_func=CronAddView.as_view("add"))
 ap_cron.add_url_rule("/delete/<job_id>", view_func=CronDeleteJobView.as_view("delete"))
 ap_cron.add_url_rule("/run/<job_id>", view_func=CronRunJobView.as_view("run"))
