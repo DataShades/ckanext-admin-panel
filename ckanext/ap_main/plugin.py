@@ -4,8 +4,8 @@ from typing import Any, Callable
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-from ckan.types import SignalMapping
 from ckan.lib.redis import connect_to_redis
+from ckan.types import SignalMapping
 
 import ckanext.ap_main.types as ap_types
 from ckanext.ap_main import helpers, utils

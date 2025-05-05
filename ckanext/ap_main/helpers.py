@@ -119,9 +119,11 @@ def get_toolbar_structure() -> list[ToolbarButton]:
         default_structure.append(
             ToolbarButton(
                 icon="fa-solid fa-moon",
+                url="#",
                 attributes={
                     "title": tk._("Theme Switcher"),
                     "data-module": "ap-theme-switcher",
+                    "class": "ap-theme-switcher",
                 },
             ),
         )

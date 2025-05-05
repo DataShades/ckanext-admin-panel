@@ -1,8 +1,6 @@
-{% extends "admin_panel/base.html" %}
-
 {% import 'macros/form.html' as form %}
 
-{% block ap_content %}
+{% block table_filters %}
     <div class="d-flex gap-2 mb-3 flex-column">
         <label>{{ _("Filters") }}</label>
 
@@ -32,9 +30,10 @@
                 <i class="fa fa-times"></i>
             </button>
         </div>
-
     </div>
+{% endblock %}
 
+{% block table_global_filters %}
     <div class="d-flex gap-2 flex-column">
         <label for="global-action">{{ _("Global action") }}</label>
 
@@ -53,7 +52,21 @@
             </button>
         </div>
     </div>
+{% endblock %}
 
+{% block table_actions %}
+    {% if table.table_action_snippet %}
+        <div class="d-flex gap-2 mt-3 flex-column">
+            <label for="table-actions">{{ _("Table actions") }}</label>
+
+            <div class="d-flex gap-2">
+                {% snippet table.table_action_snippet %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block table_container %}
     <div
         id="{{ table.id }}" class="tabulator-container"
         data-module="ap-tabulator"

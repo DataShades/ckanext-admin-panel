@@ -20,7 +20,6 @@ from ckanext.ap_main.types import Formatter
 @tk.blanket.validators
 class AdminPanelCronPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurer)
-    p.implements(p.IBlueprint)
     p.implements(p.ITemplateHelpers)
     p.implements(p.IClick)
     p.implements(IAdminPanel, inherit=True)
@@ -31,19 +30,6 @@ class AdminPanelCronPlugin(p.SingletonPlugin):
         tk.add_template_directory(config_, "templates")
         tk.add_public_directory(config_, "public")
         tk.add_resource("assets", "ap_cron")
-
-    # IConfigurable
-
-    # def configure(self, config: tk.CKANConfig) -> None:
-    #     from ckanext.ap_cron.utils import enqueue_cron_job
-
-    #     jobs_list = cron_model.CronJob.get_list(states=[cron_model.CronJob.State.new])
-
-    #     for job in jobs_list:
-    #         if job.schedule != CronSchedule.reboot.value:
-    #             continue
-
-    #         enqueue_cron_job(job)
 
     # ITemplateHelpers
 
@@ -58,15 +44,17 @@ class AdminPanelCronPlugin(p.SingletonPlugin):
         """Extension will receive the list of toolbar button objects."""
 
         for button in toolbar_buttons_list:
-            if button.get("label") == "Reports":
-                button.setdefault("subitems", [])
+            if button.get("label") != "Reports":
+                continue
 
-                button["subitems"].append(  # type: ignore
-                    ap_types.ToolbarButton(
-                        label=tk._("Cron jobs"),
-                        url=tk.url_for("ap_cron.manage"),
-                    )
+            button.setdefault("subitems", [])
+
+            button["subitems"].append(  # type: ignore
+                ap_types.ToolbarButton(
+                    label=tk._("Cron jobs"),
+                    url=tk.url_for("ap_cron.manage"),
                 )
+            )
 
         return toolbar_buttons_list
 

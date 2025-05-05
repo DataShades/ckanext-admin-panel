@@ -15,6 +15,7 @@ admin_panel-js:
     - js/ap-copy-to-clipboard.js
     - js/ap-tom-select.js
     - js/ap-tabulator.js
+    - js/ap-jsonlint.js
 
   extra:
     preload:

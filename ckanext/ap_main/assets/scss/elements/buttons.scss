@@ -63,6 +63,7 @@ body[admin-panel="true"],
 
         @include register-button("primary");
         @include register-button("secondary");
+        @include register-button("default");
         @include register-button("outline-primary");
         @include register-button("outline-secondary");
         @include register-button("black", var(--ap-black-btn-outline-color));

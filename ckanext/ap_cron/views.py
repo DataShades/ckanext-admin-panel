@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Callable, Optional, Union, cast
+from functools import partial
+from typing import Any, Optional, cast
 
 from flask import Blueprint, Response, jsonify, make_response
 from flask.views import MethodView
@@ -15,57 +16,54 @@ from ckanext.ap_cron import types as cron_types
 from ckanext.ap_cron.interfaces import IAPCron
 from ckanext.ap_cron.model import CronJob
 
-from ckanext.ap_main.utils import get_all_formatters
 from ckanext.ap_main.table import (
     ActionDefinition,
     ColumnDefinition,
     GlobalActionDefinition,
     TableDefinition,
 )
+from ckanext.ap_main.types import GlobalActionHandler, Row, GlobalActionHandlerResult
 from ckanext.ap_main.utils import ap_before_request
+from ckanext.ap_main.views.generics import ApTableView
 
-ap_cron = Blueprint(
-    "ap_cron",
-    __name__,
-    url_prefix="/admin-panel/cron",
-)
+ap_cron = Blueprint("ap_cron", __name__, url_prefix="/admin-panel/cron")
 ap_cron.before_request(ap_before_request)
 
 
 class CronTable(TableDefinition):
     def __init__(self):
-        formatters = get_all_formatters()
-
         super().__init__(
             name="cron",
             ajax_url=tk.url_for("ap_cron.manage", data=True),
             placeholder="No cron jobs found",
+            table_action_snippet="ap_cron/cron_table_actions.html",
+            table_template="ap_cron/tables/table_base.html",
             columns=[
                 ColumnDefinition(field="id", visible=False, filterable=False),
-                ColumnDefinition(field="name"),
-                ColumnDefinition(field="actions"),
-                ColumnDefinition(
-                    field="data",
-                    formatters=[(formatters["json_display"], {})],
-                ),
+                ColumnDefinition(field="name", min_width=250),
+                ColumnDefinition(field="cron_actions", min_width=300),
                 ColumnDefinition(
                     field="schedule",
-                    formatters=[(formatters["schedule"], {})],
+                    formatters=[("schedule", {})],
+                    tabulator_formatter="html",
                 ),
                 ColumnDefinition(
                     field="updated_at",
-                    formatters=[
-                        (formatters["date"], {"date_format": "%Y-%m-%d %H:%M"})
-                    ],
+                    formatters=[("date", {"date_format": "%Y-%m-%d %H:%M"})],
                 ),
                 ColumnDefinition(
                     field="last_run",
-                    formatters=[(formatters["last_run"], {})],
+                    formatters=[("last_run", {})],
                 ),
                 ColumnDefinition(field="state"),
                 ColumnDefinition(
                     field="actions",
-                    formatters=[(formatters["actions"], {})],
+                    formatters=[
+                        (
+                            "actions",
+                            {"template": "ap_cron/tables/formatters/actions.html"},
+                        )
+                    ],
                     filterable=False,
                     tabulator_formatter="html",
                     sorter=None,
@@ -103,8 +101,8 @@ class CronTable(TableDefinition):
         query = model.Session.query(
             CronJob.id.label("id"),
             CronJob.name.label("name"),
-            CronJob.actions.label("actions"),
-            CronJob.data.label("data"),
+            CronJob.actions.label("cron_actions"),
+            CronJob.data.label("data"),  # type: ignore
             CronJob.schedule.label("schedule"),
             CronJob.updated_at.label("updated_at"),
             CronJob.last_run.label("last_run"),
@@ -114,73 +112,33 @@ class CronTable(TableDefinition):
         return [dict(row) for row in query.all()]
 
 
-class CronListView(MethodView):
-    def get(self) -> Union[str, Response]:
-        table = CronTable()
-
-        if tk.request.args.get("data"):
-            return jsonify(table.get_data())
-
-        return table.render_table()
-
-    def post(self) -> Response:
-        global_action = tk.request.form.get("global_action")
-        entity_ids = tk.request.form.getlist("entity_ids")
-
-        action_func = self._get_global_action(global_action) if global_action else None
-
-        if not action_func:
-            return jsonify(
-                {
-                    "success": False,
-                    "error": tk._("The global action is not implemented"),
-                }
-            )
-
-        errors = []
-
-        for entity_id in entity_ids:
-            try:
-                action_func(entity_id)
-            except tk.ValidationError as e:
-                errors.append(str(e))
-
-        if errors:
-            return jsonify(
-                {
-                    "success": False,
-                    "error": tk._("An error occurred while applying the global action"),
-                }
-            )
-
-        return jsonify({"success": True})
-
-    def _get_global_action(self, value: str) -> Callable[[str], bool] | None:
+class CronListView(ApTableView):
+    def get_global_action(self, value: str) -> GlobalActionHandler | None:
         return {
-            "disable": self._change_job_state,
-            "enable": self._change_job_state,
+            "disable": partial(self._change_job_state, is_active=False),
+            "enable": partial(self._change_job_state, is_active=True),
             "delete": self._delete_job,
         }.get(value)
 
     @staticmethod
-    def _change_job_state(entity_id: str, is_active: Optional[bool] = True) -> bool:
-        job = model.Session.query(CronJob).get(entity_id)
+    def _change_job_state(row: Row, is_active: Optional[bool] = True) -> GlobalActionHandlerResult:
+        job = model.Session.query(CronJob).get(row["id"])
         if not job:
-            return False
+            return False, "Job not found"
 
         job.state = CronJob.State.active if is_active else CronJob.State.disabled
         model.Session.commit()
-        return True
+        return True, None
 
     @staticmethod
-    def _delete_job(entity_id: str) -> bool:
-        job = model.Session.query(CronJob).get(entity_id)
+    def _delete_job(row: Row) -> GlobalActionHandlerResult:
+        job = model.Session.query(CronJob).get(row["id"])
         if not job:
-            return False
+            return False, "Job not found"
 
         model.Session.delete(job)
         model.Session.commit()
-        return True
+        return True, None
 
 
 class CronAddView(MethodView):
@@ -338,7 +296,7 @@ def action_autocomplete() -> Response:
     return make_response(jsonify({"ResultSet": {"Result": actions}}))
 
 
-ap_cron.add_url_rule("/", view_func=CronListView.as_view("manage"))
+ap_cron.add_url_rule("/", view_func=CronListView.as_view("manage", table=CronTable))
 ap_cron.add_url_rule("/add", view_func=CronAddView.as_view("add"))
 ap_cron.add_url_rule("/delete/<job_id>", view_func=CronDeleteJobView.as_view("delete"))
 ap_cron.add_url_rule("/run/<job_id>", view_func=CronRunJobView.as_view("run"))

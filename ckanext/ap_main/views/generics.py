@@ -5,17 +5,17 @@ import logging
 from abc import abstractmethod
 from typing import Any
 
-from flask import jsonify, Response
+from flask import Response, jsonify
 from flask.views import MethodView
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 from ckan.logic import parse_params
 
+import ckanext.ap_main.types as types
 from ckanext.ap_main.interfaces import IAdminPanel
 from ckanext.ap_main.table import TableDefinition
 from ckanext.ap_main.utils import get_config_schema
-import ckanext.ap_main.types as types
 
 log = logging.getLogger(__name__)
 
@@ -165,11 +165,7 @@ class ApConfigurationPageView(MethodView):
 
 
 class ApTableView(MethodView):
-    def __init__(
-        self,
-        table: type[TableDefinition],
-        render_template: str = "admin_panel/tables/table.html",
-    ):
+    def __init__(self, table: type[TableDefinition]):
         """A generic view to render tables
 
         Args:
@@ -177,7 +173,6 @@ class ApTableView(MethodView):
             render_template (optional): a path to a render template
         """
         self.table = table
-        self.render_template = render_template
 
     def get(self) -> str | Response:
         """Render a table

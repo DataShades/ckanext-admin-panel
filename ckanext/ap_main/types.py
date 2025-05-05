@@ -4,19 +4,22 @@ from typing import Any, Callable, Optional, TypedDict
 
 from typing_extensions import TypeAlias
 
-from ckanext.ap_main.table import TableDefinition
+from ckanext.ap_main.table import ColumnDefinition, TableDefinition
 
 ItemList: TypeAlias = "list[dict[str, Any]]"
 Item: TypeAlias = "dict[str, Any]"
 ItemValue: TypeAlias = Any
 
+Value: TypeAlias = Any
+Options: TypeAlias = "dict[str, Any]"
 Row: TypeAlias = dict[str, Any]
 GlobalActionHandlerResult: TypeAlias = tuple[bool, str | None]
 GlobalActionHandler: TypeAlias = Callable[[Row], GlobalActionHandlerResult]
+FormatterResult: TypeAlias = str
 
 Formatter: TypeAlias = Callable[
-    [Any, "dict[str, Any]", str, Any, TableDefinition],
-    Any,
+    [Value, Options, ColumnDefinition, Row, TableDefinition],
+    FormatterResult,
 ]
 
 

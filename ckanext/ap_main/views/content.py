@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 from functools import partial
 from typing import Any, Optional, Union
@@ -13,16 +12,11 @@ from typing_extensions import TypeAlias
 import ckan.plugins.toolkit as tk
 from ckan import model
 
-import ckanext.ap_main.formatters as formatters
-import ckanext.ap_main.utils as ap_utils
 import ckanext.ap_main.types as types
+import ckanext.ap_main.utils as ap_utils
+from ckanext.ap_main.table import (ActionDefinition, ColumnDefinition,
+                                   GlobalActionDefinition, TableDefinition)
 from ckanext.ap_main.views.generics import ApTableView
-from ckanext.ap_main.table import (
-    ActionDefinition,
-    ColumnDefinition,
-    GlobalActionDefinition,
-    TableDefinition,
-)
 
 ContentList: TypeAlias = "list[dict[str, Any]]"
 
@@ -43,23 +37,23 @@ class ContentTable(TableDefinition):
                 ColumnDefinition(field="type"),
                 ColumnDefinition(
                     field="author",
-                    formatters=[(formatters.user_link, {})],
+                    formatters=[("user_link", {})],
                     tabulator_formatter="html",
                 ),
                 ColumnDefinition(field="state", resizable=False),
                 ColumnDefinition(
                     field="metadata_created",
-                    formatters=[(formatters.date, {"date_format": "%Y-%m-%d %H:%M"})],
+                    formatters=[("date", {"date_format": "%Y-%m-%d %H:%M"})],
                     resizable=False,
                 ),
                 ColumnDefinition(
                     field="metadata_modified",
-                    formatters=[(formatters.date, {"date_format": "%Y-%m-%d %H:%M"})],
+                    formatters=[("date", {"date_format": "%Y-%m-%d %H:%M"})],
                     resizable=False,
                 ),
                 ColumnDefinition(
                     field="actions",
-                    formatters=[(formatters.actions, {})],
+                    formatters=[("actions", {})],
                     filterable=False,
                     tabulator_formatter="html",
                     sorter=None,

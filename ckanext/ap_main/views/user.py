@@ -13,7 +13,6 @@ import ckan.logic as logic
 import ckan.plugins.toolkit as tk
 from ckan import model, types
 
-import ckanext.ap_main.formatters as formatters
 import ckanext.ap_main.table as table
 import ckanext.ap_main.types as ap_types
 from ckanext.ap_main.logic import schema as ap_schema
@@ -34,29 +33,30 @@ class UserTable(table.TableDefinition):
         super().__init__(
             name="user",
             ajax_url=tk.url_for("ap_user.list", data=True),
+            placeholder=tk._("No users found"),
             columns=[
                 table.ColumnDefinition("id", visible=False, filterable=False),
                 table.ColumnDefinition(
                     "name",
-                    formatters=[(formatters.user_link, {})],
+                    formatters=[("user_link", {})],
                     tabulator_formatter="html",
                     min_width=300,
                 ),
                 table.ColumnDefinition(
                     "fullname",
-                    formatters=[(formatters.none_as_empty, {})],
+                    formatters=[("none_as_empty", {})],
                     min_width=200,
                 ),
                 table.ColumnDefinition(
                     "email",
-                    formatters=[(formatters.none_as_empty, {})],
+                    formatters=[("none_as_empty", {})],
                     min_width=200,
                 ),
                 table.ColumnDefinition("state"),
-                table.ColumnDefinition("sysadmin", formatters=[(formatters.bool, {})]),
+                table.ColumnDefinition("sysadmin", formatters=[("bool", {})]),
                 table.ColumnDefinition(
                     "actions",
-                    formatters=[(formatters.actions, {})],
+                    formatters=[("actions", {})],
                     filterable=False,
                     tabulator_formatter="html",
                     sorter=None,

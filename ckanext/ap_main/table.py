@@ -6,6 +6,8 @@ from typing import Any, Callable
 
 import ckan.plugins.toolkit as tk
 
+from ckanext.ap_main.utils import get_all_formatters
+
 
 class TableDefinition:
     """Defines a table to be rendered with Tabulator"""
@@ -21,6 +23,8 @@ class TableDefinition:
         pagination: bool = True,
         page_size: int = 10,
         selectable: bool = False,
+        table_action_snippet: str | None = None,
+        table_template: str = "admin_panel/tables/table_base.html",
     ):
         """
         Initialize a table definition
@@ -35,6 +39,8 @@ class TableDefinition:
             pagination (bool): Whether to enable pagination
             page_size (int): Number of rows per page
             selectable (bool): Whether rows can be selected
+            table_action_snippet (str, optional): Snippet to render table actions
+            template (str, optional): Template to render the table
         """
         self.id = f"table_{name}_{uuid.uuid4().hex[:8]}"
         self.name = name
@@ -46,6 +52,8 @@ class TableDefinition:
         self.pagination = pagination
         self.page_size = page_size
         self.selectable = True if self.global_actions else selectable
+        self.table_action_snippet = table_action_snippet
+        self.table_template = table_template
 
     def get_tabulator_config(self) -> dict[str, Any]:
         columns = [col.to_dict() for col in self.columns]
@@ -70,12 +78,10 @@ class TableDefinition:
 
         return options
 
-    def render_table(
-        self, template: str = "admin_panel/tables/table.html", **kwargs: dict[str, Any]
-    ) -> str:
+    def render_table(self, **kwargs: dict[str, Any]) -> str:
         """Render the table template with the necessary data"""
 
-        return tk.render(template, extra_vars={"table": self, **kwargs})
+        return tk.render(self.table_template, extra_vars={"table": self, **kwargs})
 
     @abstractmethod
     def get_raw_data(self) -> list[dict[str, Any]]:
@@ -87,6 +93,8 @@ class TableDefinition:
 
     def get_data(self) -> list[Any]:
         """Get the data for the table with applied formatters"""
+        self._formatters = get_all_formatters()
+
         return [self.apply_formatters(dict(row)) for row in self.get_raw_data()]
 
     def apply_formatters(self, row: dict[str, Any]) -> dict[str, Any]:
@@ -98,7 +106,11 @@ class TableDefinition:
                 continue
 
             for formatter, formatter_options in column.formatters:
-                cell_value = formatter(cell_value, formatter_options, column, row, self)
+                formatter_function = self._formatters[formatter]
+
+                cell_value = formatter_function(
+                    cell_value, formatter_options, column, row, self
+                )
 
             row[column.field] = cell_value
 
@@ -112,7 +124,7 @@ class ColumnDefinition:
         self,
         field: str,
         title: str | None = None,
-        formatters: list[tuple[Callable[..., Any], dict[str, Any]]] | None = None,
+        formatters: list[tuple[str, dict[str, Any]]] | None = None,
         tabulator_formatter: str | None = None,
         tabulator_formatter_params: dict[str, Any] | None = None,
         width: int | None = None,

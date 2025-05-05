@@ -20,6 +20,8 @@
     --ap-nav-item-bg: white;
     --ap-nav-item-bg-hover: #E9ECEF;
 
+    --ap-theme-switcher-icon: "\f186";
+
     // buttons
     --ap-primary-btn-bg: #2A77A7;
     --ap-primary-btn-color: white;
@@ -32,6 +34,12 @@
     --ap-secondary-btn-border: #CED4DA;
     --ap-secondary-btn-hover-bg: #CED4DA;
     --ap-secondary-btn-hover-color: #1F3044;
+
+    --ap-default-btn-bg: white;
+    --ap-default-btn-color: #1F3044;
+    --ap-default-btn-border: #CED4DA;
+    --ap-default-btn-hover-bg: #CED4DA;
+    --ap-default-btn-hover-color: #1F3044;
 
     --ap-outline-primary-btn-bg: white;
     --ap-outline-primary-btn-color: #2A77A7;
@@ -96,10 +104,12 @@ body[admin-panel-theme="dark"] {
     --ap-nav-item-bg: #1F3044;
     --ap-nav-item-bg-hover: #335A79;
 
+    --ap-theme-switcher-icon: "\f185";
+
     // forms
 
     --ap-form-control-bg: #2A3A4D;
-    --ap-form-control-color: white;
+    --ap-form-control-color: black;
     --ap-form-control-border: #335A79;
 
     --ck-color-base-background: #2A3A4D;

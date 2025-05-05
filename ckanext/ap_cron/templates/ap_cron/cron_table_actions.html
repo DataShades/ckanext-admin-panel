@@ -1,0 +1,25 @@
+<div data-module="ap-cron-htmx">
+    <div class="cron-manage mb-2">
+        <button
+            type="button"
+            class="btn btn-success"
+            data-bs-toggle="modal"
+            data-bs-target="#add-cron-job">
+            {{ _("Add cron job")}}
+        </button>
+
+        <form class="d-inline-block" action="{{ h.url_for('ap_cron.run_active') }}" method="POST">
+            <button type="submit" class="btn btn-primary">
+                {{ _("Run active jobs")}}
+            </button>
+        </form>
+    </div>
+
+    <form action="{{ h.url_for('ap_cron.add') }}" method="POST" id="ap-cron-add">
+        {% snippet 'ap_cron/cron_new_modal.html' %}
+    </form>
+
+    <form action="{{ h.url_for('ap_cron.edit') }}" method="POST" id="ap-cron-edit">
+        {% snippet 'ap_cron/cron_edit_modal.html' %}
+    </form>
+</div>

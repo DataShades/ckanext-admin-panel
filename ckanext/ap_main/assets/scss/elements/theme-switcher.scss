@@ -1,0 +1,5 @@
+.ap-theme-switcher.nav-item {
+    .nav-link i:before {
+        content: var(--ap-theme-switcher-icon);
+    }
+}

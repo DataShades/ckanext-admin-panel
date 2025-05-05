@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Callable
 
 import ckan.plugins.toolkit as tk
 
+
 from ckanext.toolbelt.decorators import Collector
 
-from ckanext.ap_main.table import TableDefinition
+import ckanext.ap_main.types as types
 from ckanext.ap_main.types import Formatter
 
 get_formatters: Callable[[], dict[str, Formatter]]
@@ -15,8 +16,12 @@ formatter, get_formatters = Collector().split()
 
 @formatter
 def last_run(
-    value: Any, options: dict[str, Any], name: str, record: Any, table: TableDefinition
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     date_format: str = options.get("date_format", "%d/%m/%Y - %H:%M")
 
     if not value:
@@ -27,25 +32,17 @@ def last_run(
 
 @formatter
 def schedule(
-    value: Any, options: dict[str, Any], name: str, record: Any, table: TableDefinition
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     tooltip = tk.h.ap_cron_explain_cron_schedule(value)
 
     return tk.literal(
         tk.render(
-            "ap_cron/formatters/schedule.html",
+            "ap_cron/tables/formatters/schedule.html",
             extra_vars={"value": value, "tooltip": tooltip},
-        )
-    )
-
-
-@formatter
-def json_display(
-    value: Any, options: dict[str, Any], name: str, record: Any, table: TableDefinition
-) -> str:
-    return tk.literal(
-        tk.render(
-            "ap_cron/formatters/json.html",
-            extra_vars={"value": value},
         )
     )

@@ -9,10 +9,10 @@ from ckan.plugins import toolkit as tk
 
 from ckanext.toolbelt.decorators import Collector
 
-from ckanext.ap_main.table import ColumnDefinition, TableDefinition
-from ckanext.ap_main.types import Formatter
+import ckanext.ap_main.types as types
+from ckanext.ap_main.table import TableDefinition
 
-get_formatters: Callable[[], dict[str, Formatter]]
+get_formatters: Callable[[], dict[str, types.Formatter]]
 formatter, get_formatters = Collector().split()
 
 
@@ -28,10 +28,10 @@ def date(
 
     Args:
         value (datetime): date value
-        options (dict[str, Any]): options for the renderer
+        options: options for the renderer
         name (str): column name
         record (Any): row data
-        table (TableDefinition): table definition
+        table: table definition
 
     Options:
         - `date_format` (str) - date format string. **Default** is `%d/%m/%Y - %H:%M`
@@ -46,12 +46,12 @@ def date(
 
 @formatter
 def user_link(
-    value: str,
-    options: dict[str, Any],
-    column: ColumnDefinition,
-    row: dict[str, Any],
-    table: TableDefinition,
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     """Generate a link to the user profile page with an avatar.
 
     It's a custom implementation of the linked_user
@@ -62,10 +62,10 @@ def user_link(
 
     Args:
         value (str): user ID
-        options (dict[str, Any]): options for the renderer
-        column (ColumnDefinition): column definition
-        row (dict[str, Any]): row data
-        table (TableDefinition): table definition
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
 
     Options:
         - `maxlength` (int) - maximum length of the user name. **Default** is `20`
@@ -102,20 +102,20 @@ def user_link(
 
 @formatter
 def bool(
-    value: Any,
-    options: dict[str, Any],
-    column: ColumnDefinition,
-    row: dict[str, Any],
-    table: TableDefinition,
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     """Render a boolean value as a string.
 
     Args:
         value (Any): boolean value
-        options (dict[str, Any]): options for the renderer
-        column (ColumnDefinition): column definition
-        row (dict[str, Any]): row data
-        table (TableDefinition): table definition
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
     Returns:
         "Yes" if value is True, otherwise "No"
     """
@@ -124,20 +124,20 @@ def bool(
 
 @formatter
 def log_level(
-    value: int,
-    options: dict[str, Any],
-    column: ColumnDefinition,
-    row: dict[str, Any],
-    table: TableDefinition,
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     """Render a log level as a string.
 
     Args:
-        value (Any): numeric representation of logging level
-        options (dict[str, Any]): options for the renderer
-        column (ColumnDefinition): column definition
-        row (dict[str, Any]): row data
-        table (TableDefinition): table definition
+        value: numeric representation of logging level
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
 
     Returns:
         log level name
@@ -147,20 +147,20 @@ def log_level(
 
 @formatter
 def list(
-    value: Any,
-    options: dict[str, Any],
-    column: ColumnDefinition,
-    row: dict[str, Any],
-    table: TableDefinition,
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     """Render a list as a comma-separated string.
 
     Args:
-        value (Any): list value
-        options (dict[str, Any]): options for the renderer
-        column (ColumnDefinition): column definition
-        row (dict[str, Any]): row data
-        table (TableDefinition): table definition
+        value: list value
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
 
     Returns:
         comma-separated string
@@ -170,27 +170,31 @@ def list(
 
 @formatter
 def none_as_empty(
-    value: Any,
-    options: dict[str, Any],
-    column: ColumnDefinition,
-    row: dict[str, Any],
-    table: TableDefinition,
-) -> Any:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     return value if value is not None else ""
 
 
 @formatter
 def day_passed(
-    value: Any, options: dict[str, Any], column: ColumnDefinition, row: dict[str, Any]
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     """Calculate the number of days passed since the date.
 
     Args:
-        value (Any): date value
-        options (dict[str, Any]): options for the renderer
-        column (ColumnDefinition): column definition
-        row (dict[str, Any]): row data
-        table (TableDefinition): table definition
+        value: date value
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
     Returns:
         A priority badge with day counter and color based on priority.
     """
@@ -216,19 +220,20 @@ def day_passed(
 
 @formatter
 def trim_string(
-    value: str,
-    options: dict[str, Any],
-    column: ColumnDefinition,
-    row: dict[str, Any],
-    table: TableDefinition,
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
     """Trim string to a certain length.
 
     Args:
-        value (str): string value
-        options (dict[str, Any]): options for the renderer
-        column (ColumnDefinition): column definition
-        row (dict[str, Any]): row data
+        value: string value
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
 
     Options:
         - `max_length` (int) - maximum length of the string. **Default** is `79`
@@ -251,15 +256,58 @@ def trim_string(
 
 @formatter
 def actions(
-    value: Any,
-    options: dict[str, Any],
-    column: ColumnDefinition,
-    row: dict[str, Any],
-    table: TableDefinition,
-) -> str:
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
+    """Render actions for the table row.
+
+    Args:
+        value: string value
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
+
+    Options:
+        - `template` (str) - template to render the actions.
+    """
+
+    template = options.get("template", "admin_panel/tables/formatters/actions.html")
+
     return tk.literal(
         tk.render(
-            "admin_panel/tables/formatters/actions.html",
+            template,
             extra_vars={"table": table, "column": column, "row": row},
+        )
+    )
+
+
+@formatter
+def json_display(
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
+    """Render a JSON object as a string.
+
+    Args:
+        value: JSON object
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
+
+    Returns:
+        JSON object as a string
+    """
+    return tk.literal(
+        tk.render(
+            "ap_cron/formatters/json.html",
+            extra_vars={"value": value},
         )
     )

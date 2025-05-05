@@ -2,9 +2,7 @@ admin_panel_cron-js:
   filter: rjsmin
   output: ckanext-admin_panel/%(version)s-admin_panel_cron.js
   contents:
-    - js/ap-jsonlint.js
     - js/ap-hyperscript.js
-    - js/ap-cron-htmx.js
   extra:
     preload:
       - base/main
