@@ -108,7 +108,9 @@ class UserTable(table.TableDefinition):
             .order_by(model.User.name)
         )
 
-        return [dict(row) for row in query.all()]
+        columns = ["id", "name", "fullname", "email", "state", "sysadmin"]
+
+        return [dict(zip(columns, row)) for row in query.all()]
 
 
 class UserListView(ApTableView):

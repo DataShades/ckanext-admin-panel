@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from sqlalchemy import Column, DateTime, Integer, Text
@@ -33,8 +33,8 @@ class CronJob(tk.BaseModel):
     id = Column(Text, primary_key=True, default=make_uuid)
 
     name = Column(Text)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
     last_run = Column(DateTime, nullable=True)
     schedule = Column(Text)
     actions = Column(Text)

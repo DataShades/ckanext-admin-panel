@@ -4,7 +4,6 @@ from typing import Callable
 
 import ckan.plugins.toolkit as tk
 
-
 from ckanext.toolbelt.decorators import Collector
 
 import ckanext.ap_main.types as types

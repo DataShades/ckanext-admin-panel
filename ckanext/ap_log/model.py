@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 from unittest import mock
 
-from sqlalchemy import Column, DateTime, Integer, Text
+from sqlalchemy import Column, DateTime, Integer, Text, inspect
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Query, Session
 
 from ckan.model.types import make_uuid
@@ -76,5 +77,6 @@ class ApLogs(tk.BaseModel):  # type: ignore
         if not cls.session:
             return False
 
-        engine = cls.session.get_bind()
-        return engine.has_table(cls.__table__)
+        engine = cast(Engine, cls.session.get_bind())
+
+        return inspect(engine).has_table(cls.__tablename__)

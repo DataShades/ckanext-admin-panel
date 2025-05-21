@@ -8,6 +8,6 @@ See the example below, where we're using the `date` renderer to display the date
 
 ### In-built renderers
 
-::: ap_main.col_renderers
+::: ap_main.formatters
     options:
       show_source: true

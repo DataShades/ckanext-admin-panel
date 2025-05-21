@@ -1,17 +1,34 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Callable
 
 from ckanext.toolbelt.decorators import Collector
 
-from ckanext.ap_main.table import TableDefinition
+from ckanext.ap_main import types
 
-renderer, get_formatters = Collector().split()
+get_formatters: Callable[[], dict[str, types.Formatter]]
+formatter, get_formatters = Collector().split()
 
 
-@renderer
+@formatter
 def log_level(
-    value: Any, options: dict[str, Any], name: str, record: Any, table: TableDefinition
+    value: int,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
 ) -> str:
+    """Render a log level as a string.
+
+    Args:
+        value: numeric representation of logging level
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
+
+    Returns:
+        log level name
+    """
     return logging.getLevelName(value)

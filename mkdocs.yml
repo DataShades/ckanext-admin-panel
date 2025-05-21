@@ -104,9 +104,9 @@ nav:
   - register_config_page.md
   - register_config_section.md
 
-  - Collections:
-    - collections/index.md
-    - collections/col_renderers.md
+  - Tables:
+    - tables/index.md
+    - tables/col_renderers.md
 
   - interfaces.md
   - utils.md

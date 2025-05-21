@@ -34,24 +34,26 @@
 {% endblock %}
 
 {% block table_global_filters %}
-    <div class="d-flex gap-2 flex-column">
-        <label for="global-action">{{ _("Global action") }}</label>
+    {% if table.global_actions %}
+        <div class="d-flex gap-2 flex-column">
+            <label for="global-action">{{ _("Global action") }}</label>
 
-        <div class="d-flex gap-2">
-            <select id="global-action" name="global-action" class="form-select">
-                <option value="">{{ _("Select global action") }}</option>
+            <div class="d-flex gap-2">
+                <select id="global-action" name="global-action" class="form-select">
+                    <option value="">{{ _("Select global action") }}</option>
 
-                {% for action in table.global_actions %}
-                    <option value="{{ action.action }}">
-                        {{ action.label }}
-                    </option>
-                {% endfor %}
-            </select>
-            <button class="btn btn-primary" id="apply-global-action" title="{{ _('Apply') }}">
-                <i class="fa fa-check"></i>
-            </button>
+                    {% for action in table.global_actions %}
+                        <option value="{{ action.action }}">
+                            {{ action.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-primary" id="apply-global-action" title="{{ _('Apply') }}">
+                    <i class="fa fa-check"></i>
+                </button>
+            </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
 
 {% block table_actions %}
@@ -67,14 +69,16 @@
 {% endblock %}
 
 {% block table_container %}
-    <div
-        id="{{ table.id }}" class="tabulator-container"
-        data-module="ap-tabulator"
-        data-module-config="{{ h.ap_dumps(table.get_tabulator_config()) }}"
-    >
-        <span class="ap-loading-indicator">
-            {% snippet "blocksmith/loading_indicator.html" %}
-            {{ _("Loading data...") }}
-        </span>
+    <div class="tabulator-wrapper">
+        <div
+            id="{{ table.id }}" class="tabulator-container"
+            data-module="ap-tabulator"
+            data-module-config="{{ h.ap_dumps(table.get_tabulator_config()) }}"
+        >
+            <span class="ap-loading-indicator">
+                {% snippet "snippets/loading_indicator.html" %}
+                {{ _("Loading data...") }}
+            </span>
+        </div>
     </div>
 {% endblock %}

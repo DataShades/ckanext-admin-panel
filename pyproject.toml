@@ -52,6 +52,7 @@ ap_cron_test = "ckanext.ap_cron.tests.factories:ApCronTestPlugin"
 
 [project.optional-dependencies]
 test = ["pytest-ckan", "git-changelog"]
+docs = ["mkdocs", "mkdocs-material", "mkdocstrings", "mkdocstrings-python", "mkdocs-include-markdown-plugin"]
 
 [tool.setuptools.packages]
 find = {}

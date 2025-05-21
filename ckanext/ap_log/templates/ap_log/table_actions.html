@@ -1,0 +1,11 @@
+<div>
+    <button
+        type="button" class="btn btn-danger"
+        hx-confirm="Are you sure you want to clear all logs?"
+        hx-post="{{ h.url_for('ap_log.clear') }}"
+        hx-swap="none"
+        hx-confirm-success="{{ _('All logs have been cleared') }}"
+        title="{{ _('Clear all logs') }}">
+        {{ _("Clear all logs") }}
+    </button>
+</div>

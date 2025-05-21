@@ -5,6 +5,9 @@
 
 Next generation admin interface for CKAN. See the [extended documentation](https://datashades.github.io/ckanext-admin-panel/) for more information.
 
+> [!WARNING]
+> This extension is under active development. Expect breaking changes.
+
 ## TODO
 This extension is under development, so there are many things to do:
 

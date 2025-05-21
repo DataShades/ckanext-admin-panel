@@ -122,7 +122,18 @@ class ContentTable(TableDefinition):
             union_query.c.metadata_modified.desc()
         )
 
-        return [dict(row) for row in final_query.all()]
+        columns = [
+            "id",
+            "name",
+            "title",
+            "type",
+            "author",
+            "state",
+            "metadata_created",
+            "metadata_modified",
+        ]
+
+        return [dict(zip(columns, row)) for row in final_query.all()]
 
 
 class ContentListView(ApTableView):

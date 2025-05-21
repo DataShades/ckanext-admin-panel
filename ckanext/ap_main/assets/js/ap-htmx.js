@@ -51,6 +51,13 @@ ckan.module("ap-htmx", function ($) {
                     // If the user confirms, we manually issue the request
                     // true to skip the built-in window.confirm()
                     event.detail.issueRequest(true);
+
+                    let successMsg = event.target.getAttribute("hx-confirm-success");
+                    // show a success notification and refresh the table
+                    if (successMsg) {
+                        this.sandbox.publish("ap:notify", successMsg, "success");
+                        this.sandbox.publish("ap:tabulator:refresh")
+                    }
                 }
             });
         }

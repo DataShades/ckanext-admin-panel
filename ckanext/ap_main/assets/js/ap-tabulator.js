@@ -1,12 +1,16 @@
 ckan.module("ap-tabulator", function ($, _) {
     "use strict";
     return {
+        templates: {
+            btnFullscreen: `<a class='btn btn-default d-none d-sm-inline-block' id='btn-fullscreen' title='Fullscreen toggle'><i class='fa fa-expand'></i></a>`,
+        },
         options: {
-            config: null
+            config: null,
+            enableFullscreenToggle: true
         },
 
         initialize: function () {
-            $.proxyAll(this, /_on/);
+            $.proxyAll(this, /_/);
 
             if (!this.options.config) {
                 console.error("No config provided for tabulator");
@@ -19,18 +23,31 @@ ckan.module("ap-tabulator", function ($, _) {
             this.filterClear = document.getElementById("filter-clear");
             this.globalAction = document.getElementById("global-action");
             this.applyGlobalAction = document.getElementById("apply-global-action");
+            this.tableWrapper = document.querySelector(".tabulator-wrapper");
 
             // Update filters on change
             this.filterField.addEventListener("change", this._onUpdateFilter);
             this.filterOperator.addEventListener("change", this._onUpdateFilter);
             this.filterValue.addEventListener("keyup", this._onUpdateFilter);
             this.filterClear.addEventListener("click", this._onClearFilter);
-            this.applyGlobalAction.addEventListener("click", this._onApplyGlobalAction);
+
+            if (this.applyGlobalAction) {
+                this.applyGlobalAction.addEventListener("click", this._onApplyGlobalAction);
+            }
+
+            this.sandbox.subscribe("ap:tabulator:refresh", this._refreshData);
+
+            this.options.config.footerElement = this.templates.btnFullscreen;
 
             this.table = new Tabulator(this.el[0], this.options.config);
 
             this.table.on("tableBuilt", () => {
                 this._onUpdateFilter();
+
+                if (this.options.enableFullscreenToggle) {
+                    this.btnFullscreen = document.getElementById("btn-fullscreen");
+                    this.btnFullscreen.addEventListener("click", this._onFullscreen);
+                }
             });
 
             this.table.on("renderComplete", function () {
@@ -99,14 +116,26 @@ ckan.module("ap-tabulator", function ($, _) {
                 return;
             }
 
+            // exclude 'actions' column
+            const data = selectedData.map(row => {
+                const { actions, ...rest } = row;
+                return rest;
+            });
+
             const form = new FormData();
 
+            const csrf_field = $('meta[name=csrf_field_name]').attr('content');
+            const csrf_token = $('meta[name=' + csrf_field + ']').attr('content');
+
             form.append("global_action", globalAction);
-            form.append("rows", JSON.stringify(selectedData));
+            form.append("rows", JSON.stringify(data));
 
             fetch(this.sandbox.client.url(this.options.config.ajaxURL), {
                 method: "POST",
                 body: form,
+                headers: {
+                    'X-CSRFToken': csrf_token
+                }
             })
                 .then(resp => resp.json())
                 .then(resp => {
@@ -118,11 +147,25 @@ ckan.module("ap-tabulator", function ($, _) {
                         }
                     }
 
-                    this.table.replaceData();
+                    this._refreshData()
                     this.sandbox.publish("ap:notify", "Operation completed", "success");
                 }).catch(error => {
                     console.error("Error:", error);
                 });
+        },
+
+        _refreshData: function () {
+            this.table.replaceData();
+        },
+
+        _onFullscreen: function () {
+            const isFullscreen = this.tableWrapper.classList.contains("fullscreen");
+
+            if (isFullscreen) {
+                this.tableWrapper.classList.remove("fullscreen");
+            } else {
+                this.tableWrapper.classList.add("fullscreen");
+            }
         },
     };
 });

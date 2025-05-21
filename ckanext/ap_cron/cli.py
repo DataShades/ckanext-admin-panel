@@ -1,4 +1,5 @@
-from datetime import datetime as dt, timezone
+from datetime import datetime as dt
+from datetime import timezone
 
 import click
 

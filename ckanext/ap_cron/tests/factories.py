@@ -52,6 +52,6 @@ class CronJobFactory(factories.CKANFactory):
     updated_at = factory.Faker("date_this_month")
     last_run = None
     schedule = "* * * * *"
-    actions = "ap_cron_test_action"
+    actions = "api_token_list"
     data = {"foo": "baar"}
     timeout = factory.LazyAttribute(lambda _: cron_conf.get_job_timeout())

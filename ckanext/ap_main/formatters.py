@@ -123,29 +123,6 @@ def bool(
 
 
 @formatter
-def log_level(
-    value: types.Value,
-    options: types.Options,
-    column: types.ColumnDefinition,
-    row: types.Row,
-    table: types.TableDefinition,
-) -> types.FormatterResult:
-    """Render a log level as a string.
-
-    Args:
-        value: numeric representation of logging level
-        options: options for the renderer
-        column: column definition
-        row: row data
-        table: table definition
-
-    Returns:
-        log level name
-    """
-    return logging.getLevelName(value)
-
-
-@formatter
 def list(
     value: types.Value,
     options: types.Options,
@@ -311,3 +288,35 @@ def json_display(
             extra_vars={"value": value},
         )
     )
+
+
+@formatter
+def shorten_path(
+    value: types.Value,
+    options: types.Options,
+    column: types.ColumnDefinition,
+    row: types.Row,
+    table: types.TableDefinition,
+) -> types.FormatterResult:
+    """Shorten a path to a certain length.
+
+    Args:
+        value: path value
+        options: options for the renderer
+        column: column definition
+        row: row data
+        table: table definition
+
+    Options:
+        - `max_length` (int) - maximum length of the path. **Default** is `50`
+
+    Returns:
+        shortened path
+    """
+    max_length: int = options.get("max_length", 50)
+
+    if len(value) <= max_length:
+        return value
+
+    half = (max_length - 3) // 2
+    return value[:half] + "..." + value[-half:]

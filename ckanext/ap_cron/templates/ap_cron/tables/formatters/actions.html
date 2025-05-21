@@ -54,7 +54,12 @@
             class="btn btn-danger {{ 'disabled' if job_running }}"
             href="{{ '#' if job_running else h.url_for('ap_cron.run', job_id=row.id) }}"
             {% if not job_running %}data-module="ap-tooltip" title="{{ _('Remove a job') }}"{% endif %}
-            {% if not job_running %}hx-swap="none" hx-confirm="Are you sure you want to delete this job?" hx-trigger="click" hx-post="{{ h.url_for('ap_cron.delete', job_id=row.id) }}"{% endif %}>
+            {% if not job_running %}
+                hx-swap="none"
+                hx-confirm="{{ _('Are you sure you want to delete this job?') }}"
+                hx-confirm-success="{{ _('Job has been deleted') }}"
+                hx-trigger="click" hx-post="{{ h.url_for('ap_cron.delete', job_id=row.id) }}"
+            {% endif %}>
             <i class="fa fa-trash-alt"></i>
         </a>
     </div>

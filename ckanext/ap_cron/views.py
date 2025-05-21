@@ -22,7 +22,7 @@ from ckanext.ap_main.table import (
     GlobalActionDefinition,
     TableDefinition,
 )
-from ckanext.ap_main.types import GlobalActionHandler, Row, GlobalActionHandlerResult
+from ckanext.ap_main.types import GlobalActionHandler, GlobalActionHandlerResult, Row
 from ckanext.ap_main.utils import ap_before_request
 from ckanext.ap_main.views.generics import ApTableView
 
@@ -41,7 +41,7 @@ class CronTable(TableDefinition):
             columns=[
                 ColumnDefinition(field="id", visible=False, filterable=False),
                 ColumnDefinition(field="name", min_width=250),
-                ColumnDefinition(field="cron_actions", min_width=300),
+                ColumnDefinition(field="cron_actions", min_width=200),
                 ColumnDefinition(
                     field="schedule",
                     formatters=[("schedule", {})],
@@ -107,9 +107,20 @@ class CronTable(TableDefinition):
             CronJob.updated_at.label("updated_at"),
             CronJob.last_run.label("last_run"),
             CronJob.state.label("state"),
-        ).order_by(CronJob.updated_at.desc())
+        ).order_by(CronJob.updated_at.asc())
 
-        return [dict(row) for row in query.all()]
+        columns = [
+            "id",
+            "name",
+            "cron_actions",
+            "data",
+            "schedule",
+            "updated_at",
+            "last_run",
+            "state",
+        ]
+
+        return [dict(zip(columns, row)) for row in query.all()]
 
 
 class CronListView(ApTableView):
@@ -121,7 +132,9 @@ class CronListView(ApTableView):
         }.get(value)
 
     @staticmethod
-    def _change_job_state(row: Row, is_active: Optional[bool] = True) -> GlobalActionHandlerResult:
+    def _change_job_state(
+        row: Row, is_active: Optional[bool] = True
+    ) -> GlobalActionHandlerResult:
         job = model.Session.query(CronJob).get(row["id"])
         if not job:
             return False, "Job not found"
