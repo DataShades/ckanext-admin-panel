@@ -28,5 +28,6 @@ class ToolbarButton(TypedDict, total=False):
     label: str
     url: Optional[str]
     icon: Optional[str]
+    aria_label: Optional[str]
     attributes: Optional[dict[str, Any]]
     subitems: list["ToolbarButton"]

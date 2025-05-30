@@ -21,7 +21,11 @@
         {% endif %}
         {{ attributes(button.attributes or {}) }}>
 
-        <a class="{% if nested %}dropdown-item {{ 'with-subitems' if button.subitems }}{% else %}nav-link{% endif %}" href="{{ button.url or '#' }}">
+        <a
+            class="{% if nested %}dropdown-item {{ 'with-subitems' if button.subitems }}{% else %}nav-link{% endif %}"
+            href="{{ button.url or '#' }}"
+            {% if button.aria_label %}aria-label="{{ button.aria_label }}"{% endif %}>
+
             {% if button.icon %}
                 <i class="{{ button.icon }}"></i>
             {% endif %}
@@ -43,13 +47,14 @@
                     id="{{ dropdown_id }}"
                     role="button"
                     data-bs-toggle="dropdown"
-                    aria-expanded="false">
+                    aria-expanded="false"
+                    aria-label="{{ button.label }} options">
 
                     <i class="fas fa-chevron-down"></i>
                 </a>
             {% endif %}
 
-            <ul class="dropdown-menu {% if nested %}submenu{% endif %}" aria-labelledby="{{ dropdown_id }}">
+            <ul class="dropdown-menu {% if nested %}submenu{% endif %}" {% if not nested %}aria-labelledby="{{ dropdown_id }}"{% endif %}>
                 {% for item in button.subitems %}
                     {{ toolbar_button(item, nested=True) }}
                 {% endfor %}

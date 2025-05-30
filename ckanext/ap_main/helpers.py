@@ -98,16 +98,19 @@ def get_toolbar_structure() -> list[ToolbarButton]:
         ToolbarButton(
             icon="fa fa-gavel",
             url=tk.url_for("admin.index"),
+            aria_label=tk._("Old admin"),
             attributes={"title": tk._("Old admin")},
         ),
         ToolbarButton(
             icon="fa fa-tachometer",
             url=tk.url_for("dashboard.datasets"),
+            aria_label=tk._("View dashboard"),
             attributes={"title": tk._("View dashboard")},
         ),
         ToolbarButton(
             icon="fa fa-cog",
             url=tk.url_for("user.edit", id=tk.current_user.name),
+            aria_label=tk._("Profile settings"),
             attributes={"title": tk._("Profile settings")},
         ),
     ]
@@ -116,6 +119,7 @@ def get_toolbar_structure() -> list[ToolbarButton]:
         default_structure.append(
             ToolbarButton(
                 icon="fa-solid fa-moon",
+                aria_label=tk._("Theme Switcher"),
                 attributes={
                     "title": tk._("Theme Switcher"),
                     "data-module": "ap-theme-switcher",
@@ -128,6 +132,7 @@ def get_toolbar_structure() -> list[ToolbarButton]:
         ToolbarButton(
             icon="fa fa-sign-out",
             url=tk.url_for("user.logout"),
+            aria_label=tk._("Log out"),
             attributes={"title": tk._("Log out")},
         )
     )
