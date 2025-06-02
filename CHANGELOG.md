@@ -2,11 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [2.0.1] - 2025-06-02
 
 ### 🚀 Features
 
 - Replace user collection with custom table
+- Replace cron collection with custom table, refactoring table
+- Improve tabulator integration, wip
+- Migrate doi to tabulator
+
+### 🐛 Bug Fixes
+
+- Fix color schema bug with htmx reinit
+- Fix build_url_from_params helper
+
+### 📚 Documentation
+
+- Update doc and remove unused templates
 
 ## [1.2.0] - 2025-05-02
 
@@ -21,6 +33,7 @@ All notable changes to this project will be documented in this file.
 
 - Fix tom_select macro
 - Fix ap-confirm-action.js, fix tom_select macro
+- Accessibility issues
 
 ### 💼 Other
 

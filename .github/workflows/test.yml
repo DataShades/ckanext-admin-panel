@@ -1,21 +1,26 @@
 name: Tests
-on: [push, pull_request]
+on: [ push, pull_request ]
 jobs:
   test:
     strategy:
       matrix:
-        ckan-version: ["2.10"]
+        include:
+        #ckan-image see https://github.com/ckan/ckan-docker-base, ckan-version controls other image tags
+        - ckan-version: "2.11"
+          ckan-image: "2.11-py3.10"
+          experimental: false
+        - ckan-version: "2.10"
+          ckan-image: "2.10-py3.10"
       fail-fast: false
 
+    name: Test CKAN ${matrix.ckan-version}
     runs-on: ubuntu-latest
     container:
-      # The CKAN version tag of the Solr and Postgres containers should match
-      # the one of the container the tests run on.
-      # You can switch this base image with a custom image tailored to your project
-      image: openknowledge/ckan-dev:${{ matrix.ckan-version }}
+      image: ckan/ckan-dev:${{ matrix.ckan-image }}
+      options: --user root
     services:
       solr:
-        image: ckan/ckan-solr:${{ matrix.ckan-version }}
+        image: ckan/ckan-solr:${{ matrix.ckan-version }}-solr9
       postgres:
         image: ckan/ckan-postgres-dev:${{ matrix.ckan-version }}
         env:
@@ -24,7 +29,7 @@ jobs:
           POSTGRES_DB: postgres
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       redis:
-          image: redis:3
+        image: redis:7
 
     env:
       CKAN_SQLALCHEMY_URL: postgresql://ckan_default:pass@postgres/ckan_test
@@ -38,9 +43,7 @@ jobs:
     - name: Install requirements
       # Install any extra requirements your extension has here (dev requirements, other extensions etc)
       run: |
-        pip install -r requirements.txt
-        pip install -r dev-requirements.txt
-        pip install -e .
+        pip install -e '.[test]'
     - name: Setup extension
       # Extra initialization steps
       run: |
