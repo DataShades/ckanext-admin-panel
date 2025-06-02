@@ -1,6 +1,6 @@
 {% if h.ap_show_toolbar_theme_switcher() %}
     <script>
-        let theme = localStorage.getItem('apPreferredColorScheme') || 'light';
+        var theme = localStorage.getItem('apPreferredColorScheme') || 'light';
         document.body.setAttribute('admin-panel-theme', theme);
     </script>
 {% endif %}

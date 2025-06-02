@@ -17,13 +17,7 @@ helper, get_helpers = Collector("ap_cron").split()
 def get_actions_list_options() -> list[dict[str, str]]:
     from ckan.logic import _actions
 
-    return [
-        {
-            "value": action,
-            "text": action,
-        }
-        for action in sorted(_actions)
-    ]
+    return [{"value": action, "text": action} for action in sorted(_actions)]
 
 
 @helper

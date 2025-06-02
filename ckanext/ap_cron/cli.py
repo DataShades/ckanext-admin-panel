@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+from datetime import timezone
 
 import click
 
@@ -41,8 +42,8 @@ def _job_should_be_started(job: CronJob) -> bool:
     if not job.last_run:
         return True
 
-    now = dt.utcnow()
-    next_run = cron_utils.get_next_run_datetime(job.last_run, job.schedule)
+    now = dt.now(timezone.utc)
+    next_run = cron_utils.get_next_run_datetime(job.last_run, job.schedule)  # type: ignore
 
     return next_run <= now
 

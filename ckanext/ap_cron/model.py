@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from sqlalchemy import Column, DateTime, Integer, Text
@@ -23,7 +23,6 @@ class CronJob(tk.BaseModel):
     __tablename__ = "ap_cron_job"
 
     class State:
-        # new = "new"
         active = "active"
         disabled = "disabled"
         pending = "pending"
@@ -34,8 +33,8 @@ class CronJob(tk.BaseModel):
     id = Column(Text, primary_key=True, default=make_uuid)
 
     name = Column(Text)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
     last_run = Column(DateTime, nullable=True)
     schedule = Column(Text)
     actions = Column(Text)
@@ -91,18 +90,18 @@ class CronJob(tk.BaseModel):
         return job
 
     def dictize(self, context) -> DictizedCronJob:
-        return {
-            "id": self.id,
-            "name": self.name,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-            "last_run": self.last_run.isoformat() if self.last_run else None,
-            "schedule": self.schedule,
-            "actions": self.get_actions,
-            "data": self.data,
-            "state": self.state,
-            "timeout": self.timeout,
-        }
+        return DictizedCronJob(
+            id=str(self.id),
+            name=str(self.name),
+            created_at=self.created_at.isoformat(),
+            updated_at=self.updated_at.isoformat(),
+            last_run=self.last_run.isoformat() if self.last_run else None,
+            schedule=str(self.schedule),
+            actions=self.get_actions,  # type: ignore
+            data=self.data,
+            state=str(self.state),
+            timeout=int(self.timeout),  # type: ignore
+        )
 
     @property
     def get_actions(self):

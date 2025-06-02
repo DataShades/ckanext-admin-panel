@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 
+from ckan import types
 from ckan.logic import validate
 from ckan.plugins import toolkit as tk
-from ckan import types
 
 import ckanext.ap_support.logic.schema as schema
 import ckanext.ap_support.model as support_model

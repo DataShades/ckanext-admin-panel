@@ -3,19 +3,16 @@ from __future__ import annotations
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
-from ckanext.collection.interfaces import ICollection, CollectionFactory
-from ckanext.ap_main.interfaces import IAdminPanel
-import ckanext.ap_main.types as ap_types
+from ckanext.ap_log.formatters import get_formatters
 
-from ckanext.ap_log.col_renderers import get_renderers
-from ckanext.ap_log import collection
+import ckanext.ap_main.types as ap_types
+from ckanext.ap_main.interfaces import IAdminPanel
 
 
 @tk.blanket.blueprints
 class AdminPanelLogPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurer)
     p.implements(IAdminPanel, inherit=True)
-    p.implements(ICollection, inherit=True)
 
     # IConfigurer
 
@@ -26,8 +23,8 @@ class AdminPanelLogPlugin(p.SingletonPlugin):
 
     # IAdminPanel
 
-    def get_col_renderers(self) -> dict[str, ap_types.ColRenderer]:
-        return get_renderers()
+    def get_formatters(self) -> dict[str, ap_types.Formatter]:
+        return get_formatters()
 
     def register_toolbar_button(
         self, toolbar_buttons_list: list[ap_types.ToolbarButton]
@@ -46,9 +43,3 @@ class AdminPanelLogPlugin(p.SingletonPlugin):
                 )
 
         return toolbar_buttons_list
-
-    # ICollection
-    def get_collection_factories(self) -> dict[str, CollectionFactory]:
-        return {
-            "ap-logs": collection.DbLogCollection,
-        }

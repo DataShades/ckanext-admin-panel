@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ckan.plugins.toolkit as tk
 
-
 CONF_TICKET_CATEGORIES = "ckanext.admin_panel.support.category_list"
 DEF_TICKET_CATEGORIES = ["Feature request", "Data request", "Bug report", "Other"]
 

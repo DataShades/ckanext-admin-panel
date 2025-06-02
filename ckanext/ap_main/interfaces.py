@@ -39,17 +39,17 @@ class IAdminPanel(Interface):
         """
         return toolbar_buttons_list
 
-    def get_col_renderers(self) -> dict[str, ap_types.ColRenderer]:
-        """Allows an extension to register its own col renderers.
+    def get_formatters(self) -> dict[str, ap_types.Formatter]:
+        """Allows an extension to register its own tabulator formatters.
 
         Example:
             ```python
-            def get_col_renderers():
+            def get_formatters():
                 return {'col_counter': col_counter}
             ```
 
         Returns:
-            A mapping of renderer names to renderer functions
+            A mapping of formatter names to tabulator formatter functions
         """
         return {}
 

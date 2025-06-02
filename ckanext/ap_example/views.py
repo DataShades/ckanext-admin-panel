@@ -13,7 +13,6 @@ from ckanext.editable_config.shared import value_as_string
 from ckanext.ap_main.utils import ap_before_request, get_config_schema
 from ckanext.ap_main.views.generics import ApConfigurationPageView
 
-
 log = logging.getLogger(__name__)
 ap_example = Blueprint("ap_example", __name__, url_prefix="/admin-panel/example")
 ap_example.before_request(ap_before_request)

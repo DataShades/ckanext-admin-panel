@@ -2,7 +2,6 @@ import pytest
 from faker import Faker
 from pytest_factoryboy import register
 
-
 import ckanext.ap_cron.tests.factories as local_factories
 
 fake = Faker()

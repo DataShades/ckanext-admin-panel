@@ -1,27 +1,23 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 from os import path
+from typing import Any
 
 from yaml import safe_load
 
-import ckan.plugins as p
 import ckan.logic as logic
+import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-from ckan.types import SignalMapping
 from ckan.config.declaration import Declaration, Key
+from ckan.types import SignalMapping
 
+import ckanext.ap_doi.config as config
+import ckanext.ap_doi.const as const
+import ckanext.ap_doi.utils as utils
 from ckanext.doi.plugin import DOIPlugin
 
 import ckanext.ap_main.types as ap_types
-
-from ckanext.collection.interfaces import CollectionFactory, ICollection
-from ckanext.ap_doi.collection import ApDOICollection
-
-import ckanext.ap_doi.const as const
-import ckanext.ap_doi.utils as utils
-import ckanext.ap_doi.config as config
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +30,6 @@ class AdminPanelDoiPlugin(p.SingletonPlugin):
     p.implements(p.IPackageController, inherit=True)
     p.implements(p.ISignal)
     p.implements(p.IConfigDeclaration)
-    p.implements(ICollection, inherit=True)
 
     # IConfigurer
 
@@ -111,11 +106,6 @@ class AdminPanelDoiPlugin(p.SingletonPlugin):
             data_dict = safe_load(file)
 
         return declaration.load_dict(data_dict)
-
-    # ICollection
-
-    def get_collection_factories(self) -> dict[str, CollectionFactory]:
-        return {"ap-doi": ApDOICollection}
 
 
 class ApDOIPlugin(DOIPlugin):

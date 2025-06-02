@@ -1,0 +1,84 @@
+{% import 'macros/form.html' as form %}
+
+{% block table_filters %}
+    <div class="d-flex gap-2 mb-3 flex-column">
+        <label>{{ _("Filters") }}</label>
+
+        <div class="d-flex gap-2">
+            <select id="filter-field" class="form-select">
+                <option value="">{{ _('Select a field') }}</option>
+                {% for column in table.columns %}
+                    {% if column.filterable %}
+                        <option value="{{ column.field }}" {{ "selected" if request.args.get('field') == column.field }}>
+                            {{ column.title }}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+
+            <select id="filter-operator" class="form-select">
+                {% for operator in ["=", "<", "<=", ">", ">=", "!=", "like"] %}
+                    <option value="{{ operator }}" {{ "selected" if request.args.get('operator') == operator }}>
+                        {{ operator }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <input class="form-control" id="filter-value" value="{{ request.args.get('q', '')}}" type="text" placeholder="{{ _('Value to filter') }}">
+
+            <button class="btn btn-primary" id="filter-clear" title="{{ _('Clear filter') }}">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block table_global_filters %}
+    {% if table.global_actions %}
+        <div class="d-flex gap-2 flex-column">
+            <label for="global-action">{{ _("Global action") }}</label>
+
+            <div class="d-flex gap-2">
+                <select id="global-action" name="global-action" class="form-select">
+                    <option value="">{{ _("Select global action") }}</option>
+
+                    {% for action in table.global_actions %}
+                        <option value="{{ action.action }}">
+                            {{ action.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-primary" id="apply-global-action" title="{{ _('Apply') }}">
+                    <i class="fa fa-check"></i>
+                </button>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block table_actions %}
+    {% if table.table_action_snippet %}
+        <div class="d-flex gap-2 mt-3 flex-column">
+            <label for="table-actions">{{ _("Table actions") }}</label>
+
+            <div class="d-flex gap-2">
+                {% snippet table.table_action_snippet %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block table_container %}
+    <div class="tabulator-wrapper">
+        <div
+            id="{{ table.id }}" class="tabulator-container"
+            data-module="ap-tabulator"
+            data-module-config="{{ h.ap_dumps(table.get_tabulator_config()) }}"
+        >
+            <span class="ap-loading-indicator">
+                {% snippet "snippets/loading_indicator.html" %}
+                {{ _("Loading data...") }}
+            </span>
+        </div>
+    </div>
+{% endblock %}

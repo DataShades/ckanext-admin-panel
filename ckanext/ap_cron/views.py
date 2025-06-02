@@ -2,78 +2,156 @@ from __future__ import annotations
 
 import json
 from functools import partial
-from typing import Any, Callable, Union, cast
+from typing import Any, Optional, cast
 
 from flask import Blueprint, Response, jsonify, make_response
 from flask.views import MethodView
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-from ckan import types
-from ckan.logic import parse_params
-
-from ckanext.collection.shared import get_collection
+from ckan import model, types
 
 import ckanext.ap_cron.utils as cron_utils
 from ckanext.ap_cron import types as cron_types
 from ckanext.ap_cron.interfaces import IAPCron
 from ckanext.ap_cron.model import CronJob
 
-from ckanext.ap_main.utils import ap_before_request
-
-ap_cron = Blueprint(
-    "ap_cron",
-    __name__,
-    url_prefix="/admin-panel/cron",
+from ckanext.ap_main.table import (
+    ActionDefinition,
+    ColumnDefinition,
+    GlobalActionDefinition,
+    TableDefinition,
 )
+from ckanext.ap_main.types import GlobalActionHandler, GlobalActionHandlerResult, Row
+from ckanext.ap_main.utils import ap_before_request
+from ckanext.ap_main.views.generics import ApTableView
+
+ap_cron = Blueprint("ap_cron", __name__, url_prefix="/admin-panel/cron")
 ap_cron.before_request(ap_before_request)
 
 
-class CronManagerView(MethodView):
-    def get(self) -> Union[str, Response]:
-        return tk.render(
-            "ap_cron/cron_list.html",
-            extra_vars={
-                "collection": get_collection("ap-cron", parse_params(tk.request.args)),
-            },
+class CronTable(TableDefinition):
+    def __init__(self):
+        super().__init__(
+            name="cron",
+            ajax_url=tk.url_for("ap_cron.manage", data=True),
+            placeholder="No cron jobs found",
+            table_action_snippet="ap_cron/cron_table_actions.html",
+            table_template="ap_cron/tables/table_base.html",
+            columns=[
+                ColumnDefinition(field="id", visible=False, filterable=False),
+                ColumnDefinition(field="name", min_width=250),
+                ColumnDefinition(field="cron_actions", min_width=200),
+                ColumnDefinition(
+                    field="schedule",
+                    formatters=[("schedule", {})],
+                    tabulator_formatter="html",
+                ),
+                ColumnDefinition(
+                    field="updated_at",
+                    formatters=[("date", {"date_format": "%Y-%m-%d %H:%M"})],
+                ),
+                ColumnDefinition(
+                    field="last_run",
+                    formatters=[("last_run", {})],
+                ),
+                ColumnDefinition(field="state"),
+                ColumnDefinition(
+                    field="actions",
+                    formatters=[
+                        (
+                            "actions",
+                            {"template": "ap_cron/tables/formatters/actions.html"},
+                        )
+                    ],
+                    filterable=False,
+                    tabulator_formatter="html",
+                    sorter=None,
+                    resizable=False,
+                ),
+            ],
+            actions=[
+                ActionDefinition(
+                    name="edit",
+                    icon="fa fa-pencil",
+                    endpoint="ap_cron.entity_proxy",
+                    url_params={
+                        "view": "edit",
+                        "entity_id": "$id",
+                    },
+                ),
+                ActionDefinition(
+                    name="view",
+                    icon="fa fa-eye",
+                    endpoint="ap_cron.entity_proxy",
+                    url_params={
+                        "view": "read",
+                        "entity_id": "$id",
+                    },
+                ),
+            ],
+            global_actions=[
+                GlobalActionDefinition(action="disable", label="Disable selected jobs"),
+                GlobalActionDefinition(action="enable", label="Enable selected jobs"),
+                GlobalActionDefinition(action="delete", label="Delete selected jobs"),
+            ],
         )
 
-    def post(self) -> Response:
-        bulk_action = tk.request.form.get("bulk-action")
-        entity_ids = tk.request.form.getlist("entity_id")
+    def get_raw_data(self) -> list[dict[str, Any]]:
+        query = model.Session.query(
+            CronJob.id.label("id"),
+            CronJob.name.label("name"),
+            CronJob.actions.label("cron_actions"),
+            CronJob.data.label("data"),  # type: ignore
+            CronJob.schedule.label("schedule"),
+            CronJob.updated_at.label("updated_at"),
+            CronJob.last_run.label("last_run"),
+            CronJob.state.label("state"),
+        ).order_by(CronJob.updated_at.asc())
 
-        action_func = self._get_bulk_action(bulk_action) if bulk_action else None
+        columns = [
+            "id",
+            "name",
+            "cron_actions",
+            "data",
+            "schedule",
+            "updated_at",
+            "last_run",
+            "state",
+        ]
 
-        if not action_func:
-            tk.h.flash_error(tk._("The bulk action is not implemented"))
-            return tk.redirect_to("ap_cron.manage")
+        return [dict(zip(columns, row)) for row in query.all()]
 
-        for entity_id in entity_ids:
-            try:
-                action_func(entity_id)
-            except tk.ValidationError as e:
-                tk.h.flash_error(str(e))
 
-        return tk.redirect_to("ap_cron.manage")
-
-    def _get_bulk_action(self, value: str) -> Callable[[str], None] | None:
+class CronListView(ApTableView):
+    def get_global_action(self, value: str) -> GlobalActionHandler | None:
         return {
-            "1": partial(self._change_job_state, state=CronJob.State.disabled),
-            "2": partial(self._change_job_state, state=CronJob.State.active),
-            "3": self._remove_job,
+            "disable": partial(self._change_job_state, is_active=False),
+            "enable": partial(self._change_job_state, is_active=True),
+            "delete": self._delete_job,
         }.get(value)
 
-    def _change_job_state(self, job_id: str, state: str) -> None:
-        tk.get_action("ap_cron_update_cron_job")(
-            {"ignore_auth": True},
-            {
-                "id": job_id,
-                "state": state,
-            },
-        )
+    @staticmethod
+    def _change_job_state(
+        row: Row, is_active: Optional[bool] = True
+    ) -> GlobalActionHandlerResult:
+        job = model.Session.query(CronJob).get(row["id"])
+        if not job:
+            return False, "Job not found"
 
-    def _remove_job(self, job_id: str) -> None:
-        tk.get_action("ap_cron_remove_cron_job")({"ignore_auth": True}, {"id": job_id})
+        job.state = CronJob.State.active if is_active else CronJob.State.disabled
+        model.Session.commit()
+        return True, None
+
+    @staticmethod
+    def _delete_job(row: Row) -> GlobalActionHandlerResult:
+        job = model.Session.query(CronJob).get(row["id"])
+        if not job:
+            return False, "Job not found"
+
+        model.Session.delete(job)
+        model.Session.commit()
+        return True, None
 
 
 class CronAddView(MethodView):
@@ -168,10 +246,7 @@ class CronEditJobFormView(MethodView):
 
         return tk.render(
             "ap_cron/cron_edit_modal_form.html",
-            extra_vars={
-                "data": result,
-                "scope": "edit"
-            },
+            extra_vars={"data": result, "scope": "edit"},
         )
 
 
@@ -234,7 +309,7 @@ def action_autocomplete() -> Response:
     return make_response(jsonify({"ResultSet": {"Result": actions}}))
 
 
-ap_cron.add_url_rule("/", view_func=CronManagerView.as_view("manage"))
+ap_cron.add_url_rule("/", view_func=CronListView.as_view("manage", table=CronTable))
 ap_cron.add_url_rule("/add", view_func=CronAddView.as_view("add"))
 ap_cron.add_url_rule("/delete/<job_id>", view_func=CronDeleteJobView.as_view("delete"))
 ap_cron.add_url_rule("/run/<job_id>", view_func=CronRunJobView.as_view("run"))

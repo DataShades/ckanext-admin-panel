@@ -46,9 +46,5 @@ The extension requires the following CKAN extensions to be installed and enabled
 1. [`ckanext-scheming`](https://github.com/ckan/ckanext-scheming):
 We're using the scheming extension to create custom forms for plugin configuration pages. See the [documentation](./register_config_page.md) for more information.
 
-2. [`ckanext-collection`](https://github.com/DataShades/ckanext-collection):
-The `ckanext-collection` is a tool for building interfaces for data collections using declarative style. We use it to represent
-tabular data in the admin panel, such as Content or User list.
-
-3. [`ckanext-editable-config`](https://github.com/ckan/ckanext-editable-config):
+2. [`ckanext-editable-config`](https://github.com/ckan/ckanext-editable-config):
 The `ckanext-editable-config` extension allows you to edit the CKAN configuration in runtime.

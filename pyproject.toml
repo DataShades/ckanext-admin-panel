@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ckanext-admin-panel"
-version = "1.1.19"
+version = "2.0.0"
 description = "Custom admin panel for CKAN to expand default functionality"
 authors = [
     { name = "DataShades", email = "datashades@linkdigital.com.au" },
@@ -15,21 +15,17 @@ license = { text = "AGPL" }
 classifiers = [
     "Development Status :: 4 - Beta",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 keywords = ["CKAN"]
-requires-python = ">= 3.8"
+requires-python = ">= 3.10"
 dependencies = [
     "typing-extensions",
     "ckanext-toolbelt",
-    "ckanext-collection>=0.1.21,<1.0.0",
     "croniter>=2.0.1,<3.0.0",
     "cron-descriptor>=1.4.0,<2.0.0",
-    "ckanext-wysiwyg>=0.1.0,<1.0.0",
-    "ckanext-doi>=3.1.12,<4.0.0",
-    "ckanext-editable-config==0.0.6",
+    "ckanext-editable-config==0.0.7",
 ]
 
 [project.readme]
@@ -54,16 +50,15 @@ ap_cron_test = "ckanext.ap_cron.tests.factories:ApCronTestPlugin"
 
 [project.optional-dependencies]
 test = ["pytest-ckan", "git-changelog"]
+docs = ["mkdocs", "mkdocs-material", "mkdocstrings", "mkdocstrings-python", "mkdocs-include-markdown-plugin"]
+wysiwyg = ["ckanext-wysiwyg>=0.1.0,<1.0.0"]
+doi = ["ckanext-doi>=4.0.0,<5.0.0"]
 
 [tool.setuptools.packages]
 find = {}
 
-[tool.black]
-# line-length = 88
-# preview = true
-
 [tool.ruff]
-target-version = "py38"
+target-version = "py310"
 
 [tool.isort]
 known_ckan = "ckan"
@@ -79,7 +74,7 @@ filterwarnings = [
 ]
 
 [tool.pyright]
-pythonVersion = "3.8"
+pythonVersion = "3.10"
 include = ["ckanext"]
 exclude = [
     "**/test*",

@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import ckan.types as types
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
+import ckan.types as types
+
+from ckanext.ap_support.collection import SupportCollection
+from ckanext.ap_support.formatters import get_formatters
 
 from ckanext.ap_main.interfaces import IAdminPanel
-from ckanext.ap_main.types import ColRenderer
-
-from ckanext.ap_support.col_renderers import get_renderers
-from ckanext.ap_support.collection import SupportCollection
+from ckanext.ap_main.types import Formatter
 
 
 @tk.blanket.blueprints
@@ -64,5 +64,5 @@ class AdminPanelSupportPlugin(p.SingletonPlugin):
 
     # IAdminPanel
 
-    def get_col_renderers(self) -> dict[str, ColRenderer]:
-        return get_renderers()
+    def get_formatters(self) -> dict[str, Formatter]:
+        return get_formatters()
