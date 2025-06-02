@@ -15,5 +15,8 @@
 The DOI feature requires the following dependencies to be installed and enabled:
 
 - `ckanext-admin-panel` plugin
-- `ckanext-doi` plugin
-- `ckanext-flakes` plugin
+- [`ckanext-doi`](https://github.com/NaturalHistoryMuseum/ckanext-doi) plugin
+- [`ckanext-flakes`](https://github.com/DataShades/ckanext-flakes) plugin
+
+Ensure, that you've installed the `ckanext-admin-panel` with the `doi` depdendencies, like this:
+`pip install -e '.[doi]'`

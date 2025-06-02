@@ -1,21 +1,82 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Union
+from typing import Any
 
-from flask import Blueprint, Response
+from flask import Blueprint
 from flask.views import MethodView
 
 import ckan.plugins.toolkit as tk
 
 from ckanext.editable_config.shared import value_as_string
 
+import ckanext.ap_main.table as table
+import ckanext.ap_main.types as types
 from ckanext.ap_main.utils import ap_before_request, get_config_schema
-from ckanext.ap_main.views.generics import ApConfigurationPageView
+from ckanext.ap_main.views.generics import ApConfigurationPageView, ApTableView
 
 log = logging.getLogger(__name__)
 doi_dashboard = Blueprint("doi_dashboard", __name__, url_prefix="/admin-panel/doi")
 doi_dashboard.before_request(ap_before_request)
+
+
+class DoiTable(table.TableDefinition):
+    def __init__(self):
+        super().__init__(
+            name="doi",
+            ajax_url=tk.url_for("doi_dashboard.list", data=True),
+            placeholder=tk._("No DOIs found"),
+            columns=[
+                table.ColumnDefinition("id", visible=False, filterable=False),
+                table.ColumnDefinition("title", min_width=300),
+                table.ColumnDefinition("doi_status", min_width=100),
+                table.ColumnDefinition("identifier", min_width=200),
+                table.ColumnDefinition(
+                    "timestamp",
+                    formatters=[("date", {"date_format": "%Y-%m-%d %H:%M"})],
+                    min_width=150,
+                ),
+                table.ColumnDefinition(
+                    "published",
+                    formatters=[("date", {"date_format": "%Y-%m-%d %H:%M"})],
+                    min_width=150,
+                ),
+                table.ColumnDefinition(
+                    "actions",
+                    formatters=[("actions", {})],
+                    filterable=False,
+                    tabulator_formatter="html",
+                    sorter=None,
+                    resizable=False,
+                ),
+            ],
+            actions=[
+                table.ActionDefinition(
+                    "update",
+                    icon="fa fa-refresh",
+                    endpoint="doi_dashboard.create_or_update_doi",
+                    url_params={"package_id": "$id"},
+                ),
+                table.ActionDefinition(
+                    "view",
+                    icon="fa fa-eye",
+                    endpoint="ap_content.entity_proxy",
+                    url_params={
+                        "view": "read",
+                        "entity_type": "$type",
+                        "entity_id": "$name",
+                    },
+                ),
+            ],
+            global_actions=[
+                table.GlobalActionDefinition(
+                    action="update_doi", label="Update DOI for selected packages"
+                ),
+            ],
+        )
+
+    def get_raw_data(self) -> list[dict[str, Any]]:
+        return tk.get_action("ap_doi_get_packages_doi")({"ignore_auth": True}, {})
 
 
 class ApConfigurationDisplayPageView(MethodView):
@@ -47,39 +108,25 @@ class ApConfigurationDisplayPageView(MethodView):
         return data
 
 
-class ApDoiView(MethodView):
-    def get(self) -> Union[str, Response]:
-
-        return tk.render(
-            "ap_doi/list.html",
-            extra_vars={"collection": ""},
-        )
-
-    def post(self) -> Response:
-        bulk_action = tk.request.form.get("bulk-action")
-        package_ids = tk.request.form.getlist("entity_id")
-
-        action_func = self._get_bulk_action(bulk_action) if bulk_action else None
-
-        if not action_func:
-            tk.h.flash_error(tk._("The bulk action is not implemented"))
-            return tk.redirect_to("doi_dashboard.list")
-
-        for package_id in package_ids:
-            try:
-                action_func(package_id)
-            except tk.ValidationError as e:
-                tk.h.flash_error(str(e))
-
-        return tk.redirect_to("doi_dashboard.list")
-
-    def _get_bulk_action(self, value: str) -> Callable[[str], None] | None:
+class ApDoiView(ApTableView):
+    def get_global_action(self, value: str) -> types.GlobalActionHandler | None:
         return {
-            "1": self._update_doi,
+            "update_doi": self._create_or_update_doi,
         }.get(value)
 
-    def _update_doi(self, package_id: str) -> None:
-        create_or_update_doi(package_id)
+    @staticmethod
+    def _create_or_update_doi(row: types.Row) -> types.GlobalActionHandlerResult:
+        try:
+            result = tk.get_action("ap_doi_update_doi")({}, {"package_id": row["id"]})
+            if result["status"] == "error":
+                for err in result["errors"]:
+                    return False, err
+            else:
+                return True, result["message"]
+        except Exception:
+            return False, "Error updating DOI"
+
+        return True, None
 
 
 def create_or_update_doi(package_id: str):
@@ -97,7 +144,7 @@ def create_or_update_doi(package_id: str):
 
 
 doi_dashboard.add_url_rule("/update_doi/<package_id>", view_func=create_or_update_doi)
-doi_dashboard.add_url_rule("/list", view_func=ApDoiView.as_view("list"))
+doi_dashboard.add_url_rule("/list", view_func=ApDoiView.as_view("list", table=DoiTable))
 
 doi_dashboard.add_url_rule(
     "/config",

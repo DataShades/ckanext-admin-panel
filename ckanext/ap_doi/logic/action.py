@@ -14,10 +14,13 @@ from ckan.logic import validate
 import ckanext.ap_doi.logic.schema as schema
 import ckanext.doi.model.crud as doi_crud
 from ckanext.ap_doi import config, const
-from ckanext.ap_doi.utils import (DOIProblemPackageData, get_doi_to_update,
-                                  get_packages_to_update,
-                                  package_already_in_flake,
-                                  remove_package_from_flake)
+from ckanext.ap_doi.utils import (
+    DOIProblemPackageData,
+    get_doi_to_update,
+    get_packages_to_update,
+    package_already_in_flake,
+    remove_package_from_flake,
+)
 from ckanext.doi.lib.api import DataciteClient
 from ckanext.doi.lib.metadata import build_metadata_dict, build_xml_dict
 from ckanext.doi.model.doi import DOI

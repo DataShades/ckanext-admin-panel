@@ -25,9 +25,7 @@ dependencies = [
     "ckanext-toolbelt",
     "croniter>=2.0.1,<3.0.0",
     "cron-descriptor>=1.4.0,<2.0.0",
-    "ckanext-wysiwyg>=0.1.0,<1.0.0",
-    "ckanext-doi>=3.1.12,<4.0.0",
-    "ckanext-editable-config==0.0.6",
+    "ckanext-editable-config==0.0.7",
 ]
 
 [project.readme]
@@ -53,6 +51,8 @@ ap_cron_test = "ckanext.ap_cron.tests.factories:ApCronTestPlugin"
 [project.optional-dependencies]
 test = ["pytest-ckan", "git-changelog"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings", "mkdocstrings-python", "mkdocs-include-markdown-plugin"]
+wysiwyg = ["ckanext-wysiwyg>=0.1.0,<1.0.0"]
+doi = ["ckanext-doi>=4.0.0,<5.0.0"]
 
 [tool.setuptools.packages]
 find = {}

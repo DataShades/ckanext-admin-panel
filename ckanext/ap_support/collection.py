@@ -8,9 +8,13 @@ from ckanext.ap_support.model import Ticket
 from ckanext.collection.types import ButtonFilter, InputFilter, SelectFilter
 from ckanext.collection.utils import Filters, ModelData
 
-from ckanext.ap_main.collection.base import (ApCollection, ApColumns,
-                                             ApHtmxTableSerializer, BulkAction,
-                                             RowAction)
+from ckanext.ap_main.collection.base import (
+    ApCollection,
+    ApColumns,
+    ApHtmxTableSerializer,
+    BulkAction,
+    RowAction,
+)
 
 
 def custom_row_dictizer(serializer: ApHtmxTableSerializer, row: Ticket):

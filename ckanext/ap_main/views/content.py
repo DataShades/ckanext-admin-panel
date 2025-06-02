@@ -14,8 +14,12 @@ from ckan import model
 
 import ckanext.ap_main.types as types
 import ckanext.ap_main.utils as ap_utils
-from ckanext.ap_main.table import (ActionDefinition, ColumnDefinition,
-                                   GlobalActionDefinition, TableDefinition)
+from ckanext.ap_main.table import (
+    ActionDefinition,
+    ColumnDefinition,
+    GlobalActionDefinition,
+    TableDefinition,
+)
 from ckanext.ap_main.views.generics import ApTableView
 
 ContentList: TypeAlias = "list[dict[str, Any]]"

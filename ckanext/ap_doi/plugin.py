@@ -15,8 +15,6 @@ from ckan.types import SignalMapping
 import ckanext.ap_doi.config as config
 import ckanext.ap_doi.const as const
 import ckanext.ap_doi.utils as utils
-from ckanext.ap_doi.collection import ApDOICollection
-from ckanext.collection.interfaces import CollectionFactory, ICollection
 from ckanext.doi.plugin import DOIPlugin
 
 import ckanext.ap_main.types as ap_types
@@ -32,7 +30,6 @@ class AdminPanelDoiPlugin(p.SingletonPlugin):
     p.implements(p.IPackageController, inherit=True)
     p.implements(p.ISignal)
     p.implements(p.IConfigDeclaration)
-    p.implements(ICollection, inherit=True)
 
     # IConfigurer
 
@@ -109,11 +106,6 @@ class AdminPanelDoiPlugin(p.SingletonPlugin):
             data_dict = safe_load(file)
 
         return declaration.load_dict(data_dict)
-
-    # ICollection
-
-    def get_collection_factories(self) -> dict[str, CollectionFactory]:
-        return {"ap-doi": ApDOICollection}
 
 
 class ApDOIPlugin(DOIPlugin):
