@@ -231,12 +231,13 @@ def build_url_from_params(
         url_params: The URL parameters to build the URL for
         row: The row to build the URL for
     """
+    params = url_params.copy()
 
-    for key, value in url_params.items():
+    for key, value in params.items():
         if value.startswith("$"):
-            url_params[key] = row[value[1:]]
+            params[key] = row[value[1:]]
 
-    return tk.url_for(endpoint, **url_params)
+    return tk.url_for(endpoint, **params)
 
 
 @helper
