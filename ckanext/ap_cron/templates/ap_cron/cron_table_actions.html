@@ -6,6 +6,7 @@
 
         <form class="d-inline-block" hx-post="{{ h.url_for('ap_cron.run_active') }}" hx-swap="none"
             hx-confirm="{{ _('Are you sure you want to run active jobs?') }}"
+            hx-refresh-tabulator="true"
             hx-confirm-success="{{ _('The active jobs have been run.') }}">
             <button type="submit" class="btn btn-primary">
                 {{ _("Run active jobs")}}
