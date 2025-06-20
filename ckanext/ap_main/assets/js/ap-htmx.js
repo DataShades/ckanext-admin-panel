@@ -5,6 +5,7 @@ ckan.module("ap-htmx", function ($) {
 
             htmx.on("htmx:afterSettle", this._afterSettle);
             htmx.on("htmx:confirm", this._onHTMXconfirm);
+            htmx.on("htmx:afterSwap", this._onAfterSwap);
         },
 
         /**
@@ -51,15 +52,30 @@ ckan.module("ap-htmx", function ($) {
                     // If the user confirms, we manually issue the request
                     // true to skip the built-in window.confirm()
                     event.detail.issueRequest(true);
-
-                    let successMsg = event.target.getAttribute("hx-confirm-success");
-                    // show a success notification and refresh the table
-                    if (successMsg) {
-                        this.sandbox.publish("ap:notify", successMsg, "success");
-                        this.sandbox.publish("ap:tabulator:refresh")
-                    }
                 }
             });
-        }
+        },
+
+        /**
+         * Handle actions after HTMX content is swapped into the DOM
+         *
+         * This includes:
+         * - Refreshing the Tabulator table if the `hx-refresh-tabulator` attribute is present
+         * - Showing a success notification if the `hx-confirm-success` attribute is set
+         *
+         * @param {Event} event The HTMX afterSwap event
+         */
+        _onAfterSwap: function (event) {
+            // refresh the table
+            if (event.target.getAttribute("hx-refresh-tabulator")) {
+                this.sandbox.publish("ap:tabulator:refresh")
+            }
+
+            let successMsg = event.target.getAttribute("hx-confirm-success");
+            // show a success notification
+            if (successMsg) {
+                this.sandbox.publish("ap:notify", successMsg, "success");
+            }
+        },
     };
 });
