@@ -1,7 +1,7 @@
 {% extends 'admin_panel/base.html' %}
 
 {% block breadcrumb_content %}
-    <li>{% link_for _("Configurations list"), request.endpoint %}</li>
+    {% snippet 'admin_panel/config/snippets/configuration_breadcrumb.html', active=true %}
 {% endblock breadcrumb_content %}
 
 {% block ap_content %}

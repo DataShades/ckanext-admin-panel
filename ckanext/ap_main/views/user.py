@@ -225,5 +225,10 @@ class UserAddView(MethodView):
             pass
 
 
-ap_user.add_url_rule("/user", view_func=UserListView.as_view("list", table=UserTable))
+ap_user.add_url_rule(
+    "/user",
+    view_func=UserListView.as_view(
+        "list", table=UserTable, breadcrumb_label="Users", page_title="Users"
+    ),
+)
 ap_user.add_url_rule("/user/add", view_func=UserAddView.as_view("create"))

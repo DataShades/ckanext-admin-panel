@@ -227,9 +227,7 @@ class CronRunJobView(MethodView):
             tk.h.flash_error(e.error_dict["message"])
             return tk.redirect_to("ap_cron.manage")
 
-        tk.h.flash_success(
-            f"The cron job \"{result['job']['name']}\" has been started!"
-        )
+        tk.h.flash_success(f'The cron job "{result["job"]["name"]}" has been started!')
         return tk.redirect_to("ap_cron.manage")
 
 
@@ -261,7 +259,7 @@ class CronEditJobView(MethodView):
             tk.h.flash_error(e.error_dict)
             return tk.redirect_to("ap_cron.manage")
 
-        tk.h.flash_success(f"The cron job \"{result['name']}\" has been updated.")
+        tk.h.flash_success(f'The cron job "{result["name"]}" has been updated.')
 
         return tk.redirect_to("ap_cron.manage")
 
@@ -309,7 +307,12 @@ def action_autocomplete() -> Response:
     return make_response(jsonify({"ResultSet": {"Result": actions}}))
 
 
-ap_cron.add_url_rule("/", view_func=CronListView.as_view("manage", table=CronTable))
+ap_cron.add_url_rule(
+    "/",
+    view_func=CronListView.as_view(
+        "manage", table=CronTable, breadcrumb_label="Cron jobs", page_title="Cron jobs"
+    ),
+)
 ap_cron.add_url_rule("/add", view_func=CronAddView.as_view("add"))
 ap_cron.add_url_rule("/delete/<job_id>", view_func=CronDeleteJobView.as_view("delete"))
 ap_cron.add_url_rule("/run/<job_id>", view_func=CronRunJobView.as_view("run"))

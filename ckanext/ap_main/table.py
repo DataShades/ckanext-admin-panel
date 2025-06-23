@@ -78,7 +78,7 @@ class TableDefinition:
 
         return options
 
-    def render_table(self, **kwargs: dict[str, Any]) -> str:
+    def render_table(self, **kwargs: Any) -> str:
         """Render the table template with the necessary data"""
 
         return tk.render(self.table_template, extra_vars={"table": self, **kwargs})

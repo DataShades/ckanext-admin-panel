@@ -1,5 +1,10 @@
 {% extends "admin_panel/base.html" %}
 
+{% block breadcrumb_content %}
+    <li class="active">{% link_for _(breadcrumb_label), request.endpoint %}</li>
+{% endblock %}
+
 {% block ap_content %}
+    <h1>{{ _(page_title) }}</h1>
     {% snippet "admin_panel/tables/table_inner.html", table=table %}
 {% endblock %}
