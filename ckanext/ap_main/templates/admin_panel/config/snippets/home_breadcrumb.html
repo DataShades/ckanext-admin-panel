@@ -4,7 +4,3 @@
         <span>{{ _('Home') }}</span>
     </a>
 </li>
-
-{% if request.endpoint != "ap_config_list.index" %}
-    <li><a href="{{ h.url_for('ap_config_list.index') }}">{{ _("Configurations list") }}</a></li>
-{% endif %}

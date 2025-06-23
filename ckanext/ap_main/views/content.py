@@ -206,7 +206,7 @@ class ContentProxyView(MethodView):
 
 ap_content.add_url_rule(
     "/content",
-    view_func=ContentListView.as_view("list", table=ContentTable),
+    view_func=ContentListView.as_view("list", table=ContentTable, breadcrumb_label="Content", page_title="Content"),
 )
 ap_content.add_url_rule(
     "/content/<view>/<entity_type>/<entity_id>",

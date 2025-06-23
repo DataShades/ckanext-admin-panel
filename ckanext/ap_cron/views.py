@@ -309,7 +309,7 @@ def action_autocomplete() -> Response:
     return make_response(jsonify({"ResultSet": {"Result": actions}}))
 
 
-ap_cron.add_url_rule("/", view_func=CronListView.as_view("manage", table=CronTable))
+ap_cron.add_url_rule("/", view_func=CronListView.as_view("manage", table=CronTable, breadcrumb_label="Cron jobs", page_title="Cron jobs"))
 ap_cron.add_url_rule("/add", view_func=CronAddView.as_view("add"))
 ap_cron.add_url_rule("/delete/<job_id>", view_func=CronDeleteJobView.as_view("delete"))
 ap_cron.add_url_rule("/run/<job_id>", view_func=CronRunJobView.as_view("run"))

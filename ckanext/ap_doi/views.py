@@ -144,7 +144,7 @@ def create_or_update_doi(package_id: str):
 
 
 doi_dashboard.add_url_rule("/update_doi/<package_id>", view_func=create_or_update_doi)
-doi_dashboard.add_url_rule("/list", view_func=ApDoiView.as_view("list", table=DoiTable))
+doi_dashboard.add_url_rule("/list", view_func=ApDoiView.as_view("list", table=DoiTable, breadcrumb_label="DOI dashboard", page_title="DOI dashboard"))
 
 doi_dashboard.add_url_rule(
     "/config",
