@@ -86,7 +86,10 @@ class LogsClearView(MethodView):
 
 
 ap_log.add_url_rule(
-    "/reports/logs", view_func=LogsView.as_view("list", table=LogsTable, breadcrumb_label="Logs", page_title="System Logs")
+    "/reports/logs",
+    view_func=LogsView.as_view(
+        "list", table=LogsTable, breadcrumb_label="Logs", page_title="System Logs"
+    ),
 )
 
 ap_log.add_url_rule("/reports/logs/clear", view_func=LogsClearView.as_view("clear"))

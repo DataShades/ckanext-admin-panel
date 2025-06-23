@@ -165,9 +165,12 @@ class ApConfigurationPageView(MethodView):
 
 
 class ApTableView(MethodView):
-    def __init__(self, table: type[TableDefinition],
-                 breadcrumb_label: str = "Table",
-                 page_title: str = "Table"):
+    def __init__(
+        self,
+        table: type[TableDefinition],
+        breadcrumb_label: str = "Table",
+        page_title: str = "Table",
+    ):
         """A generic view to render tables
 
         Args:
@@ -188,7 +191,9 @@ class ApTableView(MethodView):
         if tk.request.args.get("data"):
             return jsonify(table.get_data())
 
-        return table.render_table(breadcrumb_label=self.breadcrumb_label, page_title=self.page_title)
+        return table.render_table(
+            breadcrumb_label=self.breadcrumb_label, page_title=self.page_title
+        )
 
     def post(self) -> Response:
         """Handle global actions on a table"""
