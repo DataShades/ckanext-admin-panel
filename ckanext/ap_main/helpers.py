@@ -13,9 +13,28 @@ from ckanext.toolbelt.utils.cache import Cache
 import ckanext.ap_main.config as ap_config
 import ckanext.ap_main.utils as ap_utils
 from ckanext.ap_main.interfaces import IAdminPanel
-from ckanext.ap_main.types import SectionConfig, ToolbarButton
+from ckanext.ap_main.types import SectionConfig, ToolbarButton, Formatter
 
 helper, get_helpers = Collector("ap").split()
+_formatter_cache: dict[str, Formatter] = {}
+
+
+@helper
+def get_all_formatters() -> dict[str, Formatter]:
+    """Get all registered tabulator formatters.
+
+    A formatter is a function that takes a column value and can modify its appearance
+    in a table.
+
+    Returns:
+        A mapping of formatter names to formatter functions
+    """
+    if not _formatter_cache:
+        for plugin in reversed(list(p.PluginImplementations(IAdminPanel))):
+            for name, fn in plugin.get_formatters().items():
+                _formatter_cache[name] = fn
+
+    return _formatter_cache
 
 
 @helper

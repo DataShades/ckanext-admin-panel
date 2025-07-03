@@ -8,8 +8,6 @@ import ckan.plugins.toolkit as tk
 import ckanext.ap_main.types as ap_types
 from ckanext.ap_main.interfaces import IAdminPanel
 
-_renderers_cache: dict[str, ap_types.ColRenderer] = {}
-
 
 collect_sections_signal = tk.signals.ckanext.signal(
     "ap_main:collect_config_sections",
@@ -48,23 +46,6 @@ def ap_before_request() -> None:
         )
     except tk.NotAuthorized:
         tk.abort(403, tk._("Need to be system administrator to administer"))
-
-
-def get_all_formatters() -> dict[str, ap_types.Formatter]:
-    """Get all registered tabulator formatters.
-
-    A formatter is a function that takes a column value and can modify its appearance
-    in a table.
-
-    Returns:
-        A mapping of formatter names to formatter functions
-    """
-    if not _renderers_cache:
-        for plugin in reversed(list(p.PluginImplementations(IAdminPanel))):
-            for name, fn in plugin.get_formatters().items():
-                _renderers_cache[name] = fn
-
-    return _renderers_cache
 
 
 def get_config_schema(schema_id: str) -> dict[Any, Any] | None:

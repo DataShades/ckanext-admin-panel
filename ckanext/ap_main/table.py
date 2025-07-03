@@ -6,8 +6,6 @@ from typing import Any, Callable
 
 import ckan.plugins.toolkit as tk
 
-from ckanext.ap_main.utils import get_all_formatters
-
 
 class TableDefinition:
     """Defines a table to be rendered with Tabulator"""
@@ -93,7 +91,7 @@ class TableDefinition:
 
     def get_data(self) -> list[Any]:
         """Get the data for the table with applied formatters"""
-        self._formatters = get_all_formatters()
+        self._formatters = tk.h.ap_get_all_formatters()
 
         return [self.apply_formatters(dict(row)) for row in self.get_raw_data()]
 
