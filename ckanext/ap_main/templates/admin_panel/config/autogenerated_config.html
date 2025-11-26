@@ -11,6 +11,8 @@
 
     {% block form %}
         <form method="POST">
+            {{ h.csrf_input() }}
+
             {% block form_fields %}
                 {% snippet 'admin_panel/snippets/render_fields.html', fields=schema.fields, data=data, errors=errors %}
             {% endblock %}
@@ -19,7 +21,6 @@
                 <button type="submit" class="btn btn-primary">{{ _('Update') }}</button>
                 <button type="submit" class="btn btn-danger" name="reset" value="reset">{{ _('Reset to default') }}</button>
             {% endblock %}
-
         </form>
     {% endblock %}
 

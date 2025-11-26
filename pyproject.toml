@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ckanext-admin-panel"
-version = "2.0.3"
+version = "2.0.4"
 description = "Custom admin panel for CKAN to expand default functionality"
 authors = [
     { name = "DataShades", email = "datashades@linkdigital.com.au" },
