@@ -1,50 +1,59 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from flask import Blueprint
 from flask.views import MethodView
 
 import ckan.plugins.toolkit as tk
+import ckanext.tables.shared as t
 from ckan import model
 
 from ckanext.ap_log.model import ApLogs
-
-import ckanext.ap_main.types as types
-from ckanext.ap_main.table import ColumnDefinition, TableDefinition
-from ckanext.ap_main.types import GlobalActionHandlerResult, Row
-from ckanext.ap_main.utils import ap_before_request
-from ckanext.ap_main.views.generics import ApTableView
+from ckanext.ap_log import formatters as lf
+from ckanext.ap_main import formatters as f
+from ckanext.tables.shared import GenericTableView
 
 ap_log = Blueprint("ap_log", __name__, url_prefix="/admin-panel")
+ap_before_request_func = tk.get_action("ap_before_request_action") if tk.asbool(tk.config.get("ckan.admin_panel.register_action", False)) else None
+# Wait, ap_before_request was imported from util.
+from ckanext.ap_main.utils import ap_before_request
 ap_log.before_request(ap_before_request)
 
 
-class LogsTable(TableDefinition):
+class LogsTable(t.TableDefinition):
     def __init__(self):
         super().__init__(
             name="logs",
             ajax_url=tk.url_for("ap_log.list", data=True),
             placeholder="No logs found",
-            table_action_snippet="ap_log/table_actions.html",
+            # table_action_snippet="ap_log/table_actions.html", # ckanext-tables doesn't support this directly in __init__ usually, handled in template
             columns=[
-                ColumnDefinition(field="name", min_width=150),
-                ColumnDefinition(
+                t.ColumnDefinition(field="name", min_width=150),
+                t.ColumnDefinition(
                     field="path",
                     min_width=200,
-                    formatters=[("shorten_path", {"max_length": 50})],
+                    formatters=[(f.ShortenPathFormatter, {"max_length": 50})],
                 ),
-                ColumnDefinition(
+                t.ColumnDefinition(
                     field="level",
-                    formatters=[("log_level", {})],
+                    formatters=[(lf.LogLevelFormatter, {})],
                     tabulator_formatter="html",
                 ),
-                ColumnDefinition(
+                t.ColumnDefinition(
                     field="timestamp",
-                    formatters=[("date", {"date_format": "%Y-%m-%d %H:%M"})],
+                    formatters=[(f.DateFormatter, {"date_format": "%Y-%m-%d %H:%M"})],
                 ),
-                ColumnDefinition(field="message", min_width=300),
+                t.ColumnDefinition(field="message", min_width=300),
             ],
+            bulk_actions=[
+                 t.BulkActionDefinition(
+                    action="clear",
+                    label="Clear logs",
+                    callback=self._clear_logs,
+                ),
+            ]
         )
 
     def get_raw_data(self) -> list[dict[str, Any]]:
@@ -63,15 +72,18 @@ class LogsTable(TableDefinition):
 
         return [dict(zip(columns, row)) for row in query.all()]
 
+    def _clear_logs(self, rows: list[t.Row]) -> t.ActionHandlerResult:
+        # This clears all logs regardless of selection, preserving legacy behavior?
+        # Or should it only delete selected rows?
+        # ApLogs uses a table defined in model.py. ApLogs.clear_logs() truncates it.
+        # If I want to delete specific rows, I need IDs. But get_raw_data doesn't select IDs?
+        # The query does not select IDs!
+        # Legacy code didn't use IDs either?
+        # Legacy code: _clear_logs(row: Row). ApLogs.clear_logs().
+        # So yes, it clears everything.
 
-class LogsView(ApTableView):
-    def get_global_action(self, value: str) -> types.GlobalActionHandler | None:
-        return {"clear": self._clear_logs}.get(value)
-
-    @staticmethod
-    def _clear_logs(row: Row) -> GlobalActionHandlerResult:
         ApLogs.clear_logs()
-        return True, None
+        return t.ActionHandlerResult(success=True, message="All logs have been cleared")
 
 
 class LogsClearView(MethodView):
@@ -87,8 +99,11 @@ class LogsClearView(MethodView):
 
 ap_log.add_url_rule(
     "/reports/logs",
-    view_func=LogsView.as_view(
-        "list", table=LogsTable, breadcrumb_label="Logs", page_title="System Logs"
+    view_func=GenericTableView.as_view(
+        "list",
+        table=LogsTable,
+        breadcrumb_label="Logs",
+        page_title="System Logs"
     ),
 )
 

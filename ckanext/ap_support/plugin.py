@@ -2,13 +2,7 @@ from __future__ import annotations
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-import ckan.types as types
-
-from ckanext.ap_support.collection import SupportCollection
-from ckanext.ap_support.formatters import get_formatters
-
-from ckanext.ap_main.interfaces import IAdminPanel
-from ckanext.ap_main.types import Formatter
+from ckan import types
 
 
 @tk.blanket.blueprints
@@ -19,7 +13,6 @@ from ckanext.ap_main.types import Formatter
 class AdminPanelSupportPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurer)
     p.implements(p.ISignal)
-    p.implements(IAdminPanel, inherit=True)
 
     # IConfigurer
 
@@ -34,15 +27,8 @@ class AdminPanelSupportPlugin(p.SingletonPlugin):
         return {
             tk.signals.ckanext.signal("ap_main:collect_config_sections"): [
                 self.collect_config_sections_subs
-            ],
-            tk.signals.ckanext.signal("collection:register_collections"): [
-                self.collect_collections_subs
-            ],
+            ]
         }
-
-    @staticmethod
-    def collect_collections_subs(sender: None):
-        return {"ap-support": SupportCollection}
 
     @staticmethod
     def collect_config_sections_subs(sender: None):
@@ -51,7 +37,7 @@ class AdminPanelSupportPlugin(p.SingletonPlugin):
             "configs": [
                 {
                     "name": "Global settings",
-                    "blueprint": "ap_user.list",
+                    "blueprint": "ap_support.list", # TODO: add blueprint
                     "info": "Support system configuration",
                 },
                 {
@@ -63,6 +49,3 @@ class AdminPanelSupportPlugin(p.SingletonPlugin):
         }
 
     # IAdminPanel
-
-    def get_formatters(self) -> dict[str, Formatter]:
-        return get_formatters()

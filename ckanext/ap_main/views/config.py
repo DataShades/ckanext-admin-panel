@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import Union
-
-from flask import Blueprint, Response
+from flask import Blueprint
 
 import ckan.plugins.toolkit as tk
 
@@ -13,5 +11,5 @@ ap_config_list.before_request(ap_before_request)
 
 
 @ap_config_list.route("/config")
-def index() -> Union[str, Response]:
+def index() -> str:
     return tk.render("admin_panel/config/config_list.html", extra_vars={})

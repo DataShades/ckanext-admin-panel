@@ -2,24 +2,21 @@ from __future__ import annotations
 
 import logging
 from functools import partial
-from typing import Any, Optional
+from typing import Any, TypeAlias
 
 from flask import Blueprint, Response
 from flask.views import MethodView
-from typing_extensions import TypeAlias
 
 import ckan.lib.navl.dictization_functions as df
-import ckan.logic as logic
 import ckan.plugins.toolkit as tk
-from ckan import model, types
+from ckan import logic, model, types
 
-import ckanext.ap_main.table as table
-import ckanext.ap_main.types as ap_types
+import ckanext.tables.shared as t
+from ckanext.ap_main import formatters as f
 from ckanext.ap_main.logic import schema as ap_schema
 from ckanext.ap_main.utils import ap_before_request
-from ckanext.ap_main.views.generics import ApTableView
+from ckanext.tables.shared import GenericTableView
 
-UserList: TypeAlias = "list[dict[str, Any]]"
 ContentList: TypeAlias = "list[dict[str, Any]]"
 
 ap_user = Blueprint("ap_user", __name__, url_prefix="/admin-panel")
@@ -28,131 +25,126 @@ ap_user.before_request(ap_before_request)
 log = logging.getLogger(__name__)
 
 
-class UserTable(table.TableDefinition):
+class UserTable(t.TableDefinition):
     def __init__(self):
         super().__init__(
             name="user",
-            ajax_url=tk.url_for("ap_user.list", data=True),
-            placeholder=tk._("No users found"),
+            table_template="admin_panel/tables/table_base.html",
+            data_source=t.DatabaseDataSource(
+                stmt=model.Session.query(
+                    model.User.id.label("id"),
+                    model.User.name.label("name"),
+                    model.User.fullname.label("fullname"),
+                    model.User.email.label("email"),
+                    model.User.state.label("state"),
+                    model.User.sysadmin.label("sysadmin"),
+                )
+                .filter(model.User.name != tk.config["ckan.site_id"])
+                .order_by(model.User.name)
+            ),
             columns=[
-                table.ColumnDefinition("id", visible=False, filterable=False),
-                table.ColumnDefinition(
-                    "name",
-                    formatters=[("user_link", {})],
+                t.ColumnDefinition(
+                    field="name",
+                    formatters=[(f.UserLinkFormatter, {})],
                     tabulator_formatter="html",
                     min_width=300,
                 ),
-                table.ColumnDefinition(
-                    "fullname",
-                    formatters=[("none_as_empty", {})],
+                t.ColumnDefinition(
+                    field="fullname",
+                    formatters=[(f.NoneAsEmptyFormatter, {})],
                     min_width=200,
                 ),
-                table.ColumnDefinition(
-                    "email",
-                    formatters=[("none_as_empty", {})],
+                t.ColumnDefinition(
+                    field="email",
+                    formatters=[(f.NoneAsEmptyFormatter, {})],
                     min_width=200,
                 ),
-                table.ColumnDefinition("state"),
-                table.ColumnDefinition("sysadmin", formatters=[("bool", {})]),
-                table.ColumnDefinition(
-                    "actions",
-                    formatters=[("actions", {})],
-                    filterable=False,
-                    tabulator_formatter="html",
-                    sorter=None,
-                    resizable=False,
-                ),
+                t.ColumnDefinition(field="state", width=100, resizable=False),
+                t.ColumnDefinition(field="sysadmin", formatters=[(f.BoolFormatter, {})], width=120, resizable=False),
             ],
-            actions=[
-                table.ActionDefinition(
-                    "edit",
+            row_actions=[
+                t.RowActionDefinition(
+                    action="edit",
+                    label="Edit",
                     icon="fa fa-pencil",
-                    endpoint="user.edit",
-                    url_params={"id": "$id"},
+                    callback=lambda row: t.ActionHandlerResult(
+                        success=True, redirect=tk.url_for("user.edit", id=row["id"])
+                    ),
                 ),
-                table.ActionDefinition(
-                    "view",
+                t.RowActionDefinition(
+                    action="view",
+                    label="View",
                     icon="fa fa-eye",
-                    endpoint="user.read",
-                    url_params={"id": "$id"},
+                    callback=lambda row: t.ActionHandlerResult(
+                        success=True, redirect=tk.url_for("user.read", id=row["id"])
+                    ),
                 ),
             ],
-            global_actions=[
-                table.GlobalActionDefinition(
-                    action="add_sysadmin", label="Add sysadmin role to selected users"
+            bulk_actions=[
+                t.BulkActionDefinition(
+                    action="add_sysadmin",
+                    label="Add sysadmin role to selected users",
+                    callback=self._change_sysadmin_role,
                 ),
-                table.GlobalActionDefinition(
+                t.BulkActionDefinition(
                     action="remove_sysadmin",
                     label="Remove sysadmin role from selected users",
+                    callback=partial(self._change_sysadmin_role, is_sysadmin=False),
                 ),
-                table.GlobalActionDefinition(
-                    action="block", label="Block selected users"
+                t.BulkActionDefinition(
+                    action="block",
+                    label="Block selected users",
+                    callback=self._change_user_state,
                 ),
-                table.GlobalActionDefinition(
-                    action="unblock", label="Unblock selected users"
+                t.BulkActionDefinition(
+                    action="unblock",
+                    label="Unblock selected users",
+                    callback=partial(self._change_user_state, is_active=True),
                 ),
             ],
         )
 
-    def get_raw_data(self) -> list[dict[str, Any]]:
-        query = (
-            model.Session.query(
-                model.User.id.label("id"),
-                model.User.name.label("name"),
-                model.User.fullname.label("fullname"),
-                model.User.email.label("email"),
-                model.User.state.label("state"),
-                model.User.sysadmin.label("sysadmin"),
-            )
-            .filter(model.User.name != tk.config["ckan.site_id"])
-            .order_by(model.User.name)
-        )
+    @staticmethod
+    def _change_sysadmin_role(rows: list[t.Row], is_sysadmin: bool | None = True) -> t.ActionHandlerResult:
+        errors = []
+        for row in rows:
+            user = model.Session.query(model.User).get(row["id"])
+            if not user:
+                errors.append(f"User {row['name']} not found")
+                continue
 
-        columns = ["id", "name", "fullname", "email", "state", "sysadmin"]
+            user.sysadmin = is_sysadmin
+            model.Session.commit()
 
-        return [dict(zip(columns, row)) for row in query.all()]
+        if errors:
+            return t.ActionHandlerResult(success=False, error="\n".join(errors))
 
-
-class UserListView(ApTableView):
-    def get_global_action(self, value: str) -> ap_types.GlobalActionHandler | None:
-        return {
-            "add_sysadmin": self._change_sysadmin_role,
-            "remove_sysadmin": partial(self._change_sysadmin_role, is_sysadmin=False),
-            "block": self._change_user_state,
-            "unblock": partial(self._change_user_state, is_active=True),
-        }.get(value)
+        return t.ActionHandlerResult(success=True)
 
     @staticmethod
-    def _change_sysadmin_role(
-        row: ap_types.Row, is_sysadmin: Optional[bool] = True
-    ) -> ap_types.GlobalActionHandlerResult:
-        user = model.Session.query(model.User).get(row["id"])
-        if not user:
-            return False, "User not found"
+    def _change_user_state(rows: list[t.Row], is_active: bool | None = False) -> t.ActionHandlerResult:
+        errors = []
+        for row in rows:
+            user = model.Session.query(model.User).get(row["id"])
+            if not user:
+                errors.append(f"User {row['name']} not found")
+                continue
 
-        user.sysadmin = is_sysadmin
-        model.Session.commit()
-        return True, None
+            user.state = model.State.ACTIVE if is_active else model.State.DELETED
+            model.Session.commit()
 
-    @staticmethod
-    def _change_user_state(
-        row: ap_types.Row, is_active: Optional[bool] = False
-    ) -> ap_types.GlobalActionHandlerResult:
-        user = model.Session.query(model.User).get(row["id"])
-        if not user:
-            return False, "User not found"
+        if errors:
+            return t.ActionHandlerResult(success=False, error="\n".join(errors))
 
-        user.state = model.State.ACTIVE if is_active else model.State.DELETED
-        model.Session.commit()
-        return True, None
+        return t.ActionHandlerResult(success=True)
 
 
 class UserAddView(MethodView):
     def get(
         self,
-        data: Optional[dict[str, Any]] = None,
-        errors: Optional[dict[str, Any]] = None,
-        error_summary: Optional[dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
+        errors: dict[str, Any] | None = None,
+        error_summary: dict[str, Any] | None = None,
     ) -> str:
         return tk.render(
             "admin_panel/config/user/create_form.html",
@@ -186,9 +178,7 @@ class UserAddView(MethodView):
             + user_dict["name"]
             + tk.h.literal("</a>")
         )
-        tk.h.flash_success(
-            tk._(f"Created a new user account for {link}"), allow_html=True
-        )
+        tk.h.flash_success(tk._(f"Created a new user account for {link}"), allow_html=True)
         log.info(tk._(f"Created a new user account for {link}"))
 
         return tk.redirect_to("ap_user.create")
@@ -204,31 +194,26 @@ class UserAddView(MethodView):
         return context
 
     def _parse_payload(self) -> dict[str, Any]:
-        data_dict = logic.clean_dict(
-            df.unflatten(logic.tuplize_dict(logic.parse_params(tk.request.form)))
-        )
+        data_dict = logic.clean_dict(df.unflatten(logic.tuplize_dict(logic.parse_params(tk.request.form))))
 
-        data_dict.update(
-            logic.clean_dict(
-                df.unflatten(logic.tuplize_dict(logic.parse_params(tk.request.files)))
-            )
-        )
+        data_dict.update(logic.clean_dict(df.unflatten(logic.tuplize_dict(logic.parse_params(tk.request.files)))))
 
         return data_dict
 
     def _make_user_sysadmin(self, user_dict: dict[str, Any]) -> None:
         try:
-            logic.get_action("user_patch")(
-                {"ignore_auth": True}, {"id": user_dict["id"], "sysadmin": True}
-            )
+            logic.get_action("user_patch")({"ignore_auth": True}, {"id": user_dict["id"], "sysadmin": True})
         except tk.ObjectNotFound:
             pass
 
 
 ap_user.add_url_rule(
     "/user",
-    view_func=UserListView.as_view(
-        "list", table=UserTable, breadcrumb_label="Users", page_title="Users"
+    view_func=GenericTableView.as_view(
+        "list",
+        table=UserTable,
+        page_title="Users",
+        breadcrumb_label="Users",
     ),
 )
 ap_user.add_url_rule("/user/add", view_func=UserAddView.as_view("create"))

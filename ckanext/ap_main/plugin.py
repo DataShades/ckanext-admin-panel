@@ -9,7 +9,6 @@ from ckan.types import SignalMapping
 
 import ckanext.ap_main.types as ap_types
 from ckanext.ap_main import helpers, utils
-from ckanext.ap_main.formatters import get_formatters
 from ckanext.ap_main.interfaces import IAdminPanel
 
 
@@ -41,11 +40,6 @@ class AdminPanelPlugin(p.SingletonPlugin):
 
     def get_helpers(self) -> dict[str, Callable[..., Any]]:
         return helpers.get_helpers()
-
-    # IAdminPanel
-
-    def get_formatters(self) -> dict[str, ap_types.Formatter]:
-        return get_formatters()
 
     # ISignal
 

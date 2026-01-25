@@ -5,11 +5,10 @@ from typing import Any, Union
 from flask import Blueprint, Response
 from flask.views import MethodView
 
-import ckan.lib.app_globals as app_globals
 import ckan.lib.navl.dictization_functions as dict_fns
-import ckan.logic as logic
-import ckan.model as model
 import ckan.plugins.toolkit as tk
+from ckan import logic, model
+from ckan.lib import app_globals
 from ckan.logic.schema import update_configuration_schema
 from ckan.views.home import CACHE_PARAMETERS
 
@@ -20,7 +19,7 @@ ap_basic.before_request(ap_utils.ap_before_request)
 
 
 class ResetView(MethodView):
-    def get(self) -> Union[str, Response]:
+    def get(self) -> str | Response:
         if "cancel" in tk.request.args:
             return tk.redirect_to("ap_basic.config")
         return tk.render("admin_panel/config/confirm_reset.html")
@@ -56,7 +55,7 @@ class ConfigView(MethodView):
             ),
         )
 
-    def post(self) -> Union[str, Response]:
+    def post(self) -> str | Response:
         try:
             req: dict[str, Any] = tk.request.form.copy()
             req.update(tk.request.files.to_dict())
@@ -138,7 +137,7 @@ class EditableConfigView(MethodView):
     def get(self) -> str:
         return self._render()
 
-    def post(self) -> Union[str, Response]:
+    def post(self) -> str | Response:
         data = logic.parse_params(tk.request.form)
 
         change: dict[str, Any] = {}

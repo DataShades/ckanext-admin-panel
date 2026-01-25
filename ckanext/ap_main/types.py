@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional, TypedDict
 
 from typing_extensions import TypeAlias
 
-from ckanext.ap_main.table import ColumnDefinition, TableDefinition
+from ckanext.tables.shared import ColumnDefinition, TableDefinition
 
 ItemList: TypeAlias = "list[dict[str, Any]]"
 Item: TypeAlias = "dict[str, Any]"

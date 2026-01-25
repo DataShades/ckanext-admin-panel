@@ -14,7 +14,6 @@ from ckan.logic import parse_params
 
 import ckanext.ap_main.types as types
 from ckanext.ap_main.interfaces import IAdminPanel
-from ckanext.ap_main.table import TableDefinition
 from ckanext.ap_main.utils import get_config_schema
 
 log = logging.getLogger(__name__)
@@ -30,8 +29,10 @@ class ApConfigurationPageView(MethodView):
         success_update_message: str = "Config options have been updated",
         fields: list[dict[str, Any]] | None = None,
     ):
-        """A generic view to render configurations for an extension based on
-        an arbitrary schema and config_declaration.yaml
+        """A generic view to render configurations for an extension.
+
+        It uses an arbitrary schema and config_declaration.yml to render
+        a configuration form.
 
         Args:
             schema_id : an arbitrary schema ID
@@ -59,8 +60,11 @@ class ApConfigurationPageView(MethodView):
         )
 
     def get_config_schema(self) -> dict[str, Any]:
-        """Fetch a full schema or use the fields user provides and put them inside
-        a dict to imitate a schema"""
+        """Return a schema for the configuration.
+
+        Fetch a full schema or use the fields user provides and put them inside
+        a dict to imitate a schema
+        """
         schema = (
             get_config_schema(self.schema_id)
             if not self.fields
@@ -73,7 +77,7 @@ class ApConfigurationPageView(MethodView):
         return schema
 
     def get_config_form_data(self) -> dict[str, Any]:
-        """Fetch/humanize configuration values from a CKANConfig"""
+        """Fetch/humanize configuration values from a CKANConfig."""
         from ckanext.editable_config.shared import value_as_string
 
         data = {}
@@ -82,15 +86,16 @@ class ApConfigurationPageView(MethodView):
             if field["field_name"] not in tk.config:
                 continue
 
-            data[field["field_name"]] = value_as_string(
-                field["field_name"], tk.config[field["field_name"]]
-            )
+            data[field["field_name"]] = value_as_string(field["field_name"], tk.config[field["field_name"]])
 
         return data
 
     def disable_non_editable_fields(self) -> None:
-        """Update a schema fields and disable those, that are not marked as editable
-        in a config_declaration.yml"""
+        """Disable non-editable fields in a schema.
+
+        Update a schema fields and disable those, that are not marked as editable
+        in a config_declaration.yml
+        """
         from ckanext.editable_config.shared import is_editable
 
         for field in self.schema["fields"]:
@@ -117,7 +122,7 @@ class ApConfigurationPageView(MethodView):
         self.disable_non_editable_fields()
         self.throw_away_undeclared_fields()
 
-        conf_before_update = {key: tk.config[key] for key in self.data.keys()}
+        conf_before_update = {key: tk.config[key] for key in self.data}
 
         for plugin in reversed(list(p.PluginImplementations(IAdminPanel))):
             plugin.before_config_update(self.schema_id, self.data)
@@ -134,14 +139,10 @@ class ApConfigurationPageView(MethodView):
                     {"options": self.data},
                 )
         except tk.ObjectNotFound as e:
-            tk.h.flash_error(
-                tk._("No default value found for option {}".format(e.message))
-            )
+            tk.h.flash_error(tk._(f"No default value found for option {e.message}"))
             return tk.render(
                 self.render_template,
-                self.prepare_extra_vars(
-                    self.schema, self.data, {"test": "No default value"}
-                ),
+                self.prepare_extra_vars(self.schema, self.data, {"test": "No default value"}),
             )
         except tk.ValidationError as e:
             return tk.render(
@@ -162,65 +163,3 @@ class ApConfigurationPageView(MethodView):
 
     def throw_away_undeclared_fields(self) -> None:
         self.data = {k: v for k, v in self.data.items() if k in tk.config}
-
-
-class ApTableView(MethodView):
-    def __init__(
-        self,
-        table: type[TableDefinition],
-        breadcrumb_label: str = "Table",
-        page_title: str = "Table",
-    ):
-        """A generic view to render tables
-
-        Args:
-            table: a table definition
-            render_template (optional): a path to a render template
-        """
-        self.table = table
-        self.breadcrumb_label = breadcrumb_label
-        self.page_title = page_title
-
-    def get(self) -> str | Response:
-        """Render a table
-
-        If the data argument is provided, returns the table data
-        """
-        table = self.table()  # type: ignore
-
-        if tk.request.args.get("data"):
-            return jsonify(table.get_data())
-
-        return table.render_table(
-            breadcrumb_label=self.breadcrumb_label, page_title=self.page_title
-        )
-
-    def post(self) -> Response:
-        """Handle global actions on a table"""
-        global_action = tk.request.form.get("global_action")
-        rows = tk.request.form.get("rows")
-
-        action_func = self.get_global_action(global_action) if global_action else None
-
-        if not action_func or not rows:
-            return jsonify(
-                {
-                    "success": False,
-                    "errors": [tk._("The global action is not implemented")],
-                }
-            )
-
-        errors = []
-
-        for row in json.loads(rows):
-            success, error = action_func(row)
-
-            if not success:
-                log.debug("Error during global action %s: %s", global_action, error)
-                errors.append(error)
-
-        return jsonify({"success": not errors, "errors": errors})
-
-    @abstractmethod
-    def get_global_action(self, value: str) -> types.GlobalActionHandler | None:
-        pass

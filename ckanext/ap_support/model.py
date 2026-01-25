@@ -8,7 +8,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text
 from sqlalchemy.orm import backref, relationship
 from typing_extensions import Self
 
-import ckan.model as model
+from ckan import model
 from ckan.plugins import toolkit as tk
 
 from ckanext.ap_support.types import DictizedTicket, TicketData
@@ -30,7 +30,7 @@ class Ticket(tk.BaseModel):
     category = Column(Text)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    author_id: Optional[str] = Column(Text, ForeignKey(model.User.id), nullable=False)
+    author_id = Column(Text, ForeignKey(model.User.id), nullable=False)
 
     author = relationship(
         model.User,

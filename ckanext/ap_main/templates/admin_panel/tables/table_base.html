@@ -1,10 +1,28 @@
-{% extends "admin_panel/base.html" %}
+{% extends 'admin_panel/base.html' %}
 
 {% block breadcrumb_content %}
-    <li class="active">{% link_for _(breadcrumb_label), request.endpoint %}</li>
+    <li class="active">
+        <a href="{{ request.path }}">{{ _(breadcrumb_label) }}</a>
+    </li>
 {% endblock %}
 
 {% block ap_content %}
-    <h1>{{ _(page_title) }}</h1>
-    {% snippet "admin_panel/tables/table_inner.html", table=table %}
+    <div class="pt-2">
+        {% if page_title %}
+            <h1>{{ _(page_title) if page_title else "" }}</h1>
+        {% endif %}
+
+        {% snippet "tables/render_table.html", table=table %}
+    </div>
+{% endblock ap_content %}
+
+{% block scripts %}
+    {{ super() }}
+
+    {% asset "tables/tables-js" %}
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    {% asset "tables/tables-css" %}
 {% endblock %}

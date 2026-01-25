@@ -9,149 +9,133 @@ from flask.views import MethodView
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
+import ckanext.tables.shared as t
 from ckan import model, types
 
 import ckanext.ap_cron.utils as cron_utils
 from ckanext.ap_cron import types as cron_types
 from ckanext.ap_cron.interfaces import IAPCron
 from ckanext.ap_cron.model import CronJob
+from ckanext.ap_cron import formatters as cf
+from ckanext.ap_main import formatters as f
 
-from ckanext.ap_main.table import (
-    ActionDefinition,
-    ColumnDefinition,
-    GlobalActionDefinition,
-    TableDefinition,
-)
-from ckanext.ap_main.types import GlobalActionHandler, GlobalActionHandlerResult, Row
 from ckanext.ap_main.utils import ap_before_request
-from ckanext.ap_main.views.generics import ApTableView
+from ckanext.tables.shared import GenericTableView
 
 ap_cron = Blueprint("ap_cron", __name__, url_prefix="/admin-panel/cron")
 ap_cron.before_request(ap_before_request)
 
 
-class CronTable(TableDefinition):
+class CronTable(t.TableDefinition):
     def __init__(self):
         super().__init__(
             name="cron",
-            ajax_url=tk.url_for("ap_cron.manage", data=True),
-            placeholder="No cron jobs found",
-            table_action_snippet="ap_cron/cron_table_actions.html",
             table_template="ap_cron/tables/table_base.html",
+            data_source=t.DatabaseDataSource(
+                stmt=model.Session.query(
+                    CronJob.id.label("id"),
+                    CronJob.name.label("name"),
+                    CronJob.actions.label("cron_actions"),
+                    CronJob.data.label("data"),
+                    CronJob.schedule.label("schedule"),
+                    CronJob.updated_at.label("updated_at"),
+                    CronJob.last_run.label("last_run"),
+                    CronJob.state.label("state"),
+                ).order_by(CronJob.updated_at.asc())
+            ),
             columns=[
-                ColumnDefinition(field="id", visible=False, filterable=False),
-                ColumnDefinition(field="name", min_width=250),
-                ColumnDefinition(field="cron_actions", min_width=200),
-                ColumnDefinition(
+                t.ColumnDefinition(field="id", visible=False),
+                t.ColumnDefinition(field="name", min_width=250),
+                t.ColumnDefinition(field="cron_actions", min_width=200),
+                t.ColumnDefinition(
                     field="schedule",
-                    formatters=[("schedule", {})],
-                    tabulator_formatter="html",
+                    formatters=[(cf.ScheduleFormatter, {})],
                 ),
-                ColumnDefinition(
+                t.ColumnDefinition(
                     field="updated_at",
-                    formatters=[("date", {"date_format": "%Y-%m-%d %H:%M"})],
+                    formatters=[(f.DateFormatter, {"date_format": "%Y-%m-%d %H:%M"})],
                 ),
-                ColumnDefinition(
+                t.ColumnDefinition(
                     field="last_run",
-                    formatters=[("last_run", {})],
+                    formatters=[(cf.LastRunFormatter, {})],
                 ),
-                ColumnDefinition(field="state"),
-                ColumnDefinition(
-                    field="actions",
-                    formatters=[
-                        (
-                            "actions",
-                            {"template": "ap_cron/tables/formatters/actions.html"},
-                        )
-                    ],
-                    filterable=False,
-                    tabulator_formatter="html",
-                    sorter=None,
-                    resizable=False,
-                ),
+                t.ColumnDefinition(field="state"),
             ],
-            actions=[
-                ActionDefinition(
-                    name="edit",
+            row_actions=[
+                t.RowActionDefinition(
+                    action="edit",
+                    label="Edit",
                     icon="fa fa-pencil",
-                    endpoint="ap_cron.entity_proxy",
-                    url_params={
-                        "view": "edit",
-                        "entity_id": "$id",
-                    },
+                    callback=lambda row: tk.redirect_to(
+                        "ap_cron.entity_proxy",
+                        view="edit",
+                        entity_id=row["id"],
+                    ),
                 ),
-                ActionDefinition(
-                    name="view",
+                t.RowActionDefinition(
+                    action="view",
+                    label="View",
                     icon="fa fa-eye",
-                    endpoint="ap_cron.entity_proxy",
-                    url_params={
-                        "view": "read",
-                        "entity_id": "$id",
-                    },
+                    callback=lambda row: tk.redirect_to(
+                        "ap_cron.entity_proxy",
+                        view="read",
+                        entity_id=row["id"],
+                    ),
                 ),
             ],
-            global_actions=[
-                GlobalActionDefinition(action="disable", label="Disable selected jobs"),
-                GlobalActionDefinition(action="enable", label="Enable selected jobs"),
-                GlobalActionDefinition(action="delete", label="Delete selected jobs"),
+            bulk_actions=[
+                t.BulkActionDefinition(
+                    action="disable",
+                    label="Disable selected jobs",
+                    callback=partial(self._change_job_state, is_active=False),
+                ),
+                t.BulkActionDefinition(
+                    action="enable",
+                    label="Enable selected jobs",
+                    callback=partial(self._change_job_state, is_active=True),
+                ),
+                t.BulkActionDefinition(
+                    action="delete",
+                    label="Delete selected jobs",
+                    callback=self._delete_job,
+                ),
             ],
+            searchable_columns=[t.SearchableColumn(field="name")],
         )
 
-    def get_raw_data(self) -> list[dict[str, Any]]:
-        query = model.Session.query(
-            CronJob.id.label("id"),
-            CronJob.name.label("name"),
-            CronJob.actions.label("cron_actions"),
-            CronJob.data.label("data"),  # type: ignore
-            CronJob.schedule.label("schedule"),
-            CronJob.updated_at.label("updated_at"),
-            CronJob.last_run.label("last_run"),
-            CronJob.state.label("state"),
-        ).order_by(CronJob.updated_at.asc())
-
-        columns = [
-            "id",
-            "name",
-            "cron_actions",
-            "data",
-            "schedule",
-            "updated_at",
-            "last_run",
-            "state",
-        ]
-
-        return [dict(zip(columns, row)) for row in query.all()]
-
-
-class CronListView(ApTableView):
-    def get_global_action(self, value: str) -> GlobalActionHandler | None:
-        return {
-            "disable": partial(self._change_job_state, is_active=False),
-            "enable": partial(self._change_job_state, is_active=True),
-            "delete": self._delete_job,
-        }.get(value)
-
-    @staticmethod
     def _change_job_state(
-        row: Row, is_active: Optional[bool] = True
-    ) -> GlobalActionHandlerResult:
-        job = model.Session.query(CronJob).get(row["id"])
-        if not job:
-            return False, "Job not found"
+        self, rows: list[t.Row], is_active: Optional[bool] = True
+    ) -> t.ActionHandlerResult:
+        errors = []
+        for row in rows:
+            job = model.Session.query(CronJob).get(row["id"])
+            if not job:
+                errors.append(f"Job {row['name']} not found")
+                continue
 
-        job.state = CronJob.State.active if is_active else CronJob.State.disabled
-        model.Session.commit()
-        return True, None
+            job.state = CronJob.State.active if is_active else CronJob.State.disabled
+            model.Session.commit()
 
-    @staticmethod
-    def _delete_job(row: Row) -> GlobalActionHandlerResult:
-        job = model.Session.query(CronJob).get(row["id"])
-        if not job:
-            return False, "Job not found"
+        if errors:
+            return t.ActionHandlerResult(success=False, error="\n".join(errors))
 
-        model.Session.delete(job)
-        model.Session.commit()
-        return True, None
+        return t.ActionHandlerResult(success=True)
+
+    def _delete_job(self, rows: list[t.Row]) -> t.ActionHandlerResult:
+        errors = []
+        for row in rows:
+            job = model.Session.query(CronJob).get(row["id"])
+            if not job:
+                errors.append(f"Job {row['name']} not found")
+                continue
+
+            model.Session.delete(job)
+            model.Session.commit()
+
+        if errors:
+            return t.ActionHandlerResult(success=False, error="\n".join(errors))
+
+        return t.ActionHandlerResult(success=True)
 
 
 class CronAddView(MethodView):
@@ -309,8 +293,11 @@ def action_autocomplete() -> Response:
 
 ap_cron.add_url_rule(
     "/",
-    view_func=CronListView.as_view(
-        "manage", table=CronTable, breadcrumb_label="Cron jobs", page_title="Cron jobs"
+    view_func=GenericTableView.as_view(
+        "manage",
+        table=CronTable,
+        breadcrumb_label="Cron jobs",
+        page_title="Cron jobs"
     ),
 )
 ap_cron.add_url_rule("/add", view_func=CronAddView.as_view("add"))
