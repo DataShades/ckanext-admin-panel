@@ -37,7 +37,7 @@ class AdminPanelSupportPlugin(p.SingletonPlugin):
             "configs": [
                 {
                     "name": "Global settings",
-                    "blueprint": "ap_support.list", # TODO: add blueprint
+                    "blueprint": "ap_support.list",  # TODO: add blueprint
                     "info": "Support system configuration",
                 },
                 {

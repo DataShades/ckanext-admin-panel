@@ -16,7 +16,7 @@ log = logging.getLogger(LOG_NAME)
 
 
 def get_next_run_datetime(date: datetime.datetime, schedule: str) -> datetime.datetime:
-    """Get a datetime object of the next job run"""
+    """Get a datetime object of the next job run."""
     return croniter(schedule, date).get_next(datetime.datetime)
 
 
@@ -60,7 +60,7 @@ def enqueue_cron_job(job: CronJob) -> bool:
 
 
 def job_failure_callback(rq_job, connection, type, value, traceback):
-    """Mark a cron job as failed if the rq throw an exception"""
+    """Mark a cron job as failed if the rq throw an exception."""
     job: CronJob = rq_job.args[0]["data"]["cron_job"]
     job.data[ERRORS] = str(value)
 
@@ -68,9 +68,10 @@ def job_failure_callback(rq_job, connection, type, value, traceback):
 
 
 def cron_job_pipe(data_dict: dict[str, Any]) -> DictizedCronJob:
-    """This function runs a list of actions for a specific cron job successively.
-    The result of the action is passed to the next one."""
+    """Run a list of actions for a specific cron job successively.
 
+    The result of the action is passed to the next one.
+    """
     job: CronJob = data_dict["data"]["cron_job"]
 
     log.info("[id:%s] The cron job has been started", job.id)

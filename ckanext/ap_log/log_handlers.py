@@ -24,10 +24,10 @@ class DatabaseHandler(logging.Handler):
             self.not_ready = True
             log.error("The ApLogs table is not initialized")
 
-        Session = sessionmaker(bind=engine)
-        ApLogs.set_session(Session())
+        session = sessionmaker(bind=engine)
+        ApLogs.set_session(session())
 
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord) -> None:
         if not tk.config:
             return
 

@@ -40,15 +40,12 @@ ckan.module("ap-htmx", function ($) {
 
             event.preventDefault(); // Prevent the default confirm
 
-            Swal.fire({
-                title: this._('Are you sure?'),
-                text: event.detail.question, // The value of `hx-confirm`
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: this._('Yes'),
-                cancelButtonText: this._('Cancel'),
-            }).then((result) => {
-                if (result.isConfirmed) {
+            ckan.apConfirm({
+                message: event.detail.question,
+                title: ckan.i18n._("Please Confirm"),
+                confirmText: ckan.i18n._("Yes"),
+                cancelText: ckan.i18n._("Cancel"),
+                onConfirm: function () {
                     // If the user confirms, we manually issue the request
                     // true to skip the built-in window.confirm()
                     event.detail.issueRequest(true);

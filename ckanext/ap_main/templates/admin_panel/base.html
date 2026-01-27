@@ -42,3 +42,18 @@
         </div>
     </div>
 {% endblock -%}
+
+{%- block scripts %}
+    {% asset 'admin_panel/admin_panel-js' %}
+    {% asset 'admin_panel/admin_panel-vendor-js' %}
+
+    {{ super() }}
+{% endblock -%}
+
+
+{%- block styles -%}
+    {% asset 'admin_panel/admin_panel-css' %}
+    {% asset 'admin_panel/admin_panel-vendor-css' %}
+
+    {{ super() }}
+{% endblock %}

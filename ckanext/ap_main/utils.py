@@ -2,11 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-
-import ckanext.ap_main.types as ap_types
-from ckanext.ap_main.interfaces import IAdminPanel
 
 
 collect_sections_signal = tk.signals.ckanext.signal(

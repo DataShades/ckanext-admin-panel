@@ -6,8 +6,7 @@ Compatibility with core CKAN versions:
 
 | CKAN version | Compatible? |
 |--------------|-------------|
-| 2.9          | no          |
-| 2.10         | yes         |
+| 2.10         | no          |
 | 2.11         | yes         |
 
 ## Installation
@@ -20,18 +19,20 @@ Compatibility with core CKAN versions:
 2. Enable the main plugin and extra plugins you want to use in your CKAN configuration file (e.g. `ckan.ini` or `production.ini`):
 
     ```ini
-    ckan.plugins = ... admin_panel admin_panel_log ...
+    ckan.plugins = ... admin_panel admin_panel_support ...
     ```
 
-3. Initialize all missing tables with: `ckan db pending-migrations --apply`
+3. Initialize all missing tables with: `ckan db upgrade`
 
 ## Developer installation
 
 To install `ckanext-admin-panel` for development, activate your CKAN virtualenv and do:
 
+```sh
     git clone https://github.com/DataShades/ckanext-admin-panel.git
     cd ckanext-admin-panel
     pip install -e .
+```
 
 ## Extra plugins
 

@@ -1,31 +1,17 @@
 from __future__ import annotations
 
 import logging
+from typing import cast
 
-from ckan import types
+from ckan import model, types
 from ckan.logic import validate
 from ckan.plugins import toolkit as tk
 
-import ckanext.ap_support.logic.schema as schema
 import ckanext.ap_support.model as support_model
-from ckanext.ap_support.types import DictizedTicket
+from ckanext.ap_support.logic import schema
+from ckanext.ap_support.types import DictizedMessage, DictizedTicket, TicketData
 
 log = logging.getLogger(__name__)
-
-
-@tk.side_effect_free
-@validate(schema.ticket_search)
-def ap_support_ticket_search(
-    context: types.Context, data_dict: types.DataDict
-) -> list[DictizedTicket]:
-    tk.check_access("ap_support_ticket_search", context, data_dict)
-
-    if data_dict.get("state"):
-        result = support_model.Ticket.get_list(states=[data_dict["state"]])
-    else:
-        result = support_model.Ticket.get_list()
-
-    return [ticket.dictize(context) for ticket in result]
 
 
 @validate(schema.ticket_create)
@@ -34,7 +20,7 @@ def ap_support_ticket_create(
 ) -> DictizedTicket:
     tk.check_access("ap_support_ticket_create", context, data_dict)
 
-    ticket = support_model.Ticket.add(data_dict)
+    ticket = support_model.Ticket.add(TicketData(**data_dict))
 
     log.info("[id:%s] the ticket has been submitted", ticket["id"])
 
@@ -48,39 +34,108 @@ def ap_support_ticket_show(
 ) -> DictizedTicket:
     tk.check_access("ap_support_ticket_show", context, data_dict)
 
-    return support_model.Ticket.get(data_dict["id"]).dictize(context)
+    return cast(
+        support_model.Ticket, support_model.Ticket.get(data_dict["id"])
+    ).dictize(context)
 
 
 @tk.side_effect_free
 @validate(schema.ticket_delete)
-def ap_support_ticket_delete(
-    context: types.Context, data_dict: types.DataDict
-) -> DictizedTicket:
+def ap_support_ticket_delete(context: types.Context, data_dict: types.DataDict) -> bool:
     tk.check_access("ap_support_ticket_delete", context, data_dict)
 
-    ticket = support_model.Ticket.get(data_dict["id"])
-
+    ticket = cast(support_model.Ticket, support_model.Ticket.get(data_dict["id"]))
     ticket.delete()
 
-    context["session"].commit()
+    model.Session.commit()
 
     return True
 
 
 @tk.side_effect_free
 @validate(schema.ticket_update)
-def ap_support_ticket_update(
-    context: types.Context, data_dict: types.DataDict
-) -> DictizedTicket:
+def ap_support_ticket_update(context: types.Context, data_dict: types.DataDict) -> DictizedTicket:
     tk.check_access("ap_support_ticket_delete", context, data_dict)
 
-    ticket = support_model.Ticket.get(data_dict["id"])
+    ticket = cast(support_model.Ticket, support_model.Ticket.get(data_dict["id"]))
 
     for key, value in data_dict.items():
         setattr(ticket, key, value)
 
-    context["session"].commit()
+    model.Session.commit()
 
     log.info("[id:%s] ticket been updated: %s", ticket.id, data_dict)
 
+    return ticket.dictize(context)
+
+
+@validate(schema.message_create)
+def ap_support_message_create(
+    context: types.Context, data_dict: types.DataDict
+) -> DictizedMessage:
+    tk.check_access("ap_support_ticket_create", context, data_dict)
+
+    ticket = cast(
+        support_model.Ticket, support_model.Ticket.get(data_dict["ticket_id"])
+    )
+
+    if ticket.status != support_model.Ticket.Status.opened:
+        raise tk.ValidationError(
+            {"ticket_id": ["Cannot add messages to closed tickets"]}
+        )
+
+    message = support_model.TicketMessage.add(
+        ticket_id=data_dict["ticket_id"],
+        author_id=data_dict["author_id"],
+        content=data_dict["content"],
+    )
+
+    # Update ticket updated_at
+    ticket.updated_at = support_model.datetime.utcnow()
+    model.Session.commit()
+
+    log.info(
+        "[ticket_id:%s] new message from %s",
+        data_dict["ticket_id"],
+        data_dict["author_id"],
+    )
+
+    return message.dictize(context)
+
+
+@validate(schema.message_delete)
+def ap_support_message_delete(
+    context: types.Context, data_dict: types.DataDict
+) -> bool:
+    tk.check_access("ap_support_message_delete", context, data_dict)
+
+    message = support_model.TicketMessage.get(data_dict["id"])
+
+    if not message:
+        raise tk.ObjectNotFound("Message not found")
+
+    message.delete()
+    model.Session.commit()
+
+    log.info("[message_id:%s] message deleted", data_dict["id"])
+
     return True
+
+
+@validate(schema.message_update)
+def ap_support_message_update(
+    context: types.Context, data_dict: types.DataDict
+) -> DictizedMessage:
+    tk.check_access("ap_support_message_update", context, data_dict)
+
+    message = support_model.TicketMessage.get(data_dict["id"])
+
+    if not message:
+        raise tk.ObjectNotFound("Message not found")
+
+    message.update(data_dict["content"])
+    model.Session.commit()
+
+    log.info("[message_id:%s] message updated", data_dict["id"])
+
+    return message.dictize(context)

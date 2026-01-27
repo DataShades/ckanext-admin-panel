@@ -3,6 +3,9 @@ admin_panel_support-js:
   output: ckanext-admin_panel/%(version)s-admin_panel_support.js
   contents:
     - js/ap-support-modal-htmx.js
+  extra:
+    preload:
+      - base/main
 
 admin_panel_support-css:
   filter: cssrewrite

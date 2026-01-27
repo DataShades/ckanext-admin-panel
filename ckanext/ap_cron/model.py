@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
 
 from sqlalchemy import Column, DateTime, Integer, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from typing_extensions import Self
 
-import ckan.model as model
+from ckan import model, types
 from ckan.model.types import make_uuid
 from ckan.plugins import toolkit as tk
 
@@ -38,7 +37,7 @@ class CronJob(tk.BaseModel):
     last_run = Column(DateTime, nullable=True)
     schedule = Column(Text)
     actions = Column(Text)
-    data: dict[str, Any] = Column(JSONB, nullable=False)  # type: ignore
+    data = Column(JSONB, nullable=False)  # type: ignore
     state = Column(Text, default=State.active)
     timeout = Column(Integer, default=cron_conf.get_job_timeout())
 
@@ -55,7 +54,7 @@ class CronJob(tk.BaseModel):
         return query.one_or_none()
 
     @classmethod
-    def get_list(cls, states: Optional[list[str]] = None) -> list[Self]:
+    def get_list(cls, states: list[str] | None = None) -> list[Self]:
         """Get a list of cron jobs.
 
         Args:
@@ -89,7 +88,7 @@ class CronJob(tk.BaseModel):
 
         return job
 
-    def dictize(self, context) -> DictizedCronJob:
+    def dictize(self, context: types.Context) -> DictizedCronJob:
         return DictizedCronJob(
             id=str(self.id),
             name=str(self.name),

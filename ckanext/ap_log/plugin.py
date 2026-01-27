@@ -3,8 +3,6 @@ from __future__ import annotations
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
-from ckanext.ap_log.formatters import get_formatters
-
 import ckanext.ap_main.types as ap_types
 from ckanext.ap_main.interfaces import IAdminPanel
 
@@ -23,14 +21,10 @@ class AdminPanelLogPlugin(p.SingletonPlugin):
 
     # IAdminPanel
 
-    def get_formatters(self) -> dict[str, ap_types.Formatter]:
-        return get_formatters()
-
     def register_toolbar_button(
         self, toolbar_buttons_list: list[ap_types.ToolbarButton]
     ) -> list[ap_types.ToolbarButton]:
         """Extension will receive the list of toolbar button objects."""
-
         for button in toolbar_buttons_list:
             if button.get("label") == "Reports":
                 button.setdefault("subitems", [])

@@ -10,6 +10,15 @@ class TicketData(TypedDict):
     category: str
 
 
+class DictizedMessage(TypedDict):
+    id: int
+    ticket_id: int
+    content: str
+    author: dict[str, Any]
+    created_at: str
+    updated_at: str
+
+
 class DictizedTicket(TypedDict):
     id: int
     subject: str
@@ -18,3 +27,4 @@ class DictizedTicket(TypedDict):
     author: dict[str, Any]
     created_at: str
     updated_at: str
+    messages: list[DictizedMessage]

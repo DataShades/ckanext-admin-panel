@@ -1,0 +1,23 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block ap_main_class %} ap-ticket-list {% endblock %}
+
+{% block breadcrumb_content %}
+    <li class="active">{% link_for _("My Support Requests"), request.endpoint %}</li>
+{% endblock breadcrumb_content %}
+
+{% block ap_content %}
+    <h1>{{ _("My Support Requests") }}</h1>
+    <p class="text-muted">{{ _("View and manage your support tickets") }}</p>
+    {% snippet "tables/render_table.html", table=table %}
+{% endblock ap_content %}
+
+{% block scripts %}
+    {{ super() }}
+    {% asset "tables/tables-js" %}
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    {% asset "tables/tables-css" %}
+{% endblock %}

@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 
+import ckanext.ap_main.types as ap_types
 from ckanext.ap_cron import helpers
 from ckanext.ap_cron.cli import get_commands
-from ckanext.ap_cron.formatters import get_formatters
-
-import ckanext.ap_main.types as ap_types
 from ckanext.ap_main.interfaces import IAdminPanel
-from ckanext.ap_main.types import Formatter
 
 
 @tk.blanket.blueprints
@@ -42,7 +40,6 @@ class AdminPanelCronPlugin(p.SingletonPlugin):
         self, toolbar_buttons_list: list[ap_types.ToolbarButton]
     ) -> list[ap_types.ToolbarButton]:
         """Extension will receive the list of toolbar button objects."""
-
         for button in toolbar_buttons_list:
             if button.get("label") != "Reports":
                 continue
@@ -57,9 +54,6 @@ class AdminPanelCronPlugin(p.SingletonPlugin):
             )
 
         return toolbar_buttons_list
-
-    def get_formatters(self) -> dict[str, Formatter]:
-        return get_formatters()
 
     # IClick
 

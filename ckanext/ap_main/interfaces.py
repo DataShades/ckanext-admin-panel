@@ -39,20 +39,6 @@ class IAdminPanel(Interface):
         """
         return toolbar_buttons_list
 
-    def get_formatters(self) -> dict[str, ap_types.Formatter]:
-        """Allows an extension to register its own tabulator formatters.
-
-        Example:
-            ```python
-            def get_formatters():
-                return {'col_counter': col_counter}
-            ```
-
-        Returns:
-            A mapping of formatter names to tabulator formatter functions
-        """
-        return {}
-
     def before_config_update(self, schema_id: str, data: dict[str, Any]) -> None:
         """Called before generic view configuration update.
 
@@ -69,7 +55,6 @@ class IAdminPanel(Interface):
                     data['my_field'] = 'my_value'
             ```
         """
-        pass
 
     def after_config_update(
         self, schema_id: str, data_before_update: dict[str, Any], data: dict[str, Any]
@@ -90,4 +75,3 @@ class IAdminPanel(Interface):
                     do_something()
             ```
         """
-        pass

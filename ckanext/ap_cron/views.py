@@ -1,26 +1,26 @@
 from __future__ import annotations
 
+import contextlib
 import json
 from functools import partial
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from flask import Blueprint, Response, jsonify, make_response
 from flask.views import MethodView
+from sqlalchemy import select
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-import ckanext.tables.shared as t
 from ckan import model, types
 
 import ckanext.ap_cron.utils as cron_utils
+import ckanext.tables.shared as t
+from ckanext.ap_cron import formatters as cf
 from ckanext.ap_cron import types as cron_types
 from ckanext.ap_cron.interfaces import IAPCron
 from ckanext.ap_cron.model import CronJob
-from ckanext.ap_cron import formatters as cf
 from ckanext.ap_main import formatters as f
-
 from ckanext.ap_main.utils import ap_before_request
-from ckanext.tables.shared import GenericTableView
 
 ap_cron = Blueprint("ap_cron", __name__, url_prefix="/admin-panel/cron")
 ap_cron.before_request(ap_before_request)
@@ -32,7 +32,7 @@ class CronTable(t.TableDefinition):
             name="cron",
             table_template="ap_cron/tables/table_base.html",
             data_source=t.DatabaseDataSource(
-                stmt=model.Session.query(
+                stmt=select(
                     CronJob.id.label("id"),
                     CronJob.name.label("name"),
                     CronJob.actions.label("cron_actions"),
@@ -66,20 +66,26 @@ class CronTable(t.TableDefinition):
                     action="edit",
                     label="Edit",
                     icon="fa fa-pencil",
-                    callback=lambda row: tk.redirect_to(
-                        "ap_cron.entity_proxy",
-                        view="edit",
-                        entity_id=row["id"],
+                    callback=lambda row: t.ActionHandlerResult(
+                        success=True,
+                        redirect=tk.url_for(
+                            "ap_cron.entity_proxy",
+                            view="edit",
+                            entity_id=row["id"],
+                        ),
                     ),
                 ),
                 t.RowActionDefinition(
                     action="view",
                     label="View",
                     icon="fa fa-eye",
-                    callback=lambda row: tk.redirect_to(
-                        "ap_cron.entity_proxy",
-                        view="read",
-                        entity_id=row["id"],
+                    callback=lambda row: t.ActionHandlerResult(
+                        success=True,
+                        redirect=tk.url_for(
+                            "ap_cron.entity_proxy",
+                            view="read",
+                            entity_id=row["id"],
+                        ),
                     ),
                 ),
             ],
@@ -100,11 +106,10 @@ class CronTable(t.TableDefinition):
                     callback=self._delete_job,
                 ),
             ],
-            searchable_columns=[t.SearchableColumn(field="name")],
         )
 
     def _change_job_state(
-        self, rows: list[t.Row], is_active: Optional[bool] = True
+        self, rows: list[t.Row], is_active: bool | None = True
     ) -> t.ActionHandlerResult:
         errors = []
         for row in rows:
@@ -186,21 +191,16 @@ class CronAddView(MethodView):
 
 class CronDeleteJobView(MethodView):
     def post(self, job_id: str) -> str:
-        try:
+        with contextlib.suppress(tk.ValidationError):
             tk.get_action("ap_cron_remove_cron_job")(
                 {},
                 cast(types.DataDict, {"id": job_id}),
             )
-        except tk.ValidationError:
-            pass
 
         return ""
 
 
 class CronRunJobView(MethodView):
-    """Initially I wanted to make it with HTMX. Having a get endpoint for such
-    an action is a bit wrong."""
-
     def get(self, job_id: str) -> Response:
         try:
             result = tk.get_action("ap_cron_run_cron_job")(
@@ -249,8 +249,10 @@ class CronEditJobView(MethodView):
 
 
 class CronRunActiveView(MethodView):
-    """Schedule all the cron jobs that are not pending or running. The current
-    cron job schedule will be ignored."""
+    """Schedule all the cron jobs that are not pending or running.
+
+    The current cron job schedule will be ignored.
+    """
 
     def post(self) -> Response:
         jobs_list = CronJob.get_list(
@@ -273,8 +275,11 @@ class CronRunActiveView(MethodView):
 
 
 def action_autocomplete() -> Response:
-    """This is an autocomplete for a cron job actions. Cron job could work
-    only with CKAN actions to prevent any non-wanted behaviour."""
+    """Job actions autocomplete.
+
+    Cron job could work only with CKAN actions to
+    prevent any non-wanted behaviour.
+    """
     q = tk.request.args.get("incomplete", "")
     limit = tk.request.args.get("limit", 10)
 
@@ -293,11 +298,8 @@ def action_autocomplete() -> Response:
 
 ap_cron.add_url_rule(
     "/",
-    view_func=GenericTableView.as_view(
-        "manage",
-        table=CronTable,
-        breadcrumb_label="Cron jobs",
-        page_title="Cron jobs"
+    view_func=t.GenericTableView.as_view(
+        "manage", table=CronTable, breadcrumb_label="Cron jobs", page_title="Cron jobs"
     ),
 )
 ap_cron.add_url_rule("/add", view_func=CronAddView.as_view("add"))

@@ -7,7 +7,7 @@ import ckan.plugins.toolkit as tk
 from ckan.logic import parse_params
 
 from ckanext.ap_main.utils import ap_before_request
-from ckanext.ap_support.collection import SupportTable
+from ckanext.ap_support.table import SupportTable, UserTicketTable
 from ckanext.tables.shared import GenericTableView
 
 ap_support = Blueprint(
@@ -17,9 +17,6 @@ ap_support = Blueprint(
 )
 
 ap_support.before_request(ap_before_request)
-
-
-
 
 
 def init_modal():
@@ -57,6 +54,80 @@ class AddTicketView(MethodView):
         )
 
 
+class AddMessageView(MethodView):
+    def post(self, ticket_id: str):
+        data_dict = parse_params(tk.request.form)
+
+        try:
+            message = tk.get_action("ap_support_message_create")({"user": tk.g.user}, {
+                "ticket_id": ticket_id,
+                "author_id": tk.current_user.id,
+                "content": data_dict.get("content", ""),
+            })
+        except (tk.ObjectNotFound, tk.ValidationError) as e:
+            return tk.render(
+                "ap_support/ticket_modal_response.html",
+                extra_vars={
+                    "title": tk._("Error adding message"),
+                    "message": str(e),
+                },
+            )
+
+        return tk.render(
+            "ap_support/message_item.html", extra_vars={"message": message}
+        )
+
+
+class DeleteMessageView(MethodView):
+    def post(self, message_id: str) -> Response:
+        try:
+            tk.get_action("ap_support_message_delete")(
+                {"user": tk.g.user},
+                {"id": message_id},
+            )
+        except (tk.ObjectNotFound, tk.ValidationError, tk.NotAuthorized) as e:
+            tk.h.flash_error(str(e))
+            return Response("", status=400)
+
+        # Return empty response for HTMX to remove the element
+        return Response("", status=200)
+
+
+class UpdateMessageView(MethodView):
+    def post(self, message_id: str):
+        data_dict = parse_params(tk.request.form)
+        data_dict["id"] = message_id
+
+        try:
+            tk.get_action("ap_support_message_update")(
+                {"user": tk.g.user},
+                data_dict,
+            )
+        except (tk.ObjectNotFound, tk.ValidationError, tk.NotAuthorized) as e:
+            return tk.render(
+                "ap_support/ticket_modal_response.html",
+                extra_vars={
+                    "title": tk._("Error updating message"),
+                    "message": str(e),
+                },
+            )
+
+        message = tk.get_action("ap_support_ticket_show")(
+            {"ignore_auth": True},
+            {"id": data_dict.get("ticket_id")},
+        )
+
+        for msg in message.get("messages", []):
+            if msg["id"] != int(message_id):
+                continue
+
+            return tk.render(
+                "ap_support/message_item.html", extra_vars={"message": msg}
+            )
+
+        return ""
+
+
 class TicketReadView(MethodView):
     def get(self, ticket_id: str) -> str:
         try:
@@ -82,12 +153,31 @@ class TicketDeleteView(MethodView):
         return tk.redirect_to("ap_support.list")
 
 
-ap_support.add_url_rule("/", view_func=GenericTableView.as_view("list", table=SupportTable))
+ap_support.add_url_rule(
+    "/", view_func=GenericTableView.as_view("list", table=SupportTable)
+)
+ap_support.add_url_rule(
+    "/my-tickets",
+    view_func=GenericTableView.as_view("my_tickets", table=UserTicketTable),
+)
 ap_support.add_url_rule(
     "/ticket/<ticket_id>", view_func=TicketReadView.as_view("ticket_read")
 )
 ap_support.add_url_rule(
     "/ticket/<ticket_id>/delete", view_func=TicketDeleteView.as_view("ticket_delete")
+)
+ap_support.add_url_rule(
+    "/ticket/<ticket_id>/message", view_func=AddMessageView.as_view("add_message")
+)
+ap_support.add_url_rule(
+    "/message/<message_id>/delete",
+    view_func=DeleteMessageView.as_view("delete_message"),
+    methods=("POST",),
+)
+ap_support.add_url_rule(
+    "/message/<message_id>/update",
+    view_func=UpdateMessageView.as_view("update_message"),
+    methods=("POST",),
 )
 
 # HTMX

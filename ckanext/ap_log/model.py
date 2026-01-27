@@ -9,6 +9,7 @@ from sqlalchemy import Column, DateTime, Integer, Text, inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Query, Session
 
+from ckan import types
 from ckan.model.types import make_uuid
 from ckan.plugins import toolkit as tk
 
@@ -47,7 +48,7 @@ class ApLogs(tk.BaseModel):  # type: ignore
         )
         cls.get_session().commit()
 
-    def dictize(self, context):
+    def dictize(self, context: types.Context) -> dict[str, Any]:
         return {
             "name": self.name,
             "path": self.path,

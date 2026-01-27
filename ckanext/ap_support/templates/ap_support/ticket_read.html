@@ -10,12 +10,56 @@
 {% endblock breadcrumb_content %}
 
 {% block ap_content %}
-    <p><b>Subject</b>: {{ ticket.subject }}</p>
-    <p><b>Author</b>: {{ h.linked_user(ticket.author.name, maxlength=30) }}</p>
+    <p><b>{{ _("Subject") }}</b>: {{ ticket.subject }}</p>
+    <p><b>{{ _("Author") }}</b>: {{ h.linked_user(ticket.author.name, maxlength=30) }}</p>
+    <p>
+        <b>{{ _("Status") }}</b>:
+        {% if ticket.status == 'opened' %}
+            <span class="label label-success">{{ _('Opened') }}</span>
+        {% else %}
+            <span class="label label-default">{{ _('Closed') }}</span>
+        {% endif %}
+    </p>
 
-    <p><b>Text</b></p>
+    <p><b>{{ _("Text") }}</b></p>
     <div class="ck-content">
         {{ h.wysiwyg_sanitize_html(ticket.text) | safe }}
     </div>
+
+    <hr>
+
+    <h3>{{ _("Messages") }}</h3>
+    <div id="messages-container">
+        {% for message in ticket.messages %}
+            {% snippet "ap_support/message_item.html", message=message %}
+        {% endfor %}
+    </div>
+
+    <hr>
+
+    <h4>{{ _("Reply") }}</h4>
+    {% if ticket.status == 'opened' %}
+        <form hx-post="{{ h.url_for('ap_support.add_message', ticket_id=ticket.id) }}"
+              hx-target="#messages-container"
+              hx-swap="beforeend"
+              hx-on::after-request="if(event.detail.successful) this.reset()">
+
+            <div class="form-group">
+                <label for="content" class="control-label">{{ _("Message") }}</label>
+                <div class="controls">
+                     <textarea id="content" name="content" class="form-control" rows="5" required></textarea>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+                {{ _('Send Message') }}
+            </button>
+        </form>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fa fa-info-circle"></i>
+            {{ _("This ticket is closed. You cannot add new messages to closed tickets.") }}
+        </div>
+    {% endif %}
 
 {% endblock ap_content %}

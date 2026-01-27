@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from cron_descriptor import get_description
 
 import ckan.plugins.toolkit as tk
@@ -15,7 +13,7 @@ helper, get_helpers = Collector("ap_cron").split()
 
 @helper
 def get_actions_list_options() -> list[dict[str, str]]:
-    from ckan.logic import _actions
+    from ckan.logic import _actions  # noqa: PLC0415
 
     return [{"value": action, "text": action} for action in sorted(_actions)]
 

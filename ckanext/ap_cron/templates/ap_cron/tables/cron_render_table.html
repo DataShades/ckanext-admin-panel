@@ -1,0 +1,6 @@
+{% extends "tables/render_table.html" %}
+
+{% block table_container %}
+    {% snippet "ap_cron/cron_table_actions.html" %}
+    {{ super() }}
+{% endblock %}

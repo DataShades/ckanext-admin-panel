@@ -1,30 +1,18 @@
 from __future__ import annotations
 
-from typing import Any, Dict
-
+from ckan import types
 from ckan.logic.schema import validator_args
 
 from ckanext.ap_support.model import Ticket
 
-Schema = Dict[str, Any]
-STATUSES = [
-    Ticket.Status.opened,
-    Ticket.Status.closed,
-]
-
-
-@validator_args
-def ticket_search(ignore_missing, unicode_safe, one_of) -> Schema:
-    return {"status": [ignore_missing, unicode_safe, one_of(STATUSES)]}
-
 
 @validator_args
 def ticket_create(
-    not_missing,
-    unicode_safe,
-    user_id_or_name_exists,
-    ap_support_category_validator,
-) -> Schema:
+    not_missing: types.Validator,
+    unicode_safe: types.Validator,
+    user_id_or_name_exists: types.Validator,
+    ap_support_category_validator: types.Validator,
+) -> types.Schema:
     return {
         "subject": [not_missing, unicode_safe],
         "category": [not_missing, unicode_safe, ap_support_category_validator],
@@ -34,23 +22,82 @@ def ticket_create(
 
 
 @validator_args
-def ticket_show(ignore_missing, unicode_safe, ticket_id_exists) -> Schema:
+def ticket_show(
+    ignore_missing: types.Validator,
+    unicode_safe: types.Validator,
+    ticket_id_exists: types.Validator,
+) -> types.Schema:
     return {"id": [ignore_missing, unicode_safe, ticket_id_exists]}
 
 
 @validator_args
-def ticket_delete(ignore_missing, unicode_safe, ticket_id_exists) -> Schema:
+def ticket_delete(
+    ignore_missing: types.Validator,
+    unicode_safe: types.Validator,
+    ticket_id_exists: types.Validator,
+) -> types.Schema:
     return {"id": [ignore_missing, unicode_safe, ticket_id_exists]}
 
 
 @validator_args
-def ticket_update(
-    not_missing, ignore_missing, unicode_safe, ignore, one_of, ticket_id_exists
-) -> Schema:
+def ticket_update(  # noqa: PLR0913
+    not_missing: types.Validator,
+    ignore_missing: types.Validator,
+    unicode_safe: types.Validator,
+    ignore: types.Validator,
+    one_of: types.ValidatorFactory,
+    ticket_id_exists: types.Validator,
+) -> types.Schema:
     return {
         "id": [not_missing, unicode_safe, ticket_id_exists],
-        "status": [ignore_missing, unicode_safe, one_of(STATUSES)],
+        "status": [
+            ignore_missing,
+            unicode_safe,
+            one_of(
+                [
+                    Ticket.Status.opened,
+                    Ticket.Status.closed,
+                ]
+            ),
+        ],
         "text": [ignore_missing, unicode_safe],
         "__extras": [ignore],
         "__junk": [ignore],
+    }
+
+
+@validator_args
+def message_create(
+    not_missing: types.Validator,
+    unicode_safe: types.Validator,
+    user_id_or_name_exists: types.Validator,
+    ticket_id_exists: types.Validator,
+) -> types.Schema:
+    return {
+        "ticket_id": [not_missing, unicode_safe, ticket_id_exists],
+        "author_id": [not_missing, unicode_safe, user_id_or_name_exists],
+        "content": [not_missing, unicode_safe],
+    }
+
+
+@validator_args
+def message_delete(
+    not_missing: types.Validator,
+    unicode_safe: types.Validator,
+    message_id_exists: types.Validator,
+) -> types.Schema:
+    return {
+        "id": [not_missing, unicode_safe, message_id_exists],
+    }
+
+
+@validator_args
+def message_update(
+    not_missing: types.Validator,
+    unicode_safe: types.Validator,
+    message_id_exists: types.Validator,
+) -> types.Schema:
+    return {
+        "id": [not_missing, unicode_safe, message_id_exists],
+        "content": [not_missing, unicode_safe],
     }

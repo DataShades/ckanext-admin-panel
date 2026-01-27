@@ -11,5 +11,6 @@ class IAPCron(Interface):
         """Exclude action from being used by cron job.
 
         By default, all the CKAN actions could be used by cron job. This method
-        provides a possibiltiy to make an actions non-usable."""
+        provides a possibiltiy to make an actions non-usable.
+        """
         return action_list

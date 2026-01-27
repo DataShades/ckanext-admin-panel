@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import logging
 from typing import Any
 
@@ -8,12 +9,11 @@ from flask.views import MethodView
 
 import ckan.plugins.toolkit as tk
 
-from ckanext.editable_config.shared import value_as_string
-
 import ckanext.tables.shared as t
+from ckanext.ap_main import formatters as f
 from ckanext.ap_main.utils import ap_before_request, get_config_schema
 from ckanext.ap_main.views.generics import ApConfigurationPageView
-from ckanext.ap_main import formatters as f
+from ckanext.editable_config.shared import value_as_string
 from ckanext.tables.shared import GenericTableView
 
 log = logging.getLogger(__name__)
@@ -25,8 +25,7 @@ class DoiTable(t.TableDefinition):
     def __init__(self):
         super().__init__(
             name="doi",
-            ajax_url=tk.url_for("doi_dashboard.list", data=True),
-            placeholder=tk._("No DOIs found"),
+            data_source=t.ListDataSource(data=self.get_table_data()),
             columns=[
                 t.ColumnDefinition(field="title", min_width=300),
                 t.ColumnDefinition(field="doi_status", min_width=100),
@@ -44,7 +43,6 @@ class DoiTable(t.TableDefinition):
                 t.ColumnDefinition(
                     field="actions",
                     formatters=[(f.ActionsFormatter, {})],
-                    searchable=False,
                     tabulator_formatter="html",
                     sortable=False,
                     resizable=False,
@@ -52,20 +50,28 @@ class DoiTable(t.TableDefinition):
             ],
             row_actions=[
                 t.RowActionDefinition(
+                    label="Update DOI",
                     action="update",
                     icon="fa fa-refresh",
-                    url=lambda row: tk.url_for(
-                        "doi_dashboard.create_or_update_doi", package_id=row["id"]
+                    callback=lambda row: t.ActionHandlerResult(
+                        success=True,
+                        redirect=tk.url_for(
+                            "doi_dashboard.create_or_update_doi", package_id=row["id"]
+                        ),
                     ),
                 ),
                 t.RowActionDefinition(
+                    label="View package",
                     action="view",
                     icon="fa fa-eye",
-                    url=lambda row: tk.url_for(
-                        "ap_content.entity_proxy",
-                        view="read",
-                        entity_type=row["type"],
-                        entity_id=row["name"],
+                    callback=lambda row: t.ActionHandlerResult(
+                        success=True,
+                        redirect=tk.url_for(
+                            "ap_content.entity_proxy",
+                            view="read",
+                            entity_type=row["type"],
+                            entity_id=row["name"],
+                        ),
                     ),
                 ),
             ],
@@ -78,14 +84,16 @@ class DoiTable(t.TableDefinition):
             ],
         )
 
-    def get_raw_data(self) -> list[dict[str, Any]]:
+    def get_table_data(self) -> list[dict[str, Any]]:
         return tk.get_action("ap_doi_get_packages_doi")({"ignore_auth": True}, {})
 
     def _create_or_update_doi(self, rows: list[t.Row]) -> t.ActionHandlerResult:
         errors = []
         for row in rows:
             try:
-                result = tk.get_action("ap_doi_update_doi")({}, {"package_id": row["id"]})
+                result = tk.get_action("ap_doi_update_doi")(
+                    {}, {"package_id": row["id"]}
+                )
                 if result["status"] == "error":
                     for err in result["errors"]:
                         errors.append(err)
@@ -95,7 +103,9 @@ class DoiTable(t.TableDefinition):
         if errors:
             return t.ActionHandlerResult(success=False, error="\n".join(errors))
 
-        return t.ActionHandlerResult(success=True, message="DOI updated for selected packages")
+        return t.ActionHandlerResult(
+            success=True, message="DOI updated for selected packages"
+        )
 
 
 class ApConfigurationDisplayPageView(MethodView):
@@ -109,8 +119,7 @@ class ApConfigurationDisplayPageView(MethodView):
         )
 
     def get_config_form_data(self) -> dict[str, Any]:
-        """Fetch/humanize configuration values from a CKANConfig"""
-
+        """Fetch/humanize configuration values from a CKANConfig."""
         data = {}
 
         if not self.schema:
@@ -128,15 +137,13 @@ class ApConfigurationDisplayPageView(MethodView):
 
 
 def create_or_update_doi(package_id: str):
-    try:
+    with contextlib.suppress(Exception):
         result = tk.get_action("ap_doi_update_doi")({}, {"package_id": package_id})
         if result["status"] == "error":
             for err in result["errors"]:
                 tk.h.flash_error(err)
         else:
             tk.h.flash_success(result["message"])
-    except Exception:
-        pass
 
     return tk.h.redirect_to("doi_dashboard.list")
 

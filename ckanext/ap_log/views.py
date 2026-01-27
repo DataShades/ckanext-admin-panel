@@ -1,24 +1,20 @@
 from __future__ import annotations
 
-import logging
-from typing import Any
-
 from flask import Blueprint
 from flask.views import MethodView
+from sqlalchemy import select
 
 import ckan.plugins.toolkit as tk
-import ckanext.tables.shared as t
-from ckan import model
 
-from ckanext.ap_log.model import ApLogs
+import ckanext.tables.shared as t
 from ckanext.ap_log import formatters as lf
+from ckanext.ap_log.model import ApLogs
 from ckanext.ap_main import formatters as f
+from ckanext.ap_main.utils import ap_before_request
 from ckanext.tables.shared import GenericTableView
 
 ap_log = Blueprint("ap_log", __name__, url_prefix="/admin-panel")
-ap_before_request_func = tk.get_action("ap_before_request_action") if tk.asbool(tk.config.get("ckan.admin_panel.register_action", False)) else None
-# Wait, ap_before_request was imported from util.
-from ckanext.ap_main.utils import ap_before_request
+
 ap_log.before_request(ap_before_request)
 
 
@@ -26,9 +22,16 @@ class LogsTable(t.TableDefinition):
     def __init__(self):
         super().__init__(
             name="logs",
-            ajax_url=tk.url_for("ap_log.list", data=True),
-            placeholder="No logs found",
-            # table_action_snippet="ap_log/table_actions.html", # ckanext-tables doesn't support this directly in __init__ usually, handled in template
+            table_template="admin_panel/tables/table_base.html",
+            data_source=t.DatabaseDataSource(
+                stmt=select(
+                    ApLogs.name.label("name"),
+                    ApLogs.path.label("path"),
+                    ApLogs.level.label("level"),
+                    ApLogs.timestamp.label("timestamp"),
+                    ApLogs.message.label("message"),
+                ).order_by(ApLogs.timestamp.desc()),
+            ),
             columns=[
                 t.ColumnDefinition(field="name", min_width=150),
                 t.ColumnDefinition(
@@ -47,41 +50,16 @@ class LogsTable(t.TableDefinition):
                 ),
                 t.ColumnDefinition(field="message", min_width=300),
             ],
-            bulk_actions=[
-                 t.BulkActionDefinition(
+            table_actions=[
+                t.TableActionDefinition(
                     action="clear",
                     label="Clear logs",
                     callback=self._clear_logs,
                 ),
-            ]
+            ],
         )
 
-    def get_raw_data(self) -> list[dict[str, Any]]:
-        if not ApLogs.table_initialized():
-            return []
-
-        query = model.Session.query(
-            ApLogs.name.label("name"),
-            ApLogs.path.label("path"),
-            ApLogs.level.label("level"),
-            ApLogs.timestamp.label("timestamp"),
-            ApLogs.message.label("message"),
-        ).order_by(ApLogs.timestamp.desc())
-
-        columns = ["name", "path", "level", "timestamp", "message"]
-
-        return [dict(zip(columns, row)) for row in query.all()]
-
-    def _clear_logs(self, rows: list[t.Row]) -> t.ActionHandlerResult:
-        # This clears all logs regardless of selection, preserving legacy behavior?
-        # Or should it only delete selected rows?
-        # ApLogs uses a table defined in model.py. ApLogs.clear_logs() truncates it.
-        # If I want to delete specific rows, I need IDs. But get_raw_data doesn't select IDs?
-        # The query does not select IDs!
-        # Legacy code didn't use IDs either?
-        # Legacy code: _clear_logs(row: Row). ApLogs.clear_logs().
-        # So yes, it clears everything.
-
+    def _clear_logs(self) -> t.ActionHandlerResult:
         ApLogs.clear_logs()
         return t.ActionHandlerResult(success=True, message="All logs have been cleared")
 
@@ -100,10 +78,7 @@ class LogsClearView(MethodView):
 ap_log.add_url_rule(
     "/reports/logs",
     view_func=GenericTableView.as_view(
-        "list",
-        table=LogsTable,
-        breadcrumb_label="Logs",
-        page_title="System Logs"
+        "list", table=LogsTable, breadcrumb_label="Logs"
     ),
 )
 

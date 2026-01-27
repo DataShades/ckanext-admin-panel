@@ -1,18 +1,14 @@
 from __future__ import annotations
 
-import json
 import logging
-from abc import abstractmethod
 from typing import Any
 
-from flask import Response, jsonify
 from flask.views import MethodView
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 from ckan.logic import parse_params
 
-import ckanext.ap_main.types as types
 from ckanext.ap_main.interfaces import IAdminPanel
 from ckanext.ap_main.utils import get_config_schema
 
@@ -86,7 +82,9 @@ class ApConfigurationPageView(MethodView):
             if field["field_name"] not in tk.config:
                 continue
 
-            data[field["field_name"]] = value_as_string(field["field_name"], tk.config[field["field_name"]])
+            data[field["field_name"]] = value_as_string(
+                field["field_name"], tk.config[field["field_name"]]
+            )
 
         return data
 
@@ -142,7 +140,9 @@ class ApConfigurationPageView(MethodView):
             tk.h.flash_error(tk._(f"No default value found for option {e.message}"))
             return tk.render(
                 self.render_template,
-                self.prepare_extra_vars(self.schema, self.data, {"test": "No default value"}),
+                self.prepare_extra_vars(
+                    self.schema, self.data, {"test": "No default value"}
+                ),
             )
         except tk.ValidationError as e:
             return tk.render(

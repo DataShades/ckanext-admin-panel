@@ -126,7 +126,10 @@ class TrimStringFormatter(formatters.BaseFormatter):
         max_length: int = options.get("max_length", 79)
         trimmed_value: str = str(value)[:max_length]
 
-        if tk.asbool(options.get("add_ellipsis", True)) and len(str(value)) > max_length:
+        if (
+            tk.asbool(options.get("add_ellipsis", True))
+            and len(str(value)) > max_length
+        ):
             trimmed_value += "..."
 
         return trimmed_value

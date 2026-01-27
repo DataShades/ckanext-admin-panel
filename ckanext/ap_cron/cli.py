@@ -9,13 +9,12 @@ from ckanext.ap_cron.model import CronJob
 
 @click.group()
 def ap_cron():
-    """Admin Panel Cron manage CLI commands"""
-    pass
+    """Admin Panel Cron manage CLI commands."""
 
 
 @ap_cron.command()
 def trigger_jobs():
-    """Enqueue the cron jobs that need to be run"""
+    """Enqueue the cron jobs that need to be run."""
     jobs_list = CronJob.get_list(
         states=[
             CronJob.State.failed,
@@ -37,8 +36,14 @@ def trigger_jobs():
 
 
 def _job_should_be_started(job: CronJob) -> bool:
-    """Check if it's time to run a job according to its schedule. If the `last_run`
-    is None, it means that we never started this job and it's should be started."""
+    """Check if it's time to run a job according to its schedule.
+
+    If the `last_run` is None, it means that we never started
+    this job and it's should be started.
+
+    Args:
+        job: The cron job to check
+    """
     if not job.last_run:
         return True
 

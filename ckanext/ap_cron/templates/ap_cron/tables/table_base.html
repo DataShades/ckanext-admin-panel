@@ -1,5 +1,15 @@
 {% extends "admin_panel/tables/table_base.html" %}
 
+{% block ap_content %}
+    <div class="pt-2">
+        {% if page_title %}
+            <h1>{{ _(page_title) if page_title else "" }}</h1>
+        {% endif %}
+
+        {% snippet "ap_cron/tables/cron_render_table.html", table=table %}
+    </div>
+{% endblock ap_content %}
+
 {% block scripts %}
     {% asset 'ap_cron/admin_panel_cron-js' %}
     {{ super() }}

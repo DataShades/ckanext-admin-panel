@@ -8,13 +8,10 @@ admin_panel-js:
     - js/ap-nested-dropdown.js
     - js/ap-toggle-state.js
     - js/ap-confirm-action.js
-    - js/ap-bulk-check.js
     - js/ap-tooltip.js
     - js/ap-notify.js
-    - js/ap-disable-field.js
     - js/ap-copy-to-clipboard.js
     - js/ap-tom-select.js
-    - js/ap-tabulator.js
     - js/ap-jsonlint.js
 
   extra:
@@ -22,28 +19,28 @@ admin_panel-js:
       - base/main
       - base/ckan
 
+admin_panel-global-js:
+  filter: rjsmin
+  output: ckanext-admin_panel/%(version)s-admin_panel-global.js
+  contents:
+    - js/global-toast.js
+    - js/global-confirm.js
+
 admin_panel-css:
   filter: cssrewrite
   output: ckanext-admin_panel/%(version)s-admin_panel.css
   contents:
     - css/admin_panel.css
-    - css/ap-tabulator.css
 
 admin_panel-vendor-js:
   filter: rjsmin
   output: ckanext-admin_panel/%(version)s-admin_panel-vendor-js.js
   contents:
-    - js/vendor/sweetalert2.min.js
-    - js/vendor/htmx.min.js
-    - js/vendor/_hyperscript.min.js
     - js/vendor/jsonlint.min.js
     - js/vendor/tomselect.min.js
-    - js/vendor/tabulator.min.js
 
 admin_panel-vendor-css:
   filter: cssrewrite
   output: ckanext-admin_panel/%(version)s-admin_panel-vendor-css.css
   contents:
     - css/vendor/tomselect.min.css
-    - css/vendor/tabulator.min.css
-    - css/vendor/tabulator-theme.min.css

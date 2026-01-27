@@ -66,7 +66,10 @@ class ContentTable(t.TableDefinition):
                 t.ColumnDefinition(field="title"),
                 t.ColumnDefinition(field="type", width=100),
                 t.ColumnDefinition(
-                    field="author", formatters=[(f.UserLinkFormatter, {})], tabulator_formatter="html", width=150
+                    field="author",
+                    formatters=[(f.UserLinkFormatter, {})],
+                    tabulator_formatter="html",
+                    width=150,
                 ),
                 t.ColumnDefinition(field="state", resizable=False, width=100),
                 t.ColumnDefinition(
@@ -133,7 +136,9 @@ class ContentTable(t.TableDefinition):
             ],
         )
 
-    def _change_entities_state(self, rows: list[t.Row], is_active: bool = False) -> t.ActionHandlerResult:
+    def _change_entities_state(
+        self, rows: list[t.Row], is_active: bool = False
+    ) -> t.ActionHandlerResult:
         errors = []
         actions = {
             "dataset": "package_patch",
@@ -153,7 +158,9 @@ class ContentTable(t.TableDefinition):
                     {"ignore_auth": True},
                     {
                         "id": row["id"],
-                        "state": model.State.ACTIVE if is_active else model.State.DELETED,
+                        "state": model.State.ACTIVE
+                        if is_active
+                        else model.State.DELETED,
                     },
                 )
             except tk.ObjectNotFound:
@@ -201,7 +208,9 @@ class ContentProxyView(MethodView):
 
 ap_content.add_url_rule(
     "/content",
-    view_func=GenericTableView.as_view("list", table=ContentTable, breadcrumb_label="Content"),
+    view_func=GenericTableView.as_view(
+        "list", table=ContentTable, breadcrumb_label="Content"
+    ),
 )
 ap_content.add_url_rule(
     "/content/<view>/<entity_type>/<entity_id>",

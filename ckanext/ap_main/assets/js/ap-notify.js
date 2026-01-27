@@ -26,20 +26,19 @@ ckan.module("ap-notify", function ($) {
                 msgType = "error";
             }
 
-            const icon = msgType === "error" ? "error" : "success";
+            const icon = msgType === "error"
+                ? '<i class="me-2 fa fa-times-circle"></i>'
+                : '<i class="me-2 fa fa-check-circle"></i>';
 
-            Swal.fire({
+            ckan.apToast({
+                type: msgType === "error" ? "danger" : "success",
+                title: msgType === "error" ? ckan.i18n._("Error") : ckan.i18n._("Success"),
+                message: msg,
                 icon: icon,
-                text: msg,
-                toast: true,
-                position: 'bottom-end',
-                showConfirmButton: false,
-                timer: 5000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
+                delay: 5000,
+                position: "bottom-right",
+                showProgress: true,
+                stacking: true
             });
         }
     };

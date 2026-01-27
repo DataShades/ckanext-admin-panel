@@ -3,38 +3,18 @@ from __future__ import annotations
 import json
 from typing import Any
 
-import ckan.lib.munge as munge
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-
-from ckanext.toolbelt.decorators import Collector
-from ckanext.toolbelt.utils.cache import Cache
+from ckan.lib import munge
 
 import ckanext.ap_main.config as ap_config
 import ckanext.ap_main.utils as ap_utils
 from ckanext.ap_main.interfaces import IAdminPanel
-from ckanext.ap_main.types import SectionConfig, ToolbarButton, Formatter
+from ckanext.ap_main.types import SectionConfig, ToolbarButton
+from ckanext.toolbelt.decorators import Collector
+from ckanext.toolbelt.utils.cache import Cache
 
 helper, get_helpers = Collector("ap").split()
-_formatter_cache: dict[str, Formatter] = {}
-
-
-@helper
-def get_all_formatters() -> dict[str, Formatter]:
-    """Get all registered tabulator formatters.
-
-    A formatter is a function that takes a column value and can modify its appearance
-    in a table.
-
-    Returns:
-        A mapping of formatter names to formatter functions
-    """
-    if not _formatter_cache:
-        for plugin in reversed(list(p.PluginImplementations(IAdminPanel))):
-            for name, fn in plugin.get_formatters().items():
-                _formatter_cache[name] = fn
-
-    return _formatter_cache
 
 
 @helper
@@ -206,39 +186,7 @@ def generate_page_unique_class() -> str:
     Returns:
         A unique css class for the current page
     """
-
-    return tk.h.ap_munge_string((f"ap-{tk.request.endpoint}"))
-
-
-@helper
-def calculate_priority(value: int, threshold: int) -> str:
-    """Calculate the priority of a value based on a threshold.
-
-    Args:
-        value: The value to calculate the priority for
-        threshold: The threshold to compare the value to
-
-    Returns:
-        The priority of the value
-
-    Example:
-        ```python
-        from ckanext.ap_main.helpers import calculate_priority
-
-        priority = calculate_priority(10, 100)
-        print(priority) # low
-        ```
-    """
-    percentage = value / threshold * 100
-
-    if percentage < 25:
-        return "low"
-    elif percentage < 50:
-        return "medium"
-    elif percentage < 75:
-        return "high"
-    else:
-        return "urgent"
+    return tk.h.ap_munge_string(f"ap-{tk.request.endpoint}")
 
 
 @helper

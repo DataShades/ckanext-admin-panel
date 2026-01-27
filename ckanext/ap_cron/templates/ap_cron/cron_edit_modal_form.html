@@ -22,12 +22,12 @@
 <div class="quick-schedule mb-4">
     <label class="mb-2">{{ _("Quick Schedule") }}</label>
     <div class="d-flex flex-wrap gap-2">
-        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@reboot\'' }}">{{ _("Startup") }}</a>
-        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@hourly\'' }}">{{ _("Hourly") }}</a>
-        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@daily\'' }}">{{ _("Daily") }}</a>
-        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@weekly\'' }}">{{ _("Weekly") }}</a>
-        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@monthly\'' }}">{{ _("Monthly") }}</a>
-        <a class="btn btn-primary" _="{{ 'on click set #' ~ field_schedule_id ~ '.value to \'@yearly\'' }}">{{ _("Yearly") }}</a>
+        <a class="btn btn-primary" onclick="document.getElementById('{{ field_schedule_id }}').value = '@reboot'; return false;">{{ _("Startup") }}</a>
+        <a class="btn btn-primary" onclick="document.getElementById('{{ field_schedule_id }}').value = '@hourly'; return false;">{{ _("Hourly") }}</a>
+        <a class="btn btn-primary" onclick="document.getElementById('{{ field_schedule_id }}').value = '@daily'; return false;">{{ _("Daily") }}</a>
+        <a class="btn btn-primary" onclick="document.getElementById('{{ field_schedule_id }}').value = '@weekly'; return false;">{{ _("Weekly") }}</a>
+        <a class="btn btn-primary" onclick="document.getElementById('{{ field_schedule_id }}').value = '@monthly'; return false;">{{ _("Monthly") }}</a>
+        <a class="btn btn-primary" onclick="document.getElementById('{{ field_schedule_id }}').value = '@yearly'; return false;">{{ _("Yearly") }}</a>
     </div>
 </div>
 
@@ -61,10 +61,35 @@
     </div>
 
     {% if scope == "create" %}
-        <div class="col-md-2"><a class="btn btn-primary" _="{{ 'on click call ckan.setCreateSchedule(#' ~ field_schedule_id ~ ')' }}">{{ _("Set") }}</a></div>
+        <div class="col-md-2"><a class="btn btn-primary" onclick="ckan.setCreateSchedule(document.getElementById('{{ field_schedule_id }}')); return false;">{{ _("Set") }}</a></div>
     {% else %}
-        <div class="col-md-2"><a class="btn btn-primary" _="{{ 'on click call ckan.setEditSchedule(#' ~ field_schedule_id ~ ')' }}">{{ _("Set") }}</a></div>
+        <div class="col-md-2"><a class="btn btn-primary" onclick="ckan.setEditSchedule(document.getElementById('{{ field_schedule_id }}')); return false;">{{ _("Set") }}</a></div>
     {% endif %}
 </div>
 
 {{ form.input("schedule", id=field_schedule_id, value=data.schedule, label=_("Schedule"), is_required=true, attrs={"readonly": 1, "required": 1, "class": "form-control"}) }}
+
+<script>
+    ckan.setCreateSchedule = function (scheduleContainer) {
+        $(scheduleContainer).val(getSchedule("create"))
+    }
+
+    ckan.setEditSchedule = function (scheduleContainer) {
+        $(scheduleContainer).val(getSchedule("edit"))
+    }
+
+    /**
+    * Get a cron schedule string
+    *
+    * @returns
+    */
+    function getSchedule(scope) {
+        const min = $(`#${scope}-job-minute`).val() || "*";
+        const hour = $(`#${scope}-job-hour`).val() || "*";
+        const day = $(`#${scope}-job-day`).val() || "*";
+        const month = $(`#${scope}-job-month`).val() || "*";
+        const week = $(`#${scope}-job-week`).val() || "*";
+
+        return `${min} ${hour} ${day} ${month} ${week}`
+    }
+</script>

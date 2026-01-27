@@ -1,3 +1,16 @@
+/**
+ * CKAN module to copy text to clipboard.
+ *
+ * Options:
+ * - content: (string) Text content to copy. Optional if targetElement is provided.
+ * - targetElement: (string) Selector of the element to fetch text from. Optional if content is provided.
+ *
+ * Example usage:
+ * <button class="btn btn-success" data-module="ap-copy-to-clipboard"
+ *     data-module-content="Text to copy">
+ *     Copy Text
+ * </button>
+*/
 ckan.module("ap-copy-to-clipboard", function ($, _) {
     "use strict";
 

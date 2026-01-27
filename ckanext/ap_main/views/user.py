@@ -60,7 +60,12 @@ class UserTable(t.TableDefinition):
                     min_width=200,
                 ),
                 t.ColumnDefinition(field="state", width=100, resizable=False),
-                t.ColumnDefinition(field="sysadmin", formatters=[(f.BoolFormatter, {})], width=120, resizable=False),
+                t.ColumnDefinition(
+                    field="sysadmin",
+                    formatters=[(f.BoolFormatter, {})],
+                    width=120,
+                    resizable=False,
+                ),
             ],
             row_actions=[
                 t.RowActionDefinition(
@@ -105,7 +110,9 @@ class UserTable(t.TableDefinition):
         )
 
     @staticmethod
-    def _change_sysadmin_role(rows: list[t.Row], is_sysadmin: bool | None = True) -> t.ActionHandlerResult:
+    def _change_sysadmin_role(
+        rows: list[t.Row], is_sysadmin: bool | None = True
+    ) -> t.ActionHandlerResult:
         errors = []
         for row in rows:
             user = model.Session.query(model.User).get(row["id"])
@@ -122,7 +129,9 @@ class UserTable(t.TableDefinition):
         return t.ActionHandlerResult(success=True)
 
     @staticmethod
-    def _change_user_state(rows: list[t.Row], is_active: bool | None = False) -> t.ActionHandlerResult:
+    def _change_user_state(
+        rows: list[t.Row], is_active: bool | None = False
+    ) -> t.ActionHandlerResult:
         errors = []
         for row in rows:
             user = model.Session.query(model.User).get(row["id"])
@@ -178,7 +187,9 @@ class UserAddView(MethodView):
             + user_dict["name"]
             + tk.h.literal("</a>")
         )
-        tk.h.flash_success(tk._(f"Created a new user account for {link}"), allow_html=True)
+        tk.h.flash_success(
+            tk._(f"Created a new user account for {link}"), allow_html=True
+        )
         log.info(tk._(f"Created a new user account for {link}"))
 
         return tk.redirect_to("ap_user.create")
@@ -194,15 +205,23 @@ class UserAddView(MethodView):
         return context
 
     def _parse_payload(self) -> dict[str, Any]:
-        data_dict = logic.clean_dict(df.unflatten(logic.tuplize_dict(logic.parse_params(tk.request.form))))
+        data_dict = logic.clean_dict(
+            df.unflatten(logic.tuplize_dict(logic.parse_params(tk.request.form)))
+        )
 
-        data_dict.update(logic.clean_dict(df.unflatten(logic.tuplize_dict(logic.parse_params(tk.request.files)))))
+        data_dict.update(
+            logic.clean_dict(
+                df.unflatten(logic.tuplize_dict(logic.parse_params(tk.request.files)))
+            )
+        )
 
         return data_dict
 
     def _make_user_sysadmin(self, user_dict: dict[str, Any]) -> None:
         try:
-            logic.get_action("user_patch")({"ignore_auth": True}, {"id": user_dict["id"], "sysadmin": True})
+            logic.get_action("user_patch")(
+                {"ignore_auth": True}, {"id": user_dict["id"], "sysadmin": True}
+            )
         except tk.ObjectNotFound:
             pass
 

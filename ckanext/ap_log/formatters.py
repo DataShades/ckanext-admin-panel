@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import logging
+
 from ckanext.tables.shared import FormatterResult, Options, Value, formatters
 
 
