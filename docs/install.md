@@ -19,19 +19,26 @@ Compatibility with core CKAN versions:
 2. Enable the main plugin and extra plugins you want to use in your CKAN configuration file (e.g. `ckan.ini` or `production.ini`):
 
     ```ini
-    ckan.plugins = ... admin_panel admin_panel_support ...
+    ckan.plugins =
+            admin_panel
+            tables
+            editable_config
+            scheming_datasets
     ```
 
 3. Initialize all missing tables with: `ckan db upgrade`
+
+???+ warning
+    Ensure, that the `admin_panel` plugin is enabled **before** any other plugins.
 
 ## Developer installation
 
 To install `ckanext-admin-panel` for development, activate your CKAN virtualenv and do:
 
 ```sh
-    git clone https://github.com/DataShades/ckanext-admin-panel.git
-    cd ckanext-admin-panel
-    pip install -e .
+git clone https://github.com/DataShades/ckanext-admin-panel.git
+cd ckanext-admin-panel
+pip install -e .
 ```
 
 ## Extra plugins
@@ -49,3 +56,6 @@ We're using the scheming extension to create custom forms for plugin configurati
 
 2. [`ckanext-editable-config`](https://github.com/ckan/ckanext-editable-config):
 The `ckanext-editable-config` extension allows you to edit the CKAN configuration in runtime.
+
+3. [`ckanext-tables`](https://github.com/DataShades/ckanext-tables):
+The `ckanext-tables` extension provides a user interface for managing data tables.

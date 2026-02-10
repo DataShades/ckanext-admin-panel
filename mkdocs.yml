@@ -103,10 +103,6 @@ nav:
 - register_config_page.md
 - register_config_section.md
 
-- Tables:
-  - tables/index.md
-  - tables/formatters.md
-
 - interfaces.md
 - utils.md
 - helpers.md
