@@ -22,6 +22,10 @@ body[admin-panel="true"],
         color: var(--ap-form-control-color);
         border-color: var(--ap-form-control-border);
         border-radius: 4px;
+
+        &:invalid {
+            border-color: var(--ap-color-error);
+        }
     }
 
     .info-block {
