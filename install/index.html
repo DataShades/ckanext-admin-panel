@@ -1232,18 +1232,26 @@
 </li>
 <li>
 <p>Enable the main plugin and extra plugins you want to use in your CKAN configuration file (e.g. <code>ckan.ini</code> or <code>production.ini</code>):</p>
-<div class="highlight"><pre><span></span><code><span class="na">ckan.plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">... admin_panel admin_panel_support ...</span>
+<div class="highlight"><pre><span></span><code><span class="na">ckan.plugins</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="na">admin_panel</span>
+<span class="w">        </span><span class="na">tables</span>
+<span class="w">        </span><span class="na">editable_config</span>
+<span class="w">        </span><span class="na">scheming_datasets</span>
 </code></pre></div>
 </li>
 <li>
 <p>Initialize all missing tables with: <code>ckan db upgrade</code></p>
 </li>
 </ol>
+<details class="warning" open="open">
+<summary>Warning</summary>
+<p>Ensure, that the <code>admin_panel</code> plugin is enabled <strong>before</strong> any other plugins.</p>
+</details>
 <h2 id="developer-installation">Developer installation</h2>
 <p>To install <code>ckanext-admin-panel</code> for development, activate your CKAN virtualenv and do:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/DataShades/ckanext-admin-panel.git
-<span class="w">    </span><span class="nb">cd</span><span class="w"> </span>ckanext-admin-panel
-<span class="w">    </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/DataShades/ckanext-admin-panel.git
+<span class="nb">cd</span><span class="w"> </span>ckanext-admin-panel
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </code></pre></div>
 <h2 id="extra-plugins">Extra plugins</h2>
 <p>In addition to the main plugin, <code>ckanext-admin-panel</code> introduces several extensions that enhance the basic functionality by providing convenient tools for working with logs, cron jobs, and more.</p>
@@ -1258,6 +1266,10 @@ We're using the scheming extension to create custom forms for plugin configurati
 <li>
 <p><a href="https://github.com/ckan/ckanext-editable-config"><code>ckanext-editable-config</code></a>:
 The <code>ckanext-editable-config</code> extension allows you to edit the CKAN configuration in runtime.</p>
+</li>
+<li>
+<p><a href="https://github.com/DataShades/ckanext-tables"><code>ckanext-tables</code></a>:
+The <code>ckanext-tables</code> extension provides a user interface for managing data tables.</p>
 </li>
 </ol>
 
