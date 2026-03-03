@@ -30,10 +30,18 @@ class Ticket(tk.BaseModel):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     author_id = Column(Text, ForeignKey(model.User.id), nullable=False)
+    assignee_id = Column(Text, ForeignKey(model.User.id), nullable=True)
 
     author = relationship(
         model.User,
+        foreign_keys=[author_id],
         backref=backref("tickets", cascade="all, delete"),
+    )
+
+    assignee = relationship(
+        model.User,
+        foreign_keys=[assignee_id],
+        backref=backref("assigned_tickets", cascade="all, delete"),
     )
 
     messages = relationship(
@@ -93,10 +101,12 @@ class Ticket(tk.BaseModel):
             status=str(self.status),
             text=str(self.text),
             author=self.author.as_dict(),
+            assignee=self.assignee.as_dict() if self.assignee else None,
             created_at=self.created_at.isoformat(),
             updated_at=self.updated_at.isoformat(),
             messages=[msg.dictize(context) for msg in self.messages],
         )
+
 
 class TicketMessage(tk.BaseModel):
     __tablename__ = "ap_support_ticket_message"

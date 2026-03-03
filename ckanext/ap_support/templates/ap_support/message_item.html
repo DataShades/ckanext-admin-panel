@@ -31,7 +31,7 @@
 
             <div class="msg-actions">
                 {% if h.check_access('ap_support_message_update', {'id': message.id})
-                      and (_ticket is none or _ticket.status == 'opened') %}
+                    and (_ticket is none or _ticket.status == 'opened') %}
                     <button class="btn btn-sm btn-outline-secondary"
                             onclick="toggleMsgEdit({{ message.id }})"
                             title="{{ _('Edit') }}">
@@ -39,7 +39,8 @@
                     </button>
                 {% endif %}
 
-                {% if h.check_access('ap_support_message_delete', {'id': message.id}) %}
+                {% if h.check_access('ap_support_message_delete', {'id': message.id})
+                    and (_ticket is none or _ticket.status == 'opened')  %}
                     <button class="btn btn-sm btn-outline-danger"
                             hx-post="{{ h.url_for('ap_support.delete_message', message_id=message.id) }}"
                             hx-target="#message-{{ message.id }}"

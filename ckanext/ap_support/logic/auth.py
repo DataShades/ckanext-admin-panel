@@ -30,6 +30,12 @@ def ap_support_ticket_create(
     return {"success": True}
 
 
+def ap_support_ticket_assign(
+    context: types.Context, data_dict: types.DataDict
+) -> types.AuthResult:
+    return _sysadmin_only()
+
+
 def ap_support_message_delete(
     context: types.Context, data_dict: types.DataDict
 ) -> types.AuthResult:

@@ -59,11 +59,14 @@ class AddMessageView(MethodView):
         data_dict = parse_params(tk.request.form)
 
         try:
-            message = tk.get_action("ap_support_message_create")({"user": tk.g.user}, {
-                "ticket_id": ticket_id,
-                "author_id": tk.current_user.id,
-                "content": data_dict.get("content", ""),
-            })
+            tk.get_action("ap_support_message_create")(
+                {"user": tk.g.user},
+                {
+                    "ticket_id": ticket_id,
+                    "author_id": tk.current_user.id,
+                    "content": data_dict.get("content", ""),
+                },
+            )
         except (tk.ObjectNotFound, tk.ValidationError) as e:
             return tk.render(
                 "ap_support/ticket_modal_response.html",
@@ -153,14 +156,34 @@ class TicketUpdateStatusView(MethodView):
             ticket = tk.get_action("ap_support_ticket_show")(
                 {"ignore_auth": True}, {"id": ticket_id}
             )
-            new_status = (
-                "closed"
-                if ticket["status"] == "opened"
-                else "opened"
-            )
+            new_status = "closed" if ticket["status"] == "opened" else "opened"
             tk.get_action("ap_support_ticket_update")(
                 {"user": tk.g.user},
                 {"id": ticket_id, "status": new_status},
+            )
+        except (tk.ObjectNotFound, tk.ValidationError, tk.NotAuthorized) as e:
+            tk.h.flash_error(str(e))
+            return Response("", status=400)
+
+        redirect_url = tk.url_for("ap_support.ticket_read", ticket_id=ticket_id)
+
+        if tk.request.headers.get("HX-Request"):
+            return Response("", status=200, headers={"HX-Redirect": redirect_url})
+
+        return tk.redirect_to(redirect_url)
+
+
+class TicketAssignView(MethodView):
+    def post(self, ticket_id: str) -> Response:
+        data_dict = parse_params(tk.request.form)
+
+        assignee_id = data_dict.get("assignee_id")
+        action_data = {"id": ticket_id, "assignee_id": assignee_id}
+
+        try:
+            tk.get_action("ap_support_ticket_assign")(
+                {"user": tk.g.user},
+                action_data,
             )
         except (tk.ObjectNotFound, tk.ValidationError, tk.NotAuthorized) as e:
             tk.h.flash_error(str(e))
@@ -204,6 +227,11 @@ ap_support.add_url_rule(
 ap_support.add_url_rule(
     "/ticket/<ticket_id>/update-status",
     view_func=TicketUpdateStatusView.as_view("ticket_update_status"),
+    methods=("POST",),
+)
+ap_support.add_url_rule(
+    "/ticket/<ticket_id>/assign",
+    view_func=TicketAssignView.as_view("ticket_assign"),
     methods=("POST",),
 )
 ap_support.add_url_rule(

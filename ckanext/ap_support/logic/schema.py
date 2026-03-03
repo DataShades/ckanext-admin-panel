@@ -40,6 +40,27 @@ def ticket_delete(
 
 
 @validator_args
+def ticket_assign(
+    not_missing: types.Validator,
+    ignore_missing: types.Validator,
+    ignore_empty: types.Validator,
+    unicode_safe: types.Validator,
+    ticket_id_exists: types.Validator,
+    user_id_or_name_exists: types.Validator,
+    boolean_validator: types.Validator,
+) -> types.Schema:
+    return {
+        "id": [not_missing, unicode_safe, ticket_id_exists],
+        "assignee_id": [
+            ignore_missing,
+            ignore_empty,
+            unicode_safe,
+            user_id_or_name_exists,
+        ],
+    }
+
+
+@validator_args
 def ticket_update(  # noqa: PLR0913
     not_missing: types.Validator,
     ignore_missing: types.Validator,

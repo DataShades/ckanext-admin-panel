@@ -24,6 +24,7 @@ class SupportTable(t.TableDefinition):
                     Ticket.created_at,
                     Ticket.updated_at,
                     Ticket.author_id,
+                    Ticket.assignee_id,
                 ).order_by(Ticket.updated_at.desc()),
             ),
             columns=[
@@ -36,6 +37,12 @@ class SupportTable(t.TableDefinition):
                 t.ColumnDefinition(
                     field="author_id",
                     title="Author",
+                    formatters=[(f.UserLinkFormatter, {})],
+                    tabulator_formatter="html",
+                ),
+                t.ColumnDefinition(
+                    field="assignee_id",
+                    title="Assignee",
                     formatters=[(f.UserLinkFormatter, {})],
                     tabulator_formatter="html",
                 ),
@@ -146,7 +153,6 @@ class UserTicketTable(t.TableDefinition):
                 Ticket.category,
                 Ticket.created_at,
                 Ticket.updated_at,
-                Ticket.author_id,
             )
             .where(Ticket.author_id == user_id)
             .order_by(Ticket.updated_at.desc())
@@ -167,7 +173,7 @@ class UserTicketTable(t.TableDefinition):
                 t.ColumnDefinition(
                     field="created_at",
                     title="Created N days ago",
-                    formatters=[(f.DayPassedFormatter, {})],
+                    formatters=[(sf.DayPassedFormatter, {})],
                     tabulator_formatter="html",
                 ),
                 t.ColumnDefinition(

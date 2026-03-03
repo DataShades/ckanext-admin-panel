@@ -53,7 +53,9 @@ def ap_support_ticket_delete(context: types.Context, data_dict: types.DataDict) 
 
 
 @validate(schema.ticket_update)
-def ap_support_ticket_update(context: types.Context, data_dict: types.DataDict) -> DictizedTicket:
+def ap_support_ticket_update(
+    context: types.Context, data_dict: types.DataDict
+) -> DictizedTicket:
     tk.check_access("ap_support_ticket_update", context, data_dict)
 
     ticket = cast(support_model.Ticket, support_model.Ticket.get(data_dict["id"]))
@@ -64,6 +66,23 @@ def ap_support_ticket_update(context: types.Context, data_dict: types.DataDict) 
     model.Session.commit()
 
     log.info("[id:%s] ticket been updated: %s", ticket.id, data_dict)
+
+    return ticket.dictize(context)
+
+
+@validate(schema.ticket_assign)
+def ap_support_ticket_assign(
+    context: types.Context, data_dict: types.DataDict
+) -> DictizedTicket:
+    tk.check_access("ap_support_ticket_assign", context, data_dict)
+
+    ticket = cast(support_model.Ticket, support_model.Ticket.get(data_dict["id"]))
+
+    ticket.assignee_id = data_dict.get("assignee_id")
+
+    model.Session.commit()
+
+    log.info("[id:%s] ticket assigned to: %s", ticket.id, ticket.assignee_id)
 
     return ticket.dictize(context)
 

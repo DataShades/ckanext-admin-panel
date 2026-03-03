@@ -1,4 +1,4 @@
-"""Add ap_support_ticket table
+"""Add ap_support_ticket table.
 
 Revision ID: f5a5c7e5f284
 Revises:
@@ -41,6 +41,12 @@ def upgrade():
             sa.UnicodeText,
             sa.ForeignKey("user.id"),
             nullable=False,
+        ),
+        sa.Column(
+            "assignee_id",
+            sa.UnicodeText,
+            sa.ForeignKey("user.id"),
+            nullable=True,
         ),
     )
 

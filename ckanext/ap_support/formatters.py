@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 import ckan.plugins.toolkit as tk
+
 from ckanext.tables.shared import FormatterResult, Options, Value, formatters
 
 
@@ -17,6 +18,7 @@ class StatusFormatter(formatters.BaseFormatter):
                 extra_vars={"value": value},
             )
         )
+
 
 class DayPassedFormatter(formatters.BaseFormatter):
     """Calculate the number of days passed since the date."""

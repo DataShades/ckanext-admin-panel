@@ -44,6 +44,11 @@
                 <time title="{{ h.render_datetime(ticket.created_at, with_hours=True) }}">
                     {{ h.time_ago_from_timestamp(ticket.created_at) }}
                 </time>
+                {% if ticket.assignee %}
+                    <span class="sep">·</span>
+                    <i class="fa fa-handshake-o"></i>
+                    {{ _('Assigned to') }} {{ h.linked_user(ticket.assignee.name, maxlength=40) }}
+                {% endif %}
             </div>
         </div>
 
@@ -127,6 +132,36 @@
 
                 <dt>{{ _('Author') }}</dt>
                 <dd>{{ h.linked_user(ticket.author.name, maxlength=30) }}</dd>
+
+                <dt>{{ _('Assignee') }}</dt>
+                <dd>
+                    {% if h.check_access('ap_support_ticket_assign', {'id': ticket.id}) %}
+                        <form hx-post="{{ h.url_for('ap_support.ticket_assign', ticket_id=ticket.id) }}">
+                            <label class="control-label sr-only" for="assignee_id">{{ _('Assignee') }}</label>
+                            <div class="input-group">
+                                <select name="assignee_id" id="assignee_id" class="form-select">
+                                    <option value="">{{ _('Unassigned') }}</option>
+                                    {% for admin in h.ap_support_get_sysadmins() %}
+                                        <option value="{{ admin.value }}" {% if ticket.assignee and ticket.assignee.id == admin.value %}selected{% endif %}>
+                                            {{ admin.text }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="submit" title="{{ _('Assign') }}">
+                                        <i class="fa fa-check"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                    {% else %}
+                        {% if ticket.assignee %}
+                            {{ h.linked_user(ticket.assignee.name, maxlength=30) }}
+                        {% else %}
+                            <span class="text-muted">{{ _('Unassigned') }}</span>
+                        {% endif %}
+                    {% endif %}
+                </dd>
 
                 <dt>{{ _('Created') }}</dt>
                 <dd>

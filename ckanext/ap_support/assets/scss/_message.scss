@@ -58,11 +58,6 @@
   border-radius: var(--ap-radius);
   overflow: hidden;
 
-  // Coloured left accent based on author role
-  &.bbl-author { border-left: 3px solid var(--ap-author-from); }
-  &.bbl-staff  { border-left: 3px solid var(--ap-staff-from);  }
-
-
   // ── Bubble header ────────────────────────────────────
 
   .msg-bubble-head {
