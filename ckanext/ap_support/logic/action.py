@@ -52,10 +52,9 @@ def ap_support_ticket_delete(context: types.Context, data_dict: types.DataDict) 
     return True
 
 
-@tk.side_effect_free
 @validate(schema.ticket_update)
 def ap_support_ticket_update(context: types.Context, data_dict: types.DataDict) -> DictizedTicket:
-    tk.check_access("ap_support_ticket_delete", context, data_dict)
+    tk.check_access("ap_support_ticket_update", context, data_dict)
 
     ticket = cast(support_model.Ticket, support_model.Ticket.get(data_dict["id"]))
 

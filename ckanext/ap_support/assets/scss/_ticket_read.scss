@@ -1,0 +1,244 @@
+// ==========================================================
+//  Ticket read page
+//  Covers: layout, header card, badge/chips, body card,
+//          thread section, reply form, closed notice.
+// ==========================================================
+
+
+// ── Two-column grid layout ──────────────────────────────
+
+.ticket-read-wrap {
+  display: grid;
+  grid-template-columns: 1fr 270px;
+  gap: 1.5rem;
+  align-items: start;
+
+  @media (max-width: 991px) {
+    grid-template-columns: 1fr;
+
+    .ticket-sidebar {
+      order: -1;
+    }
+  }
+}
+
+
+// ── Header card ────────────────────────────────────────
+
+.ticket-header-card {
+  background: linear-gradient(135deg, var(--ap-header-from) 0%, var(--ap-header-to) 100%);
+  color: #f1f5f9;
+  border-radius: var(--ap-radius-lg);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+
+  // Decorative circle in top-right corner
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+  }
+
+  .ticket-id-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.45;
+    margin-bottom: 0.35rem;
+  }
+
+  .ticket-subject {
+    color: #f8fafc;
+  }
+
+  .ticket-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 1rem;
+  }
+
+  .ticket-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    opacity: 0.7;
+
+    a {
+      color: white;
+    }
+
+    .sep {
+      opacity: 0.4;
+    }
+  }
+}
+
+
+// ── Status badge & category chip ───────────────────────
+//
+//  Both share the same pill shape; only colors differ.
+
+%pill-base {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.t-status-badge {
+  @extend %pill-base;
+
+  &.status-opened {
+    background: var(--ap-opened-bg);
+    color: var(--ap-opened-color);
+    border: 1px solid var(--ap-opened-border);
+  }
+
+  &.status-closed {
+    background: var(--ap-closed-bg);
+    color: var(--ap-closed-color);
+    border: 1px solid var(--ap-closed-border);
+  }
+}
+
+.t-category-chip {
+  @extend %pill-base;
+  background: var(--ap-cat-bg);
+  color:      var(--ap-cat-color);
+  border:     1px solid var(--ap-cat-border);
+
+  i { opacity: 0.75; }
+}
+
+
+// ── Ticket body card ───────────────────────────────────
+
+.ticket-body-card {
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: var(--ap-radius);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.91rem;
+  line-height: 1.7;
+}
+
+
+// ── Thread header row ──────────────────────────────────
+
+.thread-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+  font-size: 0.87rem;
+  font-weight: 700;
+  color: var(--bs-body-color);
+
+  .thread-header-line {
+    flex: 1;
+    height: 1px;
+    background: var(--bs-border-color, #dee2e6);
+  }
+}
+
+
+// ── Empty state (no messages yet) ─────────────────────
+
+.thread-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--bs-secondary-color, #6c757d);
+
+  i {
+    font-size: 2rem;
+    opacity: 0.3;
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+}
+
+
+// ── Reply section ──────────────────────────────────────
+
+.reply-section {
+  margin-top: 1.5rem;
+}
+
+.reply-card {
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: var(--ap-radius);
+  overflow: hidden;
+
+  .reply-card-head {
+    padding: 0.65rem 1rem;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .reply-card-body {
+    padding: 1rem;
+  }
+}
+
+.reply-textarea {
+  resize: none;
+  overflow: hidden;
+  min-height: 88px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  transition: border-color 0.15s;
+}
+
+.reply-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.65rem;
+
+  .char-count {
+    font-size: 0.76rem;
+    color: var(--bs-secondary-color, #6c757d);
+  }
+}
+
+
+// ── Closed ticket notice ───────────────────────────────
+
+.ticket-closed-notice {
+  padding: 1.25rem;
+  border-radius: var(--ap-radius);
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  text-align: center;
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.88rem;
+
+  i {
+    font-size: 1.5rem;
+    opacity: 0.4;
+    display: block;
+    margin-bottom: 0.6rem;
+  }
+}

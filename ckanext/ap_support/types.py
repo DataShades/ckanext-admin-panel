@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, TypedDict
+from typing import Any, Optional, TypedDict
 
 
 class TicketData(TypedDict):
@@ -16,7 +16,7 @@ class DictizedMessage(TypedDict):
     content: str
     author: dict[str, Any]
     created_at: str
-    updated_at: str
+    updated_at: Optional[str]
 
 
 class DictizedTicket(TypedDict):

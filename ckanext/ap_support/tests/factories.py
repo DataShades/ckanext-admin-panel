@@ -16,7 +16,7 @@ class TicketFactory(factories.CKANFactory):
 
     subject = factory.Faker("sentence")
     text = factory.Faker("paragraph")
-    category = "general"
+    category = "Data request"
     author_id = factory.LazyAttribute(lambda _: factories.User()["id"])
 
 

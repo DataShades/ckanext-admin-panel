@@ -43,7 +43,7 @@ class SupportTable(t.TableDefinition):
                 t.ColumnDefinition(
                     field="created_at",
                     title="Created N days ago",
-                    formatters=[(f.DayPassedFormatter, {})],
+                    formatters=[(sf.DayPassedFormatter, {})],
                     tabulator_formatter="html",
                 ),
                 t.ColumnDefinition(

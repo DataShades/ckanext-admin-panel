@@ -39,8 +39,7 @@ def upgrade():
         sa.Column(
             "updated_at",
             sa.DateTime,
-            nullable=False,
-            server_default=sa.func.current_timestamp(),
+            nullable=True,
         ),
     )
 

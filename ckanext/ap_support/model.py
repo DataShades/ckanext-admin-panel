@@ -38,7 +38,6 @@ class Ticket(tk.BaseModel):
 
     messages = relationship(
         "TicketMessage",
-        backref="ticket",
         order_by="TicketMessage.created_at",
         cascade="all, delete",
     )
@@ -90,6 +89,7 @@ class Ticket(tk.BaseModel):
         return DictizedTicket(
             id=int(self.id),
             subject=str(self.subject),
+            category=str(self.category),
             status=str(self.status),
             text=str(self.text),
             author=self.author.as_dict(),
@@ -106,9 +106,7 @@ class TicketMessage(tk.BaseModel):
     author_id = Column(Text, ForeignKey(model.User.id), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, nullable=True)
 
     author = relationship(model.User)
     ticket = relationship("Ticket", backref="ticket_messages")
@@ -141,5 +139,5 @@ class TicketMessage(tk.BaseModel):
             content=str(self.content),
             author=self.author.as_dict(),
             created_at=self.created_at.isoformat(),
-            updated_at=self.updated_at.isoformat(),
+            updated_at=self.updated_at.isoformat() if self.updated_at else None,
         )

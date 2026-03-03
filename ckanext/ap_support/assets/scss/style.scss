@@ -1,0 +1,20 @@
+// ==========================================================
+//  ap_support — Main SCSS entry point
+//
+//  Build command (run from this folder):
+//    npx sass style.scss:./../css/style.css \
+//      --style compressed --no-source-map --watch
+//
+//  Import order is intentional:
+//    1. variables  — outputs :root{} tokens first
+//    2. list       — table/list page
+//    3. ticket_read — ticket detail layout + components
+//    4. message    — chat-bubble message cards
+//    5. sidebar    — right-hand metadata + actions panel
+// ==========================================================
+
+@use 'variables';
+@use 'list';
+@use 'ticket_read';
+@use 'message';
+@use 'sidebar';

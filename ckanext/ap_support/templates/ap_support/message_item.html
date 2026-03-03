@@ -1,73 +1,99 @@
-<div class="card mb-3" id="message-{{ message.id }}">
-    <div class="card-header d-flex justify-content-between">
-         <span>
-            <strong>{{ h.linked_user(message.author.name, maxlength=30) }}</strong>
-         </span>
-         <div class="d-flex align-items-center gap-2">
-            <span class="text-muted" title="{{ h.render_datetime(message.created_at, with_hours=True) }}">
-                {{ h.time_ago_from_timestamp(message.created_at) }}
-                {% if message.created_at != message.updated_at %}
-                    <em>({{ _('edited') }})</em>
-                {% endif %}
+{% set _ticket = ticket if ticket is defined else none %}
+{% set is_author = _ticket is not none and message.author.id == _ticket.author.id %}
+{% set author_initial = (message.author.display_name or message.author.name or '?') | first | upper %}
+
+<div class="message-card" id="message-{{ message.id }}">
+
+    <div class="msg-avatar {{ 'av-author' if is_author else 'av-staff' }}"
+         title="{{ message.author.display_name or message.author.name }}">
+        {{ author_initial }}
+    </div>
+
+    <div class="msg-bubble {{ 'bbl-author' if is_author else 'bbl-staff' }}">
+
+        <div class="msg-bubble-head">
+            <span class="msg-author">
+                {{ h.linked_user(message.author.name, maxlength=30) }}
             </span>
 
-            {% if h.check_access('ap_support_message_update', {'id': message.id}) %}
-                <button class="btn btn-sm btn-default"
-                        onclick="toggleEditForm({{ message.id }})"
-                        title="{{ _('Edit message') }}">
-                    <i class="fa fa-edit"></i>
-                </button>
-            {% endif %}
+            <div class="msg-meta">
+                {% if message.updated_at %}
+                    <span class="msg-edited">
+                        <i class="fa fa-pencil"></i> {{ _('edited') }}
+                    </span>
+                {% endif %}
+                <span class="msg-time">
+                    <time title="{{ h.render_datetime(message.created_at, with_hours=True) }}">
+                        {{ h.time_ago_from_timestamp(message.created_at) }}
+                    </time>
+                </span>
+            </div>
 
-            {% if h.check_access('ap_support_message_delete', {'id': message.id}) %}
-                <button class="btn btn-sm btn-danger"
-                        hx-post="{{ h.url_for('ap_support.delete_message', message_id=message.id) }}"
-                        hx-target="#message-{{ message.id }}"
-                        hx-swap="outerHTML"
-                        hx-confirm="{{ _('Are you sure you want to delete this message?') }}"
-                        title="{{ _('Delete message') }}">
-                    <i class="fa fa-trash"></i>
-                </button>
-            {% endif %}
-         </div>
-    </div>
-    <div class="card-body">
-        <div id="message-content-{{ message.id }}">
-            {{ h.wysiwyg_sanitize_html(message.content) | safe }}
-        </div>
-
-        <div id="message-edit-form-{{ message.id }}" style="display: none;">
-            <form hx-post="{{ h.url_for('ap_support.update_message', message_id=message.id) }}"
-                  hx-target="#message-{{ message.id }}"
-                  hx-swap="outerHTML">
-                <input type="hidden" name="ticket_id" value="{{ message.ticket_id }}">
-                <div class="form-group">
-                    <textarea name="content" class="form-control" rows="5" required>{{ message.content }}</textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">{{ _('Save') }}</button>
-                    <button type="button"
-                        class="btn btn-default"
-                        onclick="toggleEditForm({{ message.id }})">
-                        {{ _('Cancel') }}
+            <div class="msg-actions">
+                {% if h.check_access('ap_support_message_update', {'id': message.id})
+                      and (_ticket is none or _ticket.status == 'opened') %}
+                    <button class="btn btn-sm btn-outline-secondary"
+                            onclick="toggleMsgEdit({{ message.id }})"
+                            title="{{ _('Edit') }}">
+                        <i class="fa fa-pencil"></i>
                     </button>
-                </div>
-            </form>
+                {% endif %}
+
+                {% if h.check_access('ap_support_message_delete', {'id': message.id}) %}
+                    <button class="btn btn-sm btn-outline-danger"
+                            hx-post="{{ h.url_for('ap_support.delete_message', message_id=message.id) }}"
+                            hx-target="#message-{{ message.id }}"
+                            hx-swap="outerHTML swap:0.2s"
+                            hx-confirm="{{ _('Delete this message?') }}"
+                            title="{{ _('Delete') }}">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                {% endif %}
+            </div>
         </div>
+
+        <div class="msg-bubble-body">
+            <div id="message-content-{{ message.id }}">
+                {% if 'wysiwyg' in g.plugins %}
+                    {{ h.wysiwyg_sanitize_html(message.content) | safe }}
+                {% else %}
+                    {{ message.content }}
+                {% endif %}
+            </div>
+
+            <div id="message-edit-form-{{ message.id }}" style="display:none;">
+                <form hx-post="{{ h.url_for('ap_support.update_message', message_id=message.id) }}"
+                      hx-target="#message-{{ message.id }}"
+                      hx-swap="outerHTML">
+                    <input type="hidden" name="ticket_id" value="{{ message.ticket_id }}">
+                    <div class="mb-2">
+                        <textarea name="content"
+                                  class="form-control"
+                                  rows="4"
+                                  required>{{ message.content }}</textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fa fa-check"></i> {{ _('Save') }}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                onclick="toggleMsgEdit({{ message.id }})">
+                            {{ _('Cancel') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script>
-function toggleEditForm(messageId) {
-    var content = document.getElementById('message-content-' + messageId);
-    var form = document.getElementById('message-edit-form-' + messageId);
-
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        form.style.display = 'none';
-    } else {
-        content.style.display = 'none';
-        form.style.display = 'block';
+    function toggleMsgEdit(id) {
+        var c = document.getElementById('message-content-' + id);
+        var f = document.getElementById('message-edit-form-' + id);
+        var showForm = c.style.display !== 'none';
+        c.style.display = showForm ? 'none' : 'block';
+        f.style.display = showForm ? 'block' : 'none';
     }
-}
 </script>

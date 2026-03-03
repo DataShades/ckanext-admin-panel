@@ -12,6 +12,18 @@ def ap_support_ticket_delete(
     return _sysadmin_only()
 
 
+def ap_support_ticket_update(
+    context: types.Context, data_dict: types.DataDict
+) -> types.AuthResult:
+    return _sysadmin_only()
+
+
+def ap_support_ticket_show(
+    context: types.Context, data_dict: types.DataDict
+) -> types.AuthResult:
+    return {"success": True}
+
+
 def ap_support_ticket_create(
     context: types.Context, data_dict: types.DataDict
 ) -> types.AuthResult:
