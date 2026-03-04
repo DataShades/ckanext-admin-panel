@@ -1,13 +1,56 @@
 from __future__ import annotations
 
-from sqlalchemy import select
+from sqlalchemy import func, select
+from sqlalchemy.orm import aliased
 
 import ckan.plugins.toolkit as tk
+from ckan import model as ckan_model
 
 import ckanext.tables.shared as t
-from ckanext.ap_main import formatters as f
 from ckanext.ap_support import formatters as sf
 from ckanext.ap_support.model import Ticket
+
+
+def _build_support_tickets_stmt():
+    """Build the stmt for the support tickets table.
+
+    We join the CKAN User table twice (author + assignee) and expose
+    COALESCE(fullname, name) as ``author_name`` / ``assignee_name`` so
+    that column header filters operate on human-readable names rather
+    than raw UUIDs.  The raw ID columns are included as hidden columns
+    so that formatters can still build profile links.
+
+    Datetime columns are pre-formatted as ISO-style strings
+    (``YYYY-MM-DD HH24:MI``) so they sort correctly as plain strings
+    and can be filtered without a custom formatter.
+    """
+    author_alias = aliased(ckan_model.User, name="author")
+    assignee_alias = aliased(ckan_model.User, name="assignee")
+
+    author_display = func.coalesce(author_alias.fullname, author_alias.name).label(
+        "author_name"
+    )
+    assignee_display = func.coalesce(
+        assignee_alias.fullname, assignee_alias.name
+    ).label("assignee_name")
+
+    return (
+        select(
+            Ticket.id,
+            Ticket.subject,
+            Ticket.status,
+            Ticket.category,
+            func.to_char(Ticket.created_at, "YYYY-MM-DD HH24:MI").label("created_at"),
+            func.to_char(Ticket.updated_at, "YYYY-MM-DD HH24:MI").label("updated_at"),
+            Ticket.author_id,
+            Ticket.assignee_id,
+            author_display,
+            assignee_display,
+        )
+        .outerjoin(author_alias, Ticket.author_id == author_alias.id)
+        .outerjoin(assignee_alias, Ticket.assignee_id == assignee_alias.id)
+        .order_by(Ticket.updated_at.desc())
+    )
 
 
 class SupportTable(t.TableDefinition):
@@ -15,18 +58,7 @@ class SupportTable(t.TableDefinition):
         super().__init__(
             name="support_tickets",
             table_template="ap_support/list.html",
-            data_source=t.DatabaseDataSource(
-                stmt=select(
-                    Ticket.id,
-                    Ticket.subject,
-                    Ticket.status,
-                    Ticket.category,
-                    Ticket.created_at,
-                    Ticket.updated_at,
-                    Ticket.author_id,
-                    Ticket.assignee_id,
-                ).order_by(Ticket.updated_at.desc()),
-            ),
+            data_source=t.DatabaseDataSource(stmt=_build_support_tickets_stmt()),
             columns=[
                 t.ColumnDefinition(field="subject"),
                 t.ColumnDefinition(
@@ -35,28 +67,22 @@ class SupportTable(t.TableDefinition):
                     tabulator_formatter="html",
                 ),
                 t.ColumnDefinition(
-                    field="author_id",
+                    field="author_name",
                     title="Author",
-                    formatters=[(f.UserLinkFormatter, {})],
+                    formatters=[(sf.UserNameLinkFormatter, {"id_field": "author_id"})],
                     tabulator_formatter="html",
                 ),
                 t.ColumnDefinition(
-                    field="assignee_id",
+                    field="assignee_name",
                     title="Assignee",
-                    formatters=[(f.UserLinkFormatter, {})],
+                    formatters=[
+                        (sf.UserNameLinkFormatter, {"id_field": "assignee_id"})
+                    ],
                     tabulator_formatter="html",
                 ),
                 t.ColumnDefinition(field="category", title="Category"),
-                t.ColumnDefinition(
-                    field="created_at",
-                    title="Created N days ago",
-                    formatters=[(sf.DayPassedFormatter, {})],
-                    tabulator_formatter="html",
-                ),
-                t.ColumnDefinition(
-                    field="updated_at",
-                    formatters=[(f.DateFormatter, {})],
-                ),
+                t.ColumnDefinition(field="created_at", title="Created At"),
+                t.ColumnDefinition(field="updated_at", title="Updated At"),
             ],
             row_actions=[
                 t.RowActionDefinition(
@@ -151,8 +177,12 @@ class UserTicketTable(t.TableDefinition):
                 Ticket.subject,
                 Ticket.status,
                 Ticket.category,
-                Ticket.created_at,
-                Ticket.updated_at,
+                func.to_char(Ticket.created_at, "YYYY-MM-DD HH24:MI").label(
+                    "created_at"
+                ),
+                func.to_char(Ticket.updated_at, "YYYY-MM-DD HH24:MI").label(
+                    "updated_at"
+                ),
             )
             .where(Ticket.author_id == user_id)
             .order_by(Ticket.updated_at.desc())
@@ -170,16 +200,8 @@ class UserTicketTable(t.TableDefinition):
                     tabulator_formatter="html",
                 ),
                 t.ColumnDefinition(field="category", title="Category"),
-                t.ColumnDefinition(
-                    field="created_at",
-                    title="Created N days ago",
-                    formatters=[(sf.DayPassedFormatter, {})],
-                    tabulator_formatter="html",
-                ),
-                t.ColumnDefinition(
-                    field="updated_at",
-                    formatters=[(f.DateFormatter, {})],
-                ),
+                t.ColumnDefinition(field="created_at", title="Created At"),
+                t.ColumnDefinition(field="updated_at", title="Updated At"),
             ],
             row_actions=[
                 t.RowActionDefinition(

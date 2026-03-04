@@ -59,22 +59,6 @@ class Ticket(tk.BaseModel):
 
         return query.one_or_none()
 
-    @classmethod
-    def get_list(cls, statuses: list[str] | None = None) -> list[Self]:
-        """Get a list of tickets.
-
-        Args:
-            statuses: Filter by ticket status.
-        """
-        query = model.Session.query(cls)
-
-        if statuses:
-            query = query.filter(cls.status.in_(statuses))
-
-        query = query.order_by(cls.updated_at.desc())
-
-        return query.all()
-
     def delete(self) -> None:
         model.Session().autoflush = False
         model.Session.delete(self)

@@ -7,14 +7,12 @@
 //
 //  Import order is intentional:
 //    1. variables  — outputs :root{} tokens first
-//    2. list       — table/list page
-//    3. ticket_read — ticket detail layout + components
-//    4. message    — chat-bubble message cards
-//    5. sidebar    — right-hand metadata + actions panel
+//    2. ticket_read — ticket detail layout + components
+//    3. message    — chat-bubble message cards
+//    4. sidebar    — right-hand metadata + actions panel
 // ==========================================================
 
 @use 'variables';
-@use 'list';
 @use 'ticket_read';
 @use 'message';
 @use 'sidebar';

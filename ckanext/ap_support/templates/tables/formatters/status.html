@@ -1,1 +1,5 @@
-<span class="badge badge-{{ value | lower }}">{{ value | title }}</span>
+{% if value == 'opened' %}
+    <span class="badge bg-success text-white">{{ value }}</span>
+{% elif value == 'closed' %}
+    <span class="badge bg-secondary text-white">{{ value }}</span>
+{% endif %}
