@@ -30,15 +30,22 @@ class Ticket(tk.BaseModel):
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     author_id = Column(Text, ForeignKey(model.User.id), nullable=False)
+    assignee_id = Column(Text, ForeignKey(model.User.id), nullable=True)
 
     author = relationship(
         model.User,
+        foreign_keys=[author_id],
         backref=backref("tickets", cascade="all, delete"),
+    )
+
+    assignee = relationship(
+        model.User,
+        foreign_keys=[assignee_id],
+        backref=backref("assigned_tickets", cascade="all, delete"),
     )
 
     messages = relationship(
         "TicketMessage",
-        backref="ticket",
         order_by="TicketMessage.created_at",
         cascade="all, delete",
     )
@@ -51,22 +58,6 @@ class Ticket(tk.BaseModel):
         query = model.Session.query(cls).filter(cls.id == ticket_id)
 
         return query.one_or_none()
-
-    @classmethod
-    def get_list(cls, statuses: list[str] | None = None) -> list[Self]:
-        """Get a list of tickets.
-
-        Args:
-            statuses: Filter by ticket status.
-        """
-        query = model.Session.query(cls)
-
-        if statuses:
-            query = query.filter(cls.status.in_(statuses))
-
-        query = query.order_by(cls.updated_at.desc())
-
-        return query.all()
 
     def delete(self) -> None:
         model.Session().autoflush = False
@@ -90,13 +81,16 @@ class Ticket(tk.BaseModel):
         return DictizedTicket(
             id=int(self.id),
             subject=str(self.subject),
+            category=str(self.category),
             status=str(self.status),
             text=str(self.text),
             author=self.author.as_dict(),
+            assignee=self.assignee.as_dict() if self.assignee else None,
             created_at=self.created_at.isoformat(),
             updated_at=self.updated_at.isoformat(),
             messages=[msg.dictize(context) for msg in self.messages],
         )
+
 
 class TicketMessage(tk.BaseModel):
     __tablename__ = "ap_support_ticket_message"
@@ -106,9 +100,7 @@ class TicketMessage(tk.BaseModel):
     author_id = Column(Text, ForeignKey(model.User.id), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, nullable=True)
 
     author = relationship(model.User)
     ticket = relationship("Ticket", backref="ticket_messages")
@@ -141,5 +133,5 @@ class TicketMessage(tk.BaseModel):
             content=str(self.content),
             author=self.author.as_dict(),
             created_at=self.created_at.isoformat(),
-            updated_at=self.updated_at.isoformat(),
+            updated_at=self.updated_at.isoformat() if self.updated_at else None,
         )

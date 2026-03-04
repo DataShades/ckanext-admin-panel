@@ -11,4 +11,4 @@ admin_panel_support-css:
   filter: cssrewrite
   output: ckanext-admin_panel/%(version)s-admin_panel_support.css
   contents:
-    - css/styles.css
+    - css/style.css

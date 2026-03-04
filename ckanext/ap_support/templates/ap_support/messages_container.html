@@ -1,0 +1,23 @@
+<div id="messages-container-outer">
+    <div class="thread-header">
+        <i class="fa fa-comments"></i>
+        {{ _('Conversation') }}
+
+        <span class="badge bg-secondary rounded-pill" style="font-size:.7rem;">
+            {{ ticket.messages | length }}
+        </span>
+
+        <div class="thread-header-line"></div>
+    </div>
+
+    <div id="messages-container">
+        {% for message in ticket.messages %}
+            {% snippet "ap_support/message_item.html", message=message, ticket=ticket %}
+        {% else %}
+            <div class="thread-empty">
+                <i class="fa fa-comments-o"></i>
+                <p class="mb-0">{{ _('No replies yet. Be the first to respond.') }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>

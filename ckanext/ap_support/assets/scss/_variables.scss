@@ -1,0 +1,36 @@
+// ==========================================================
+//  ap_support — Design tokens
+//  Exposed as CSS custom properties on :root so they're
+//  available globally (including in JS-generated HTML).
+// ==========================================================
+
+:root {
+  // ── Status: opened ──────────────────────────────────
+  --ap-opened-bg:     rgba(34, 197, 94, 0.18);
+  --ap-opened-color:  #86efac;
+  --ap-opened-border: rgba(34, 197, 94, 0.30);
+
+  // ── Status: closed ──────────────────────────────────
+  --ap-closed-bg:     rgba(148, 163, 184, 0.14);
+  --ap-closed-color:  #94a3b8;
+  --ap-closed-border: rgba(148, 163, 184, 0.20);
+
+  // ── Category chip ───────────────────────────────────
+  --ap-cat-bg:     rgba(99, 102, 241, 0.18);
+  --ap-cat-color:  #a5b4fc;
+  --ap-cat-border: rgba(99, 102, 241, 0.25);
+
+  // ── Avatar / bubble accents ─────────────────────────
+  --ap-author-from: #0ea5e9;
+  --ap-author-to:   #0284c7;
+  --ap-staff-from:  #7c3aed;
+  --ap-staff-to:    #6d28d9;
+
+  // ── Ticket header card ──────────────────────────────
+  --ap-header-from: #1e293b;
+  --ap-header-to:   #0f172a;
+
+  // ── Spacing / shape ─────────────────────────────────
+  --ap-radius:    10px;
+  --ap-radius-lg: 12px;
+}

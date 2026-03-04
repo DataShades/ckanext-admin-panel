@@ -3,7 +3,7 @@ from __future__ import annotations
 from ckan import model, types
 from ckan.plugins import toolkit as tk
 
-from ckanext.ap_support.model import TicketMessage
+from ckanext.ap_support.model import Ticket, TicketMessage
 
 
 def ap_support_ticket_delete(
@@ -12,10 +12,45 @@ def ap_support_ticket_delete(
     return _sysadmin_only()
 
 
+def ap_support_ticket_update(
+    context: types.Context, data_dict: types.DataDict
+) -> types.AuthResult:
+    return _sysadmin_only()
+
+
+def ap_support_ticket_show(
+    context: types.Context, data_dict: types.DataDict
+) -> types.AuthResult:
+    user = context.get("user")
+    if not user:
+        return {"success": False}
+
+    if tk.h.check_access("sysadmin"):
+        return {"success": True}
+
+    ticket_id = data_dict.get("id")
+
+    user_obj = user if isinstance(user, model.User) else model.User.get(user)
+    if not user_obj:
+        return {"success": False}
+
+    ticket = Ticket.get(ticket_id)
+    if ticket and ticket.author_id == user_obj.id:
+        return {"success": True}
+
+    return {"success": False}
+
+
 def ap_support_ticket_create(
     context: types.Context, data_dict: types.DataDict
 ) -> types.AuthResult:
     return {"success": True}
+
+
+def ap_support_ticket_assign(
+    context: types.Context, data_dict: types.DataDict
+) -> types.AuthResult:
+    return _sysadmin_only()
 
 
 def ap_support_message_delete(
@@ -32,11 +67,13 @@ def ap_support_message_delete(
 
     message_id = data_dict.get("id")
 
-    if message_id and isinstance(user, model.User) or (user := model.User.get(user)):
-        message = TicketMessage.get(message_id)
+    user_obj = user if isinstance(user, model.User) else model.User.get(user)
+    if not user_obj:
+        return {"success": False}
 
-        if message and message.author_id == user.id:
-            return {"success": True}
+    message = TicketMessage.get(message_id)
+    if message and message.author_id == user_obj.id:
+        return {"success": True}
 
     return {"success": False}
 
@@ -56,10 +93,14 @@ def ap_support_message_update(
 
     # Regular users can only update their own messages
     message_id = data_dict.get("id")
-    if message_id and isinstance(user, model.User) or (user := model.User.get(user)):
-        message = TicketMessage.get(message_id)
-        if message and message.author_id == user.id:
-            return {"success": True}
+
+    user_obj = user if isinstance(user, model.User) else model.User.get(user)
+    if not user_obj:
+        return {"success": False}
+
+    message = TicketMessage.get(message_id)
+    if message and message.author_id == user_obj.id:
+        return {"success": True}
 
     return {"success": False}
 

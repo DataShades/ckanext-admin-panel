@@ -1,0 +1,91 @@
+// ==========================================================
+//  Ticket read sidebar
+//  Covers: info card, metadata dl, admin action buttons.
+// ==========================================================
+
+
+// ── Card shell ─────────────────────────────────────────
+
+.sidebar-card {
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: var(--ap-radius);
+  overflow: hidden;
+  margin-bottom: 1rem;
+
+  .sidebar-card-head {
+    padding: 0.6rem 1rem;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-secondary-color, #6c757d);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+}
+
+
+// ── Metadata definition list ───────────────────────────
+
+.sidebar-dl {
+  padding: 0.8rem 1rem;
+  margin: 0;
+
+  dt {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-bottom: 0.1rem;
+  }
+
+  dd {
+    font-size: 0.83rem;
+    margin-bottom: 0.75rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+
+// ── Admin action buttons ───────────────────────────────
+//
+//  Full-width, borderless rows inside the actions card.
+
+.sidebar-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  font-size: 0.84rem;
+
+  // Reset default button styles
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+  padding: 0.65rem 1rem;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--bs-tertiary-bg, #f8f9fa);
+  }
+
+  // Semantic colour modifiers
+  &.act-warning { color: #f59e0b; }
+  &.act-success { color: #22c55e; }
+  &.act-danger  { color: #ef4444; }
+}

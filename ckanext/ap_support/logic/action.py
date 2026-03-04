@@ -13,6 +13,8 @@ from ckanext.ap_support.types import DictizedMessage, DictizedTicket, TicketData
 
 log = logging.getLogger(__name__)
 
+_UPDATABLE_TICKET_FIELDS = {"status", "text"}
+
 
 @validate(schema.ticket_create)
 def ap_support_ticket_create(
@@ -52,19 +54,39 @@ def ap_support_ticket_delete(context: types.Context, data_dict: types.DataDict) 
     return True
 
 
-@tk.side_effect_free
 @validate(schema.ticket_update)
-def ap_support_ticket_update(context: types.Context, data_dict: types.DataDict) -> DictizedTicket:
-    tk.check_access("ap_support_ticket_delete", context, data_dict)
+def ap_support_ticket_update(
+    context: types.Context, data_dict: types.DataDict
+) -> DictizedTicket:
+    tk.check_access("ap_support_ticket_update", context, data_dict)
 
     ticket = cast(support_model.Ticket, support_model.Ticket.get(data_dict["id"]))
 
     for key, value in data_dict.items():
-        setattr(ticket, key, value)
+        if key in _UPDATABLE_TICKET_FIELDS:
+            setattr(ticket, key, value)
 
+    ticket.updated_at = support_model.datetime.utcnow()
     model.Session.commit()
 
     log.info("[id:%s] ticket been updated: %s", ticket.id, data_dict)
+
+    return ticket.dictize(context)
+
+
+@validate(schema.ticket_assign)
+def ap_support_ticket_assign(
+    context: types.Context, data_dict: types.DataDict
+) -> DictizedTicket:
+    tk.check_access("ap_support_ticket_assign", context, data_dict)
+
+    ticket = cast(support_model.Ticket, support_model.Ticket.get(data_dict["id"]))
+
+    ticket.assignee_id = data_dict.get("assignee_id")
+
+    model.Session.commit()
+
+    log.info("[id:%s] ticket assigned to: %s", ticket.id, ticket.assignee_id)
 
     return ticket.dictize(context)
 

@@ -1,0 +1,132 @@
+// ==========================================================
+//  Message cards (message_item.html)
+//  Chat-bubble layout: avatar + bubble with coloured border.
+// ==========================================================
+
+
+// ── Slide-in animation for HTMX-appended messages ──────
+
+@keyframes msgSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+// ── Outer row ──────────────────────────────────────────
+
+.message-card {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  animation: msgSlideIn 0.22s ease-out both;
+}
+
+
+// ── Avatar circle ──────────────────────────────────────
+
+.msg-avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+  user-select: none;
+
+  // Ticket author → blue
+  &.av-author {
+    background: linear-gradient(135deg, var(--ap-author-from), var(--ap-author-to));
+  }
+
+  // Staff / other users → purple
+  &.av-staff {
+    background: linear-gradient(135deg, var(--ap-staff-from), var(--ap-staff-to));
+  }
+}
+
+
+// ── Bubble wrapper ─────────────────────────────────────
+
+.msg-bubble {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: var(--ap-radius);
+  overflow: hidden;
+
+  // ── Bubble header ────────────────────────────────────
+
+  .msg-bubble-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.85rem;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    .msg-author {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--bs-body-color);
+
+      a {
+        color: inherit;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    .msg-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+
+      .msg-time {
+        font-size: 0.76rem;
+        color: var(--bs-secondary-color, #6c757d);
+        white-space: nowrap;
+      }
+
+      .msg-edited {
+        font-size: 0.72rem;
+        font-style: italic;
+        color: var(--bs-secondary-color, #6c757d);
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      }
+    }
+
+    .msg-actions {
+      display: flex;
+      gap: 0.3rem;
+      flex-shrink: 0;
+
+      .btn {
+        padding: 0.12rem 0.42rem;
+        font-size: 0.76rem;
+        line-height: 1.4;
+        border-radius: 5px;
+      }
+    }
+  }
+
+
+  // ── Bubble body: message content + edit form ─────────
+
+  .msg-bubble-body {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+}
