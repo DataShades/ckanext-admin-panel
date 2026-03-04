@@ -1,4 +1,5 @@
 {% extends 'admin_panel/base.html' %}
+{% import 'macros/form.html' as form %}
 
 {% block breadcrumb_content %}
     <li>{% link_for _("Dashboard"), named_route='ap_support.list' %}</li>
@@ -57,7 +58,7 @@
             {% if 'wysiwyg' in g.plugins %}
                 {{ h.wysiwyg_sanitize_html(ticket.text) | safe }}
             {% else %}
-                {{ ticket.text }}
+                {{ h.render_markdown(ticket.text) }}
             {% endif %}
         </div>
 
@@ -76,15 +77,10 @@
                               hx-target="#messages-container-outer"
                               hx-swap="outerHTML swap:0.1s">
 
-                            <textarea id="reply-textarea"
-                                      name="content"
-                                      class="form-control reply-textarea"
-                                      placeholder="{{ _('Write your reply…') }}"
-                                      required
-                                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';document.getElementById('reply-char-count').textContent=this.value.length;"></textarea>
+                            {{ form.markdown('content', id="reply-textarea", label=_("Comment"), value='', placeholder=_('Write your reply…'), attrs={'class': 'form-control', 'oninput': "this.style.height='auto';this.style.height=this.scrollHeight+'px';document.getElementById('reply-char-count').textContent=this.value.length;" })}}
 
-                            <div class="reply-footer">
-                                <span class="char-count">
+                            <div class="reply-footer d-flex justify-content-between mt-3 align-items-center">
+                                <span class="char-count text-muted">
                                     <span id="reply-char-count">0</span> {{ _('characters') }}
                                 </span>
                                 <button class="btn btn-primary btn-sm" type="submit">
@@ -182,7 +178,7 @@
             </dl>
         </div>
 
-        {# Admin actions #}
+        <!-- Admin actions -->
         {% if h.check_access('ap_support_ticket_update', {'id': ticket.id}) %}
             <div class="sidebar-card">
                 <div class="sidebar-card-head">
@@ -213,7 +209,7 @@
             </div>
         {% endif %}
 
-    </div>{# end ticket-sidebar #}
+    </div> <!-- end ticket-sidebar -->
 
-</div>{# end ticket-read-wrap #}
+</div> <!-- end ticket-read-wrap -->
 {% endblock ap_content %}

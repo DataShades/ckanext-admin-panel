@@ -199,30 +199,16 @@
 
   .reply-card-body {
     padding: 1rem;
+
+    .form-label {
+        display: none;
+    }
+
+    .form-group {
+        margin-bottom: 0;
+    }
   }
 }
-
-.reply-textarea {
-  resize: none;
-  overflow: hidden;
-  min-height: 88px;
-  font-size: 0.88rem;
-  line-height: 1.6;
-  transition: border-color 0.15s;
-}
-
-.reply-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 0.65rem;
-
-  .char-count {
-    font-size: 0.76rem;
-    color: var(--bs-secondary-color, #6c757d);
-  }
-}
-
 
 // ── Closed ticket notice ───────────────────────────────
 

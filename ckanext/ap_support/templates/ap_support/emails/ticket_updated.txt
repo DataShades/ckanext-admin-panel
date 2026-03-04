@@ -1,0 +1,20 @@
+Dear {{ recipient_name }},
+
+Your support ticket on {{ site_title }} has been updated.
+
+────────────────────────────────────────
+  Ticket #{{ ticket.id }}: {{ ticket.subject }}
+────────────────────────────────────────
+  Category : {{ ticket.category }}
+  Status   : {{ ticket.status }}
+{% if ticket.assignee %}  Assignee : {{ ticket.assignee.display_name | default(ticket.assignee.name) }}
+{% endif %}────────────────────────────────────────
+
+To view the full ticket, visit:
+
+  {{ ticket_url }}
+
+--
+{{ site_title }} ({{ site_url }})
+
+This is an automated notification. Do not reply to this email.

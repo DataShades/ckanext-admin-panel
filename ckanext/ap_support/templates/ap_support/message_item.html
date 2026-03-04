@@ -58,7 +58,7 @@
                 {% if 'wysiwyg' in g.plugins %}
                     {{ h.wysiwyg_sanitize_html(message.content) | safe }}
                 {% else %}
-                    {{ message.content }}
+                    {{ h.render_markdown(message.content) }}
                 {% endif %}
             </div>
 

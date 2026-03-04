@@ -1,0 +1,25 @@
+Dear {{ recipient_name }},
+
+You have received a new reply on your support ticket on {{ site_title }}.
+
+────────────────────────────────────────
+  Ticket #{{ ticket.id }}: {{ ticket.subject }}
+────────────────────────────────────────
+  Category : {{ ticket.category }}
+  Status   : {{ ticket.status }}
+────────────────────────────────────────
+
+New reply from {{ message.author.display_name | default(message.author.name) }}:
+
+{{ message.content }}
+
+────────────────────────────────────────
+
+To view the full conversation and reply, visit:
+
+  {{ ticket_url }}
+
+--
+{{ site_title }} ({{ site_url }})
+
+This is an automated notification. Do not reply to this email.

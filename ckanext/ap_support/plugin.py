@@ -4,6 +4,9 @@ import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 from ckan import types
 
+from ckanext.ap_support import mailer
+from ckanext.ap_support import signals as support_signals
+
 
 @tk.blanket.blueprints
 @tk.blanket.actions
@@ -27,7 +30,16 @@ class AdminPanelSupportPlugin(p.SingletonPlugin):
         return {
             tk.signals.ckanext.signal("ap_main:collect_config_sections"): [
                 self.collect_config_sections_subs
-            ]
+            ],
+            support_signals.ticket_created: [
+                mailer.notify_admins_on_new_ticket,
+            ],
+            support_signals.message_created: [
+                mailer.notify_author_on_new_message,
+            ],
+            support_signals.ticket_updated: [
+                mailer.notify_author_on_ticket_update,
+            ],
         }
 
     @staticmethod
