@@ -13,6 +13,8 @@ from ckanext.ap_support.types import DictizedMessage, DictizedTicket, TicketData
 
 log = logging.getLogger(__name__)
 
+_UPDATABLE_TICKET_FIELDS = {"status", "text"}
+
 
 @validate(schema.ticket_create)
 def ap_support_ticket_create(
@@ -61,8 +63,10 @@ def ap_support_ticket_update(
     ticket = cast(support_model.Ticket, support_model.Ticket.get(data_dict["id"]))
 
     for key, value in data_dict.items():
-        setattr(ticket, key, value)
+        if key in _UPDATABLE_TICKET_FIELDS:
+            setattr(ticket, key, value)
 
+    ticket.updated_at = support_model.datetime.utcnow()
     model.Session.commit()
 
     log.info("[id:%s] ticket been updated: %s", ticket.id, data_dict)
