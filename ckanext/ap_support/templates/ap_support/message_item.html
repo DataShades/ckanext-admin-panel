@@ -63,7 +63,7 @@
             </div>
 
             <div id="message-edit-form-{{ message.id }}" style="display:none;">
-                <form hx-post="{{ h.url_for('ap_support.update_message', message_id=message.id) }}"
+                <form hx-post="{{ h.url_for('ap_support_admin.update_message', message_id=message.id) }}"
                       hx-target="#message-{{ message.id }}"
                       hx-swap="outerHTML">
                     <input type="hidden" name="ticket_id" value="{{ message.ticket_id }}">

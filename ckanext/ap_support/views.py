@@ -16,7 +16,21 @@ ap_support = Blueprint(
     url_prefix="/admin-panel/support",
 )
 
-ap_support.before_request(ap_before_request)
+ap_support_admin = Blueprint(
+    "ap_support_admin",
+    __name__,
+    url_prefix="/admin-panel/support",
+)
+
+ap_support_admin.before_request(ap_before_request)
+
+
+def _authenticated_before_request() -> None:
+    if not tk.current_user.is_authenticated:
+        tk.abort(403, tk._("You must be logged in to access this page"))
+
+
+ap_support.before_request(_authenticated_before_request)
 
 
 def init_modal():
@@ -147,6 +161,12 @@ class TicketReadView(MethodView):
         except tk.ValidationError:
             return tk.abort(404, tk._("Ticket not found"))
 
+        if (
+            not tk.current_user.sysadmin
+            and ticket["author"]["id"] != tk.current_user.id
+        ):
+            tk.abort(403, tk._("You are not allowed to view this ticket"))
+
         return tk.render("ap_support/ticket_read.html", extra_vars={"ticket": ticket})
 
 
@@ -206,7 +226,7 @@ class TicketDeleteView(MethodView):
 
         tk.h.flash_success(tk._("The ticket has been deleted"))
 
-        redirect_url = tk.url_for("ap_support.list")
+        redirect_url = tk.url_for("ap_support_admin.list")
 
         if tk.request.headers.get("HX-Request"):
             return Response("", status=200, headers={"HX-Redirect": redirect_url})
@@ -214,9 +234,7 @@ class TicketDeleteView(MethodView):
         return tk.redirect_to(redirect_url)
 
 
-ap_support.add_url_rule(
-    "/", view_func=GenericTableView.as_view("list", table=SupportTable)
-)
+# ap_support — authenticated users
 ap_support.add_url_rule(
     "/my-tickets",
     view_func=GenericTableView.as_view("my_tickets", table=UserTicketTable),
@@ -225,34 +243,39 @@ ap_support.add_url_rule(
     "/ticket/<ticket_id>", view_func=TicketReadView.as_view("ticket_read")
 )
 ap_support.add_url_rule(
-    "/ticket/<ticket_id>/update-status",
-    view_func=TicketUpdateStatusView.as_view("ticket_update_status"),
-    methods=("POST",),
-)
-ap_support.add_url_rule(
-    "/ticket/<ticket_id>/assign",
-    view_func=TicketAssignView.as_view("ticket_assign"),
-    methods=("POST",),
-)
-ap_support.add_url_rule(
-    "/ticket/<ticket_id>/delete", view_func=TicketDeleteView.as_view("ticket_delete")
-)
-ap_support.add_url_rule(
     "/ticket/<ticket_id>/message", view_func=AddMessageView.as_view("add_message")
+)
+ap_support.add_url_rule("/init_modal", view_func=init_modal)
+ap_support.add_url_rule(
+    "/add_ticket", view_func=AddTicketView.as_view("add_ticket"), methods=("POST",)
 )
 ap_support.add_url_rule(
     "/message/<message_id>/delete",
     view_func=DeleteMessageView.as_view("delete_message"),
     methods=("POST",),
 )
-ap_support.add_url_rule(
-    "/message/<message_id>/update",
-    view_func=UpdateMessageView.as_view("update_message"),
+# ap_support_admin — sysadmins only
+ap_support_admin.add_url_rule(
+    "/", view_func=GenericTableView.as_view("list", table=SupportTable)
+)
+ap_support_admin.add_url_rule(
+    "/ticket/<ticket_id>/update-status",
+    view_func=TicketUpdateStatusView.as_view("ticket_update_status"),
+    methods=("POST",),
+)
+ap_support_admin.add_url_rule(
+    "/ticket/<ticket_id>/assign",
+    view_func=TicketAssignView.as_view("ticket_assign"),
+    methods=("POST",),
+)
+ap_support_admin.add_url_rule(
+    "/ticket/<ticket_id>/delete",
+    view_func=TicketDeleteView.as_view("ticket_delete"),
     methods=("POST",),
 )
 
-# HTMX
-ap_support.add_url_rule("/init_modal", view_func=init_modal)
-ap_support.add_url_rule(
-    "/add_ticket", view_func=AddTicketView.as_view("add_ticket"), methods=("POST",)
+ap_support_admin.add_url_rule(
+    "/message/<message_id>/update",
+    view_func=UpdateMessageView.as_view("update_message"),
+    methods=("POST",),
 )
