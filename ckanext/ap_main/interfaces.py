@@ -45,8 +45,8 @@ class IAdminPanel(Interface):
         Could be used to modify configuration data before it is saved.
 
         Args:
-            schema_id : an arbitrary schema ID
-            data : a dictionary with configuration data
+            schema_id: an arbitrary schema ID
+            data: a dictionary with configuration data
 
         Example:
             ```python
@@ -64,9 +64,9 @@ class IAdminPanel(Interface):
         Could be used to perform additional actions after configuration update.
 
         Args:
-            schema_id : an arbitrary schema ID
-            data_before_update : a dictionary with configuration data before update
-            data : a dictionary with configuration data after update
+            schema_id: an arbitrary schema ID
+            data_before_update: a dictionary with configuration data before update
+            data: a dictionary with configuration data after update
 
         Example:
             ```python
