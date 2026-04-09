@@ -4,6 +4,7 @@
 
 
 <form id="add-ticket-form" hx-post="{{ h.url_for('ap_support.add_ticket') }}" hx-target=".ap-ticket-data">
+    {{ h.csrf_input() }}
 
     {% set attrs = {'class': 'form-control', 'required': 'true'} %}
 

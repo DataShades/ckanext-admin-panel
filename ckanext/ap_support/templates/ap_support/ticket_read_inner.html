@@ -67,6 +67,7 @@
                               hx-post="{{ h.url_for('ap_support.add_message', ticket_id=ticket.id) }}"
                               hx-target="#messages-container-outer"
                               hx-swap="outerHTML swap:0.1s">
+                            {{ h.csrf_input() }}
 
                             {{ form.markdown('content', id="reply-textarea", label=_("Comment"), value='', placeholder=_('Write your reply…'), attrs={'class': 'form-control', 'oninput': "this.style.height='auto';this.style.height=this.scrollHeight+'px';document.getElementById('reply-char-count').textContent=this.value.length;" })}}
 
@@ -124,6 +125,8 @@
                 <dd>
                     {% if h.check_access('ap_support_ticket_assign', {'id': ticket.id}) %}
                         <form hx-post="{{ h.url_for('ap_support_admin.ticket_assign', ticket_id=ticket.id) }}">
+                            {{ h.csrf_input() }}
+
                             <label class="control-label sr-only" for="assignee_id">{{ _('Assignee') }}</label>
                             <div class="input-group">
                                 <select name="assignee_id" id="assignee_id" class="form-select">
