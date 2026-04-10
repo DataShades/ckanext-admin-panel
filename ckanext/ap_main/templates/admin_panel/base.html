@@ -6,9 +6,11 @@
     {% snippet 'snippets/apply_color_schema.html' %}
 
     {% block ap_toolbar %}
-        <header>
-            {% snippet 'admin_panel/toolbar.html' %}
-        </header>
+        {% if g.userobj.sysadmin %}
+            <header>
+                {% snippet 'admin_panel/toolbar.html' %}
+            </header>
+        {% endif %}
     {% endblock %}
 
     <div class="main {% block ap_main_class %}{% endblock %}">

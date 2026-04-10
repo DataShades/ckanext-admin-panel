@@ -8,6 +8,7 @@ from ckan.logic import validate
 from ckan.plugins import toolkit as tk
 
 import ckanext.ap_support.model as support_model
+from ckanext.ap_support import signals as support_signals
 from ckanext.ap_support.logic import schema
 from ckanext.ap_support.types import DictizedMessage, DictizedTicket, TicketData
 
@@ -25,6 +26,8 @@ def ap_support_ticket_create(
     ticket = support_model.Ticket.add(TicketData(**data_dict))
 
     log.info("[id:%s] the ticket has been submitted", ticket["id"])
+
+    support_signals.ticket_created.send(ticket=ticket)
 
     return ticket
 
@@ -71,7 +74,10 @@ def ap_support_ticket_update(
 
     log.info("[id:%s] ticket been updated: %s", ticket.id, data_dict)
 
-    return ticket.dictize(context)
+    dictized = ticket.dictize(context)
+    support_signals.ticket_updated.send(ticket=dictized)
+
+    return dictized
 
 
 @validate(schema.ticket_assign)
@@ -88,7 +94,10 @@ def ap_support_ticket_assign(
 
     log.info("[id:%s] ticket assigned to: %s", ticket.id, ticket.assignee_id)
 
-    return ticket.dictize(context)
+    dictized = ticket.dictize(context)
+    support_signals.ticket_updated.send(ticket=dictized)
+
+    return dictized
 
 
 @validate(schema.message_create)
@@ -122,7 +131,14 @@ def ap_support_message_create(
         data_dict["author_id"],
     )
 
-    return message.dictize(context)
+    dictized_message = message.dictize(context)
+
+    support_signals.message_created.send(
+        ticket=ticket.dictize(context),
+        message=dictized_message,
+    )
+
+    return dictized_message
 
 
 @validate(schema.message_delete)

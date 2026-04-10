@@ -1,219 +1,24 @@
-{% extends 'admin_panel/base.html' %}
+{% extends 'page.html' %}
 
 {% block breadcrumb_content %}
-    <li>{% link_for _("Dashboard"), named_route='ap_support.list' %}</li>
+    {% if h.check_access('admin_panel_access') %}
+        <li>{% link_for _("Dashboard"), named_route='ap_support_admin.list' %}</li>
+    {% else %}
+        <li>{% link_for _("My tickets"), named_route='ap_support.my_tickets' %}</li>
+    {% endif %}
     <li class="active">
         {% link_for "Ticket #" ~ ticket.id, named_route='ap_support.ticket_read', ticket_id=ticket.id %}
     </li>
 {% endblock breadcrumb_content %}
 
-{% block ap_content %}
-<div class="ticket-read-wrap">
+{% block secondary %}{% endblock %}
 
-    {# ── Main column ── #}
-    <div class="ticket-main">
-
-        {# Header card #}
-        <div class="ticket-header-card">
-            <div class="ticket-id-tag">{{ _('Ticket') }} #{{ ticket.id }}</div>
-            <h1 class="ticket-subject mb-5">{{ ticket.subject }}</h1>
-
-            <div class="ticket-badge-row">
-                {% if ticket.status == 'opened' %}
-                    <span class="t-status-badge status-opened">
-                        <i class="fa fa-circle" style="font-size:.5rem;"></i> {{ _('Open') }}
-                    </span>
-                {% else %}
-                    <span class="t-status-badge status-closed">
-                        <i class="fa fa-circle" style="font-size:.5rem;"></i> {{ _('Closed') }}
-                    </span>
-                {% endif %}
-
-                {% if ticket.category %}
-                    <span class="t-category-chip">
-                        <i class="fa fa-tag"></i> {{ ticket.category }}
-                    </span>
-                {% endif %}
-            </div>
-
-            <div class="ticket-meta-row">
-                <i class="fa fa-user"></i>
-                {{ h.linked_user(ticket.author.name, maxlength=40) }}
-                <span class="sep">·</span>
-                <i class="fa fa-clock-o"></i>
-                <time title="{{ h.render_datetime(ticket.created_at, with_hours=True) }}">
-                    {{ h.time_ago_from_timestamp(ticket.created_at) }}
-                </time>
-                {% if ticket.assignee %}
-                    <span class="sep">·</span>
-                    <i class="fa fa-handshake-o"></i>
-                    {{ _('Assigned to') }} {{ h.linked_user(ticket.assignee.name, maxlength=40) }}
-                {% endif %}
-            </div>
+{% block primary %}
+    <div class="primary col-md-12" role="main">
+        <div class="my-2 py-1">
+            {% block primary_content %}
+                {% snippet "ap_support/ticket_read_inner.html", ticket=ticket %}
+            {% endblock %}
         </div>
-
-        {# Original ticket body #}
-        <div class="ticket-body-card">
-            {% if 'wysiwyg' in g.plugins %}
-                {{ h.wysiwyg_sanitize_html(ticket.text) | safe }}
-            {% else %}
-                {{ ticket.text }}
-            {% endif %}
-        </div>
-
-        {% snippet "ap_support/messages_container.html", ticket=ticket %}
-
-        {# Reply form #}
-        <div class="reply-section">
-            {% if ticket.status == 'opened' %}
-                <div class="reply-card">
-                    <div class="reply-card-head">
-                        <i class="fa fa-reply"></i> {{ _('Reply') }}
-                    </div>
-                    <div class="reply-card-body">
-                        <form id="reply-form"
-                              hx-post="{{ h.url_for('ap_support.add_message', ticket_id=ticket.id) }}"
-                              hx-target="#messages-container-outer"
-                              hx-swap="outerHTML swap:0.1s">
-
-                            <textarea id="reply-textarea"
-                                      name="content"
-                                      class="form-control reply-textarea"
-                                      placeholder="{{ _('Write your reply…') }}"
-                                      required
-                                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';document.getElementById('reply-char-count').textContent=this.value.length;"></textarea>
-
-                            <div class="reply-footer">
-                                <span class="char-count">
-                                    <span id="reply-char-count">0</span> {{ _('characters') }}
-                                </span>
-                                <button class="btn btn-primary btn-sm" type="submit">
-                                    <i class="fa fa-paper-plane"></i> {{ _('Send Reply') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            {% else %}
-                <div class="ticket-closed-notice">
-                    <i class="fa fa-lock"></i>
-                    <strong>{{ _('This ticket is closed.') }}</strong>
-                    <p class="mb-0 mt-1 small">{{ _('Reopen the ticket to add new replies.') }}</p>
-                </div>
-            {% endif %}
-        </div>
-
-    </div>{# end ticket-main #}
-
-    {# ── Sidebar ── #}
-    <div class="ticket-sidebar">
-
-        {# Details #}
-        <div class="sidebar-card">
-            <div class="sidebar-card-head">
-                <i class="fa fa-info-circle"></i> {{ _('Details') }}
-            </div>
-            <dl class="sidebar-dl">
-                <dt>{{ _('Status') }}</dt>
-                <dd>
-                    {% if ticket.status == 'opened' %}
-                        <span class="t-status-badge status-opened">
-                            <i class="fa fa-circle" style="font-size:.5rem;"></i> {{ _('Open') }}
-                        </span>
-                    {% else %}
-                        <span class="t-status-badge status-closed">
-                            <i class="fa fa-circle" style="font-size:.5rem;"></i> {{ _('Closed') }}
-                        </span>
-                    {% endif %}
-                </dd>
-
-                <dt>{{ _('Category') }}</dt>
-                <dd><span class="t-category-chip">{{ ticket.category }}</span></dd>
-
-                <dt>{{ _('Author') }}</dt>
-                <dd>{{ h.linked_user(ticket.author.name, maxlength=30) }}</dd>
-
-                <dt>{{ _('Assignee') }}</dt>
-                <dd>
-                    {% if h.check_access('ap_support_ticket_assign', {'id': ticket.id}) %}
-                        <form hx-post="{{ h.url_for('ap_support.ticket_assign', ticket_id=ticket.id) }}">
-                            <label class="control-label sr-only" for="assignee_id">{{ _('Assignee') }}</label>
-                            <div class="input-group">
-                                <select name="assignee_id" id="assignee_id" class="form-select">
-                                    <option value="">{{ _('Unassigned') }}</option>
-                                    {% for admin in h.ap_support_get_sysadmins() %}
-                                        <option value="{{ admin.value }}" {% if ticket.assignee and ticket.assignee.id == admin.value %}selected{% endif %}>
-                                            {{ admin.text }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="submit" title="{{ _('Assign') }}">
-                                        <i class="fa fa-check"></i>
-                                    </button>
-                                </span>
-                            </div>
-                        </form>
-                    {% else %}
-                        {% if ticket.assignee %}
-                            {{ h.linked_user(ticket.assignee.name, maxlength=30) }}
-                        {% else %}
-                            <span class="text-muted">{{ _('Unassigned') }}</span>
-                        {% endif %}
-                    {% endif %}
-                </dd>
-
-                <dt>{{ _('Created') }}</dt>
-                <dd>
-                    <time title="{{ h.render_datetime(ticket.created_at, with_hours=True) }}">
-                        {{ h.time_ago_from_timestamp(ticket.created_at) }}
-                    </time>
-                </dd>
-
-                <dt>{{ _('Last activity') }}</dt>
-                <dd>
-                    <time title="{{ h.render_datetime(ticket.updated_at, with_hours=True) }}">
-                        {{ h.time_ago_from_timestamp(ticket.updated_at) }}
-                    </time>
-                </dd>
-
-                <dt>{{ _('Replies') }}</dt>
-                <dd>{{ ticket.messages | length }}</dd>
-            </dl>
-        </div>
-
-        {# Admin actions #}
-        {% if h.check_access('ap_support_ticket_update', {'id': ticket.id}) %}
-            <div class="sidebar-card">
-                <div class="sidebar-card-head">
-                    <i class="fa fa-cog"></i> {{ _('Actions') }}
-                </div>
-
-                {% if ticket.status == 'opened' %}
-                    <button class="sidebar-action-btn act-warning"
-                            hx-post="{{ h.url_for('ap_support.ticket_update_status', ticket_id=ticket.id) }}"
-                            hx-confirm="{{ _('Close this ticket?') }}">
-                        <i class="fa fa-lock"></i> {{ _('Close ticket') }}
-                    </button>
-                {% else %}
-                    <button class="sidebar-action-btn act-success"
-                            hx-post="{{ h.url_for('ap_support.ticket_update_status', ticket_id=ticket.id) }}"
-                            hx-confirm="{{ _('Reopen this ticket?') }}">
-                        <i class="fa fa-unlock"></i> {{ _('Reopen ticket') }}
-                    </button>
-                {% endif %}
-
-                {% if h.check_access('ap_support_ticket_delete', {'id': ticket.id}) %}
-                    <button class="sidebar-action-btn act-danger"
-                            hx-post="{{ h.url_for('ap_support.ticket_delete', ticket_id=ticket.id) }}"
-                            hx-confirm="{{ _('Are you sure you want to delete this ticket? This cannot be undone.') }}">
-                        <i class="fa fa-trash"></i> {{ _('Delete ticket') }}
-                    </button>
-                {% endif %}
-            </div>
-        {% endif %}
-
-    </div>{# end ticket-sidebar #}
-
-</div>{# end ticket-read-wrap #}
-{% endblock ap_content %}
+    </div>
+{% endblock %}

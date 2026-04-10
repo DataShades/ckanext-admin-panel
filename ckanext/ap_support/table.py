@@ -5,6 +5,7 @@ from sqlalchemy.orm import aliased
 
 import ckan.plugins.toolkit as tk
 from ckan import model as ckan_model
+from ckan import types
 
 import ckanext.tables.shared as t
 from ckanext.ap_support import formatters as sf
@@ -217,3 +218,8 @@ class UserTicketTable(t.TableDefinition):
                 ),
             ],
         )
+
+    @classmethod
+    def check_access(cls, context: types.Context) -> None:
+        if not tk.current_user.is_authenticated:
+            raise tk.NotAuthorized("You are not authorized to view this table")

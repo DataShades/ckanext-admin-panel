@@ -48,6 +48,7 @@ class Ticket(tk.BaseModel):
         "TicketMessage",
         order_by="TicketMessage.created_at",
         cascade="all, delete",
+        back_populates="ticket",
     )
 
     def __str__(self):
@@ -103,7 +104,7 @@ class TicketMessage(tk.BaseModel):
     updated_at = Column(DateTime, nullable=True)
 
     author = relationship(model.User)
-    ticket = relationship("Ticket", backref="ticket_messages")
+    ticket = relationship("Ticket", back_populates="messages")
 
     @classmethod
     def get(cls, message_id: int) -> Self | None:

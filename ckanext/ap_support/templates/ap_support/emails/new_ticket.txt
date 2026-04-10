@@ -1,0 +1,27 @@
+Dear {{ recipient_name }},
+
+A new support ticket has been submitted on {{ site_title }} and requires your attention.
+
+────────────────────────────────────────
+  Ticket #{{ ticket.id }}: {{ ticket.subject }}
+────────────────────────────────────────
+  Category : {{ ticket.category }}
+  Status   : {{ ticket.status }}
+  Submitted: {{ ticket.created_at }}
+  Author   : {{ ticket.author.display_name | default(ticket.author.name) }}
+
+{% if ticket.assignee %}  Assignee : {{ ticket.assignee.display_name | default(ticket.assignee.name) }}
+{% endif %}────────────────────────────────────────
+
+{{ ticket.text }}
+
+────────────────────────────────────────
+
+To view and respond to this ticket, visit:
+
+  {{ ticket_url }}
+
+--
+{{ site_title }} ({{ site_url }})
+
+This is an automated notification. Do not reply to this email.

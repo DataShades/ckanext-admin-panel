@@ -14,10 +14,12 @@
         {% for message in ticket.messages %}
             {% snippet "ap_support/message_item.html", message=message, ticket=ticket %}
         {% else %}
-            <div class="thread-empty">
-                <i class="fa fa-comments-o"></i>
-                <p class="mb-0">{{ _('No replies yet. Be the first to respond.') }}</p>
-            </div>
+            {% if ticket.state == 'opened' %}
+                <div class="thread-empty">
+                    <i class="fa fa-comments-o"></i>
+                    <p class="mb-0">{{ _('No replies yet. Be the first to respond.') }}</p>
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
 </div>

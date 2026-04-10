@@ -8,6 +8,7 @@
             hx-confirm="{{ _('Are you sure you want to run active jobs?') }}"
             hx-refresh-tabulator="true"
             hx-confirm-success="{{ _('The active jobs have been run.') }}">
+            {{ h.csrf_input() }}
             <button type="submit" class="btn btn-primary">
                 {{ _("Run active jobs")}}
             </button>
