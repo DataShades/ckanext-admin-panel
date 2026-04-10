@@ -22,6 +22,10 @@ admin_panel-js:
 admin_panel-global-js:
   filter: rjsmin
   output: ckanext-admin_panel/%(version)s-admin_panel-global.js
+  extra:
+    preload:
+      - base/main
+
   contents:
     - js/global-toast.js
     - js/global-confirm.js

@@ -206,44 +206,47 @@
  * @class
  * @param {HTMLElement} element - The element containing the toast config.
  */
-class ToastHandler {
-  constructor(element) {
-    this.attrKey = "data-hx-toast";
-    this.defaultToastOptions = {
-      type: "success",
-      title: ckan.i18n._("Notification"),
-    };
-    this.options = this.buildToastOptions(element);
-  }
+if (!window.ToastHandler) {
+    window.ToastHandler = class ToastHandler {
+        constructor(element) {
+            this.attrKey = "data-hx-toast";
+            this.defaultToastOptions = {
+                type: "success",
+                title: ckan.i18n._("Notification"),
+            };
+            this.options = this.buildToastOptions(element);
+        }
 
-  /**
-   * Parses the JSON string from the toast attribute and merges with defaults.
-   *
-   * @param {HTMLElement} element
-   *
-   * @returns {Object}
-   */
-  buildToastOptions(element) {
-    const attrValue = element.getAttribute(this.attrKey);
-    if (!attrValue) return this.defaultToastOptions;
+        /**
+         * Parses the JSON string from the toast attribute and merges with defaults.
+         *
+         * @param {HTMLElement} element
+         *
+         * @returns {Object}
+         */
+        buildToastOptions(element) {
+            const attrValue = element.getAttribute(this.attrKey);
+            if (!attrValue) return this.defaultToastOptions;
 
-    try {
-      const parsed = JSON.parse(attrValue);
-      return { ...this.defaultToastOptions, ...parsed };
-    } catch (e) {
-      console.error(`Invalid JSON in ${this.attrKey}:`, attrValue);
-      return {
-        ...this.defaultToastOptions,
-        message: `Invalid toast config: ${e.message}`,
-        type: "danger"
-      };
+            try {
+                const parsed = JSON.parse(attrValue);
+                return { ...this.defaultToastOptions, ...parsed };
+            } catch (e) {
+                console.error(`Invalid JSON in ${this.attrKey}:`, attrValue);
+                return {
+                    ...this.defaultToastOptions,
+                    message: `Invalid toast config: ${e.message}`,
+                    type: "danger"
+                };
+            }
+        }
+
+        showToast() {
+            if (!this.options.message) return;
+            ckan.apToast(this.options);
+        }
     }
-  }
 
-  showToast() {
-    if (!this.options.message) return;
-    ckan.apToast(this.options);
-  }
 }
 
 document.body.addEventListener("htmx:afterSwap", function (event) {
