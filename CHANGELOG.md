@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2026-09-07
+
+### 💥 Breaking changes
+
+- The bundled `admin_panel_support` plugin has been **removed**. Its support
+  ticketing functionality now lives in the standalone
+  [`ckanext-issues`](https://github.com/DataShades/ckanext-issues) extension.
+
+  After upgrading you must:
+
+  1. `pip install ckanext-issues`
+  2. In `ckan.plugins`, replace `admin_panel_support` with `issues` (and make
+     sure `tables` is enabled before it).
+  3. Run `ckan db upgrade -p issues`.
+  4. Rename config options `ckanext.admin_panel.support.*` →
+     `ckanext.issues.*`.
+  5. Custom templates overriding `ap_support/*` must be moved to `issues/*`.
+  6. Migrate existing ticket data — see
+     [docs/features/support.md](./docs/features/support.md).
+
+  The old `ap_support_ticket` / `ap_support_ticket_message` tables are left
+  untouched by the upgrade; drop them once the data has been migrated.
+
 ## [2.0.1] - 2025-06-02
 
 ### 🚀 Features
