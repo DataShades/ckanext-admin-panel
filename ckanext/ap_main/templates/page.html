@@ -15,6 +15,7 @@
 {% endblock -%}
 
 {%- block styles -%}
+    <link rel="stylesheet" href="{{ h.url_for_static('/admin_panel/fonts/fonts.css') }}">
     {% asset 'admin_panel/admin_panel-css' %}
 
     {{ super() }}
